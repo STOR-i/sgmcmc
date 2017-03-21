@@ -1,8 +1,29 @@
-# Currently have only tested this using that standard 'include' import, 
-# not the more general library import
+# Methods for implementing Stochastic Gradient Langevin Dynamics (SGLD) using Tensorflow.
+# Gradients are automatically calculated. The main function is sgld, which implements a full
+# SGLD procedure for a given model, including gradient calculation.
+#
+# References:
+#   1. Welling, M. and Teh, Y. W. (2011). 
+#       Bayesian learning via stochastic gradient Langevin dynamics. 
+#       In Proceedings of the 28th International Conference on Machine Learning (ICML-11), 
+#       pages 681–688.
+
 library(tensorflow)
 
 sgld_init = function( lpost, params, stepsize ) {
+    # Initialize SGLD tensorflow by declaring Langevin Dynamics
+    #
+    # For each parameter in param, the gradient of the approximate log posterior lpost 
+    # is calculated using tensorflows gradients function
+    # These gradients are then used to build the dynamics of a single SGLD update, as in reference 1,
+    # for each parameter in param.
+    # 
+    # Parameters:
+    #   lpost - Tensorflow tensor, unbiased estimate of the log posterior, as in reference 1.
+    #   params - an R list object, the name of this list corresponds to the name of each parameter,
+    #           the value is the corresponding tensorflow tensor for that variable.
+    #   stepsize - an R list object, the name of this list corresponds to the name of each parameter,
+    #           the value is the corresponding stepsize for the SGLD run for that variable.
     param_names = names( params )
     step_list = list()
     for ( param_name in param_names ) {
@@ -15,6 +36,7 @@ sgld_init = function( lpost, params, stepsize ) {
 
 # Extend to multidimensional arrays??
 data_feed = function( data, placeholders ) {
+    # Creates the drip feed to the algorithm. Each 
     feed_dict = dict()
     # Parse minibatch size from Python tuple object
     minibatch_size = as.numeric( unlist( strsplit( gsub( "[() ]", "", as.character( 

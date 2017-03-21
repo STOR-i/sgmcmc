@@ -2,10 +2,10 @@ library(tensorflow)
 source("../R/sgld.r")
 
 # Load in data
-X_train = as.matrix( read.table( "../data/cover_type_small/X_train.dat" ) )[,c(-2)]
-X_test = as.matrix( read.table( "../data/cover_type_small/X_test.dat" ) )[,c(-2)]
-y_train = as.matrix( read.table( "../data/cover_type_small/y_train.dat" ) )
-y_test = as.matrix( read.table( "../data/cover_type_small/y_test.dat" ) )
+X_train = as.matrix( read.table( "../data/cover_type/X_train.dat" ) )[,c(-2)]
+X_test = as.matrix( read.table( "../data/cover_type/X_test.dat" ) )[,c(-2)]
+y_train = as.matrix( read.table( "../data/cover_type/y_train.dat" ) )
+y_test = as.matrix( read.table( "../data/cover_type/y_test.dat" ) )
 
 # Declare dimensions
 N = dim( X_train )[1]
@@ -29,7 +29,7 @@ correction = tf$constant( N / minibatch_size, dtype = tf$float32 )
 estlpost = correction * ll + lprior
 
 # Declare parameters and data
-stepsize = list( "beta" = 1e-4, "bias" = 1e-4 )
+stepsize = list( "beta" = 1e-7, "bias" = 1e-7 )
 params = list( "beta" = beta, "bias" = bias )
 data = list( "input" = X_train, "y_true" = y_train )
 placeholders = list( "input" = input, "y_true" = y_true )
