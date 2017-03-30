@@ -10,7 +10,14 @@
 
 library(tensorflow)
 
-sgld_init = function( lpost, params, stepsize ) {
+# WILL ADAM WORK OKAY??
+sgld_initial_descent = function( lpost, stepsize ) {
+    optimizer = tf$train$AdamOptimizer( stepsize )
+    find_mode = optimizer$maximize( lpost )
+    return( find_mode )
+}
+
+sgld_init = function( lpost, params, param_opt, params_sgld, optlogpost, stepsize ) {
     # Initialize SGLD tensorflow by declaring Langevin Dynamics
     #
     # For each parameter in param, the gradient of the approximate log posterior lpost 
@@ -25,6 +32,8 @@ sgld_init = function( lpost, params, stepsize ) {
     #   stepsize - an R list object, the name of this list corresponds to the name of each parameter,
     #           the value is the corresponding stepsize for the SGLD run for that variable.
     param_names = names( params )
+    # Calculate improved gradient estimate
+    grads = gradEstCalc( lpost, params, param_opt, params_sgld, optlogpost )
     step_list = list()
     for ( param_name in param_names ) {
         param_current = params[[param_name]]
@@ -59,17 +68,43 @@ sgld_step = function( sess, step_list, data, placeholders ) {
 
 # Currently assuming stepsize is a dictionary
 # Add option to include a summary measure??
-sgld = function( lprior, ll, data, params, placeholders, stepsize, n_iters = 10^4 ) {
+sgldCV = function( calcLogLik, calcLogPrior, data, params, placeholders, stepsize, n_iters = 10^4 ) {
+
     # Parse data & minibatch sizes from Python objects
     minibatch_size = as.numeric( unlist( strsplit( gsub( "[() ]", "", as.character( 
             placeholders[[1]]$get_shape() ) ), "," ) ) )[1] 
     N = dim( data[[1]] )[1]
     correction = tf$constant( N / minibatch_size, dtype = tf$float32 )
-    estlpost = lprior + correction*ll
-    print( estlpost$get_dependencies() )
-    stop()
 
-    step_list = sgld_init( estlpost, params, stepsize )
+    # Declare extra variables for initial optimizer
+    param_names = names( params )
+    param_opt = list()
+    optlogpost = list()
+    for ( pname in param_names ) {
+        param_opt[[pname]] = tf$Variable( params[[pname]]$initialized_value )
+        optlogpost[[pname]] = tf$Variable( params[[pname]]$initialized_value )
+    }
+
+    # Create new placeholders for feeding in full dataset
+    fullPlaceholders = list()
+    data_names = names( data )
+    for ( dname in data_names ) {
+        fullPlaceholders[[dname]] = tf$placeholder( 
+                placeholders[[dname]]$dtype, dim( data[[dname]] ) )
+    }
+
+    # Declare log posterior operations for SGLD and optimizer
+    estLPostOpt = calcLogPrior( param_opt, placeholders ) + correction*calcLogLik( 
+            param_opt, placeholders )
+    estLPostSGLD = calcLogPrior( params, placeholders ) + correction*calcLogLik( 
+            params, placeholders )
+    
+    ### Temporarily assign opt_step
+    opt_step = 1e-5
+    sgld_initial_descent( lpost, opt_step )
+    
+    # Define SGLDCV dynamics
+    step_list = sgld_init( estlpost, params, params_opt, params_sgld, optlogpost, stepsize )
 
     # Initialise tensorflow session
     sess = tf$Session()

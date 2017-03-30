@@ -1,5 +1,5 @@
 library(tensorflow)
-source("../R/sgld.r")
+source("../R/sghmc.r")
 
 # Load in data
 X_train = as.matrix( read.table( "../data/cover_type_small/X_train.dat" ) )[,c(-2)]
@@ -25,6 +25,7 @@ bias = tf$Variable( 0, dtype = tf$float32 )
 y = 1 / ( 1 + tf$exp(-tf$squeeze(bias + tf$matmul(input,beta))) )
 ll = tf$reduce_sum( y_true * tf$log(y) + ( 1 - y_true ) * tf$log( 1 - y ) )
 lprior = - tf$reduce_sum( tf$abs( beta ) )
+estlpost = N / minibatch_size * ll + lprior # Push this into the fn
 
 # Declare data and placeholders of interest
 data = list( "input" = X_train, "y_true" = y_train )
@@ -32,6 +33,8 @@ data = list( "input" = X_train, "y_true" = y_train )
 placeholders = list( "input" = input, "y_true" = y_true )
 # Declare parameters and respective stepsizes
 params = list( "beta" = beta, "bias" = bias )
-stepsizes = list( "beta" = 1e-5, "bias" = 1e-5 )
+eta = list( "beta" = 1e-5, "bias" = 1e-5 )
+alpha = list( "beta" = 1e-2, "bias" = 1e-2 )
+L = 5
 
-sgld( lprior, ll, data, params, placeholders, stepsizes, n_iters = 10^4 )
+sghmc( estlpost, data, params, placeholders, eta, alpha, L, n_iters = 10^4 )

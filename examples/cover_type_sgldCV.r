@@ -1,5 +1,5 @@
 library(tensorflow)
-source("../R/sgld.r")
+source("../R/sgldCV.r")
 
 # Load in data
 X_train = as.matrix( read.table( "../data/cover_type_small/X_train.dat" ) )[,c(-2)]
@@ -21,11 +21,6 @@ y_true = tf$placeholder( tf$float32, shape(minibatch_size) )
 beta = tf$Variable( tf$zeros( shape(d,1) ) )
 bias = tf$Variable( 0, dtype = tf$float32 )
 
-# Declare log posterior estimate -- uses tensorflow built in distributions etc
-y = 1 / ( 1 + tf$exp(-tf$squeeze(bias + tf$matmul(input,beta))) )
-ll = tf$reduce_sum( y_true * tf$log(y) + ( 1 - y_true ) * tf$log( 1 - y ) )
-lprior = - tf$reduce_sum( tf$abs( beta ) )
-
 # Declare data and placeholders of interest
 data = list( "input" = X_train, "y_true" = y_train )
 # Placeholder names must correspond to data names (Can replace this, I'll explain)
@@ -34,4 +29,18 @@ placeholders = list( "input" = input, "y_true" = y_true )
 params = list( "beta" = beta, "bias" = bias )
 stepsizes = list( "beta" = 1e-5, "bias" = 1e-5 )
 
-sgld( lprior, ll, data, params, placeholders, stepsizes, n_iters = 10^4 )
+calcLogLik = function( params, placeholders ) {
+    # Declare log likelihood estimate -- uses tensorflow built in distributions etc
+    y = 1 / ( 1 + tf$exp(-tf$squeeze(params$bias + tf$matmul(placeholders$input,params$beta))) )
+    ll = tf$reduce_sum( placeholders$y_true * tf$log(y) + ( 
+            1 - placeholders$y_true ) * tf$log( 1 - y ) )
+    return( ll )
+}
+
+calcLogPrior = function( params, placeholders ) {
+    # Declare log prior function
+    lprior = - tf$reduce_sum( tf$abs( params$beta ) )
+    return( lprior )
+}
+
+sgldCV( calcLogLik, calcLogPrior, data, params, placeholders, stepsizes, n_iters = 10^4 )
