@@ -9,79 +9,49 @@
 #       pages 681–688.
 
 library(tensorflow)
+source("setup.r")
+source("update.r")
 
-sgld_init = function( lpost, params, stepsize ) {
+declareDynamics = function( lpost, params, stepsize ) {
     # Initialize SGLD tensorflow by declaring Langevin Dynamics
     #
-    # For each parameter in param, the gradient of the approximate log posterior lpost 
-    # is calculated using tensorflows gradients function
-    # These gradients are then used to build the dynamics of a single SGLD update, as in reference 1,
-    # for each parameter in param.
-    # 
-    # Parameters:
-    #   lpost - Tensorflow tensor, unbiased estimate of the log posterior, as in reference 1.
-    #   params - an R list object, the name of this list corresponds to the name of each parameter,
-    #           the value is the corresponding tensorflow tensor for that variable.
-    #   stepsize - an R list object, the name of this list corresponds to the name of each parameter,
-    #           the value is the corresponding stepsize for the SGLD run for that variable.
     param_names = names( params )
+    # List contains operations consisting of one SGLD update across all parameters
     step_list = list()
+    # Declare SGLD dynamics using tensorflow autodiff
     for ( param_name in param_names ) {
         param_current = params[[param_name]]
-        grad = tf$gradients( lpost, param_current )
-        step_list[[param_name]] = param_current$assign_add( 0.5 * stepsize[[param_name]] * grad[[1]] + sqrt( stepsize[[param_name]] ) * tf$random_normal( param_current$get_shape() ) )
+        grad = tf$gradients( lpost, param_current )[[1]]
+        step_list[[param_name]] = param_current$assign_add( 0.5 * stepsize[[param_name]] * grad + sqrt( stepsize[[param_name]] ) * tf$random_normal( param_current$get_shape() ) )
     }
     return( step_list )
 }
 
-# Extend to multidimensional arrays??
-data_feed = function( data, placeholders ) {
-    # Creates the drip feed to the algorithm. Each 
-    feed_dict = dict()
-    # Parse minibatch size from Python tuple object
-    minibatch_size = as.numeric( unlist( strsplit( gsub( "[() ]", "", as.character( 
-            placeholders[[1]]$get_shape() ) ), "," ) ) )[1] 
-    N = dim( data[[1]] )[1]
-    selection = sample( N, minibatch_size )
-    input_names = names( placeholders )
-    for ( input in input_names ) {
-        feed_dict[[ placeholders[[input]] ]] = data[[input]][selection,]
-    }
-    return( feed_dict )
-}
-
-# Perform one step of SGLD
-sgld_step = function( sess, step_list, data, placeholders ) {
-    for ( step in step_list ) {
-        sess$run( step, feed_dict = data_feed( data, placeholders ) )
-    }
-}
-
-# Currently assuming stepsize is a dictionary
 # Add option to include a summary measure??
-sgld = function( lprior, ll, data, params, placeholders, stepsize, n_iters = 10^4 ) {
-    # Parse data & minibatch sizes from Python objects
-    minibatch_size = as.numeric( unlist( strsplit( gsub( "[() ]", "", as.character( 
-            placeholders[[1]]$get_shape() ) ), "," ) ) )[1] 
+sgld = function( calcLogLik, calcLogPrior, data, paramsRaw, stepsize, minibatch_size, 
+        n_iters = 10^4 ) {
+    # 
+    # Get key sizes and declare correction term for log posterior estimate
+    n = getMinibatchSize( minibatch_size )
     N = dim( data[[1]] )[1]
     correction = tf$constant( N / minibatch_size, dtype = tf$float32 )
-    estlpost = lprior + correction*ll
-    print( estlpost$get_dependencies() )
-    stop()
-
-    step_list = sgld_init( estlpost, params, stepsize )
-
-    # Initialise tensorflow session
-    sess = tf$Session()
-    init = tf$global_variables_initializer()
-    sess$run(init)
-
+    # Convert params and data to tensorflow variables and placeholders
+    params = setupParams( paramsRaw )
+    placeholders = setupPlaceholders( data, minibatch_size )
+    # Declare estimated log posterior tensor using declared variables and placeholders
+    logLik = calcLogLik( params, placeholders )
+    logPrior = calcLogPrior( params, placeholders )
+    estLogPost = logPrior + correction * logLik
+    # Declare SGLD dynamics
+    dynamics = declareDynamics( estLogPost, params, stepsize )
+    # Initalize tensorflowsession
+    sess = initSess()
     # Run Langevin dynamics on each parameter for n_iters
     for ( i in 1:n_iters ) {
-        sgld_step( sess, step_list, data, placeholders )
-        if ( i %% 10 == 0 ) {
-            lpostest = sess$run( estlpost, feed_dict = data_feed( data, placeholders ) )
-            writeLines( paste0( "Iteration: ", i, "\t\tLog posterior estimate: ", lpostest ) )
+        update( sess, dynamics, data, placeholders, minibatch_size )
+        if ( i %% 100 == 0 ) {
+            printProgress( sess, estLogPost, data, placeholders, i, minibatch_size, params )
         }
+
     }
 }
