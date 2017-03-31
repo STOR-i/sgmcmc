@@ -1,6 +1,6 @@
 library(tensorflow)
 setwd("../R/")
-source("sghmc.r")
+source("sghmcCV.r")
 
 # Load in data
 X_train = as.matrix( read.table( "../data/cover_type_small/X_train.dat" ) )[,c(-2)]
@@ -36,4 +36,4 @@ calcLogPrior = function( params, placeholders ) {
     return( lprior )
 }
 
-sghmc( calcLogLik, calcLogPrior, data, params, eta, alpha, L, minibatch_size )
+sghmcCV( calcLogLik, calcLogPrior, data, params, eta, alpha, L, minibatch_size )

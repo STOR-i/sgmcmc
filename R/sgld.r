@@ -48,7 +48,7 @@ sgld = function( calcLogLik, calcLogPrior, data, paramsRaw, stepsize, minibatch_
     sess = initSess()
     # Run Langevin dynamics on each parameter for n_iters
     for ( i in 1:n_iters ) {
-        update( sess, dynamics, data, placeholders, minibatch_size )
+        updateSGLD( sess, dynamics, data, placeholders, minibatch_size )
         if ( i %% 100 == 0 ) {
             printProgress( sess, estLogPost, data, placeholders, i, minibatch_size, params )
         }

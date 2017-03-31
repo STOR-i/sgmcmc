@@ -26,18 +26,23 @@ calcCVGradient = function( estLogPost, estLogPostOpt, gradFull, params, paramsOp
     return( gradEst )
 }
 
-declareDynamics = function( estLogPost, estLogPostOpt, gradFull, params, paramsOpt, stepsize ) {
+declareDynamics = function( estLogPost, estLogPostOpt, gradFull, params, paramsOpt, eta, alpha ) {
     # Initialize SGLD tensorflow by declaring Langevin Dynamics
     #
     # List contains operations consisting of one SGLD update across all parameters
-    step_list = list()
-    # Calculate optimized gradient
+    param_names = names( params )
+    step_list = list( "dynamics" = list(), "momentum" = list(), "refresh" = list() )
+    vs = list()
     gradEst = calcCVGradient( estLogPost, estLogPostOpt, gradFull, params, paramsOpt )
-    # Declare SGLD dynamics using tensorflow autodiff
-    for ( pname in names( params ) ) {
-        paramCurr = params[[pname]]
-        gradCurr = gradEst[[pname]]
-        step_list[[pname]] = paramCurr$assign_add( 0.5 * stepsize[[pname]] * gradCurr + sqrt( stepsize[[pname]] ) * tf$random_normal( paramCurr$get_shape() ) )
+    for ( param_name in param_names ) {
+        # Declare momentum params and reparameterize
+        param_current = params[[param_name]]
+        vs[[param_name]] = tf$Variable( tf$random_normal( param_current$get_shape() ) )
+        v_current = vs[[param_name]]
+        step_list$refresh[[param_name]] = v_current$assign( sqrt( eta[[param_name]] ) * tf$random_normal( param_current$get_shape() ) )
+        grad = gradEst[[param_name]]
+        step_list$momentum[[param_name]] = v_current$assign( eta[[param_name]]*grad + alpha[[param_name]]*v_current + sqrt( eta[[param_name]] * alpha[[param_name]] / 4 ) * tf$random_normal( param_current$get_shape() ) )
+        step_list$dynamics[[param_name]] = param_current$assign_add( v_current )
     }
     return( step_list )
 }
@@ -62,7 +67,7 @@ declareOptimizer = function( estLogPost, fullLogPost, paramsOpt, params, gradFul
 }
 
 # Add option to include a summary measure??
-sgldCV = function( calcLogLik, calcLogPrior, data, paramsRaw, stepsize, minibatch_size, 
+sghmcCV = function( calcLogLik, calcLogPrior, data, paramsRaw, eta, alpha, L, minibatch_size, 
         n_iters = 10^4 ) {
     # 
     # Get key sizes and declare correction term for log posterior estimate
@@ -91,7 +96,8 @@ sgldCV = function( calcLogLik, calcLogPrior, data, paramsRaw, stepsize, minibatc
     # Declare optimizer ADD STEPSIZE AS A PARAMETER
     optSteps = declareOptimizer( estLogPostOpt, fullLogPostOpt, paramsOpt, params, gradFull, 1e-5 )
     # Declare SGLD dynamics
-    dynamics = declareDynamics( estLogPost, estLogPostOpt, gradFull, params, paramsOpt, stepsize )
+    dynamics = declareDynamics( estLogPost, estLogPostOpt, gradFull, params, 
+            paramsOpt, eta, alpha )
     # Initalize tensorflowsession
     sess = initSess()
     # Initial optimization of parameters
@@ -104,9 +110,9 @@ sgldCV = function( calcLogLik, calcLogPrior, data, paramsRaw, stepsize, minibatc
     }
     calcFullGrads( sess, optSteps, data, placeholdersFull )
     # Run Langevin dynamics on each parameter for n_iters
-    writeLines( "Sampling using SGLD-CV" )
+    writeLines( "Sampling using SGHMC-CV" )
     for ( i in 1:n_iters ) {
-        updateSGLD( sess, dynamics, data, placeholders, minibatch_size )
+        updateSGHMC( sess, dynamics, data, placeholders, minibatch_size, L )
         if ( i %% 100 == 0 ) {
             printProgress( sess, estLogPost, data, placeholders, i, minibatch_size, params )
         }

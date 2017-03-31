@@ -26,11 +26,25 @@ feedFullDataset = function( data, placeholders ) {
     return( feed_dict )
 }
 
-update = function( sess, dynamics, data, placeholders, minibatch_size ) {
+updateSGLD = function( sess, dynamics, data, placeholders, minibatch_size ) {
     # Perform one step of the declared dynamics
     feedCurr = data_feed( data, placeholders, minibatch_size )
     for ( step in dynamics ) {
         sess$run( step, feed_dict = feedCurr )
+    }
+}
+
+updateSGHMC = function( sess, dynamics, data, placeholders, minibatch_size, L ) {
+    # Perform one step of SGHMC
+    for ( pname in dynamics$momentum ) {
+        sess$run( dynamics$refresh )
+    }
+    for ( l in 1:L ) {
+        feedCurr = data_feed( data, placeholders, minibatch_size )
+        for ( pname in names( dynamics$momentum ) ) {
+            sess$run( dynamics$momentum[[pname]], feed_dict = feedCurr )
+            sess$run( dynamics$dynamics[[pname]], feed_dict = feedCurr )
+        }
     }
 }
 
