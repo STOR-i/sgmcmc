@@ -1,6 +1,5 @@
 library(tensorflow)
 
-# Extend to multidimensional arrays??
 data_feed = function( data, placeholders, minibatch_size ) {
     # Creates the data drip feed to the algorithm.
     feed_dict = dict()
@@ -8,13 +7,26 @@ data_feed = function( data, placeholders, minibatch_size ) {
     selection = sample( N, minibatch_size )
     input_names = names( placeholders )
     for ( input in input_names ) {
-        if ( is.null( dim( data[[input]] ) ) ) {
-            feed_dict[[ placeholders[[input]] ]] = data[[input]][selection]
-        } else {
-            feed_dict[[ placeholders[[input]] ]] = data[[input]][selection,,drop=FALSE]
-        }
+        feed_dict[[ placeholders[[input]] ]] = dataSelect( data[[input]], selection )
     }
     return( feed_dict )
+}
+
+dataSelect = function( data, selection ) {
+    # Subset data based on selection across general dimension containers
+    dataDim = dim( data )
+    d = length( dataDim )
+    # Handle the vector and 1d matrix case
+    if ( d < 2 ) {
+        return( data[selection] )
+    }
+    # Create do.call expression for `[` slice operator, providing required dimensionality
+    argList = list( data, selection )
+    for ( i in 2:d ) {
+        argList[[i+1]] = 1:dataDim[i]
+    }
+    argList = c( argList, list( drop = FALSE ) )
+    return( do.call( `[`, argList ) )
 }
 
 feedFullDataset = function( data, placeholders ) {
@@ -26,10 +38,10 @@ feedFullDataset = function( data, placeholders ) {
     return( feed_dict )
 }
 
-updateSGLD = function( sess, dynamics, data, placeholders, minibatch_size ) {
+updateSGLD = function( sess, stepList, data, placeholders, minibatch_size ) {
     # Perform one step of the declared dynamics
     feedCurr = data_feed( data, placeholders, minibatch_size )
-    for ( step in dynamics ) {
+    for ( step in stepList ) {
         sess$run( step, feed_dict = feedCurr )
     }
 }

@@ -11,6 +11,7 @@
 library(tensorflow)
 source("setup.r")
 source("update.r")
+source("storage.r")
 
 calcCVGradient = function( estLogPost, estLogPostOpt, gradFull, params, paramsOpt ) {
     # Calculate reduced variance gradient estimate using control variates
@@ -80,6 +81,7 @@ sghmcCV = function( calcLogLik, calcLogPrior, data, paramsRaw, eta, alpha, L, mi
     # Declare tensorflow variables for initial optimizer
     paramsOpt = setupParams( paramsRaw )
     placeholdersFull = setupFullPlaceholders( data )
+    paramStorage = initStorage( paramsRaw, n_iters )
     # Declare container for full gradient
     gradFull = setupFullGradients( paramsRaw )
     # Declare estimated log posterior tensor using declared variables and placeholders
@@ -113,9 +115,10 @@ sghmcCV = function( calcLogLik, calcLogPrior, data, paramsRaw, eta, alpha, L, mi
     writeLines( "Sampling using SGHMC-CV" )
     for ( i in 1:n_iters ) {
         updateSGHMC( sess, dynamics, data, placeholders, minibatch_size, L )
+        paramStorage = storeState( sess, i, params, paramStorage )
         if ( i %% 100 == 0 ) {
             printProgress( sess, estLogPost, data, placeholders, i, minibatch_size, params )
         }
-
     }
+    return( paramStorage )
 }

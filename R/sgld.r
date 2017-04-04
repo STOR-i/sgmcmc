@@ -11,6 +11,7 @@
 library(tensorflow)
 source("setup.r")
 source("update.r")
+source("storage.r")
 
 declareDynamics = function( lpost, params, stepsize ) {
     # Initialize SGLD tensorflow by declaring Langevin Dynamics
@@ -22,7 +23,7 @@ declareDynamics = function( lpost, params, stepsize ) {
     for ( param_name in param_names ) {
         param_current = params[[param_name]]
         grad = tf$gradients( lpost, param_current )[[1]]
-        step_list[[param_name]] = param_current$assign_add( 0.5 * stepsize[[param_name]] * grad + sqrt( stepsize[[param_name]] ) * tf$random_normal( param_current$get_shape() ) )
+        step_list$dynamics[[param_name]] = param_current$assign_add( 0.5 * stepsize[[param_name]] * grad + sqrt( stepsize[[param_name]] ) * tf$random_normal( param_current$get_shape() ) )
     }
     return( step_list )
 }
@@ -34,10 +35,11 @@ sgld = function( calcLogLik, calcLogPrior, data, paramsRaw, stepsize, minibatch_
     # Get key sizes and declare correction term for log posterior estimate
     n = getMinibatchSize( minibatch_size )
     N = dim( data[[1]] )[1]
-    correction = tf$constant( N / minibatch_size, dtype = tf$float32 )
+    correction = tf$constant( N / n, dtype = tf$float32 )
     # Convert params and data to tensorflow variables and placeholders
     params = setupParams( paramsRaw )
     placeholders = setupPlaceholders( data, minibatch_size )
+    paramStorage = initStorage( paramsRaw, n_iters )
     # Declare estimated log posterior tensor using declared variables and placeholders
     logLik = calcLogLik( params, placeholders )
     logPrior = calcLogPrior( params, placeholders )
@@ -49,9 +51,10 @@ sgld = function( calcLogLik, calcLogPrior, data, paramsRaw, stepsize, minibatch_
     # Run Langevin dynamics on each parameter for n_iters
     for ( i in 1:n_iters ) {
         updateSGLD( sess, dynamics, data, placeholders, minibatch_size )
+        paramStorage = storeState( sess, i, params, paramStorage )
         if ( i %% 100 == 0 ) {
             printProgress( sess, estLogPost, data, placeholders, i, minibatch_size, params )
         }
-
     }
+    return( paramStorage )
 }

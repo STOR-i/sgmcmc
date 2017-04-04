@@ -11,6 +11,7 @@
 library(tensorflow)
 source("setup.r")
 source("update.r")
+source("storage.r")
 
 calcCVGradient = function( estLogPost, estLogPostOpt, gradFull, params, paramsOpt ) {
     # Calculate reduced variance gradient estimate using control variates
@@ -75,6 +76,7 @@ sgldCV = function( calcLogLik, calcLogPrior, data, paramsRaw, stepsize, minibatc
     # Declare tensorflow variables for initial optimizer
     paramsOpt = setupParams( paramsRaw )
     placeholdersFull = setupFullPlaceholders( data )
+    paramStorage = initStorage( paramsRaw, n_iters )
     # Declare container for full gradient
     gradFull = setupFullGradients( paramsRaw )
     # Declare estimated log posterior tensor using declared variables and placeholders
@@ -89,7 +91,7 @@ sgldCV = function( calcLogLik, calcLogPrior, data, paramsRaw, stepsize, minibatc
     fullLogPostOpt = calcLogLik( paramsOpt, placeholdersFull ) + 
             calcLogPrior( paramsOpt, placeholdersFull )
     # Declare optimizer ADD STEPSIZE AS A PARAMETER
-    optSteps = declareOptimizer( estLogPostOpt, fullLogPostOpt, paramsOpt, params, gradFull, 1e-5 )
+    optSteps = declareOptimizer( estLogPostOpt, fullLogPostOpt, paramsOpt, params, gradFull, 1e-6 )
     # Declare SGLD dynamics
     dynamics = declareDynamics( estLogPost, estLogPostOpt, gradFull, params, paramsOpt, stepsize )
     # Initalize tensorflowsession
@@ -107,9 +109,10 @@ sgldCV = function( calcLogLik, calcLogPrior, data, paramsRaw, stepsize, minibatc
     writeLines( "Sampling using SGLD-CV" )
     for ( i in 1:n_iters ) {
         updateSGLD( sess, dynamics, data, placeholders, minibatch_size )
+        paramStorage = storeState( sess, i, params, paramStorage )
         if ( i %% 100 == 0 ) {
             printProgress( sess, estLogPost, data, placeholders, i, minibatch_size, params )
         }
-
     }
+    return( paramStorage )
 }

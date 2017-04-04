@@ -11,6 +11,7 @@
 library(tensorflow)
 source("setup.r")
 source("update.r")
+source("storage.r")
 
 declareDynamics = function( lpost, params, eta, alpha ) {
     # Initialize SGLD tensorflow by declaring Langevin Dynamics
@@ -43,6 +44,7 @@ sghmc = function( calcLogLik, calcLogPrior, data, paramsRaw, eta, alpha, L, mini
     # Convert params and data to tensorflow variables and placeholders
     params = setupParams( paramsRaw )
     placeholders = setupPlaceholders( data, minibatch_size )
+    paramStorage = initStorage( paramsRaw, n_iters )
     # Declare estimated log posterior tensor using declared variables and placeholders
     logLik = calcLogLik( params, placeholders )
     logPrior = calcLogPrior( params, placeholders )
@@ -54,9 +56,10 @@ sghmc = function( calcLogLik, calcLogPrior, data, paramsRaw, eta, alpha, L, mini
     # Run Langevin dynamics on each parameter for n_iters
     for ( i in 1:n_iters ) {
         updateSGHMC( sess, dynamics, data, placeholders, minibatch_size, L )
+        paramStorage = storeState( sess, i, params, paramStorage )
         if ( i %% 100 == 0 ) {
             printProgress( sess, estLogPost, data, placeholders, i, minibatch_size, params )
         }
-
     }
+    return( paramStorage )
 }

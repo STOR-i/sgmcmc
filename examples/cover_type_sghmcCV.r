@@ -36,4 +36,5 @@ calcLogPrior = function( params, placeholders ) {
     return( lprior )
 }
 
-sghmcCV( calcLogLik, calcLogPrior, data, params, eta, alpha, L, minibatch_size )
+storage = sghmcCV( calcLogLik, calcLogPrior, data, params, eta, alpha, L, minibatch_size )
+print( storage$beta )

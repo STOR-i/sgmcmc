@@ -47,6 +47,16 @@ setupPlaceholders = function( data, minibatch_size ) {
     return( tfPlaceholders )
 }
 
+setupGrads = function( params ) {
+    # Create placeholders to hold current gradients, used for storage
+    #
+    tfGrads = list()
+    for ( pname in names( params ) ) {
+        tfGrads[[pname]] = tf$Variable( params[[pname]], dtype = tf$float32 )
+    }
+    return( tfGrads )
+}
+
 setupFullPlaceholders = function( data ) {
     # Create placeholders to hold full dataset for full log posterior calculation
     #

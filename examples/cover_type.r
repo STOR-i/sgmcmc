@@ -18,7 +18,7 @@ beta = matrix( rep( 0, d ), nrow = d )
 bias = 0
 params = list( "beta" = beta, "bias" = bias )
 # Declare parameter stepsizes
-stepsizes = list( "beta" = 1e-5, "bias" = 1e-5 )
+stepsizes = list( "beta" = 1e-4, "bias" = 1e-4 )
 
 calcLogLik = function( params, placeholders ) {
     # Declare log likelihood estimate -- uses tensorflow built in distributions etc
@@ -34,4 +34,4 @@ calcLogPrior = function( params, placeholders ) {
     return( lprior )
 }
 
-sgld( calcLogLik, calcLogPrior, data, params, stepsizes, minibatch_size )
+paramStorage = sgld( calcLogLik, calcLogPrior, data, params, stepsizes, minibatch_size )

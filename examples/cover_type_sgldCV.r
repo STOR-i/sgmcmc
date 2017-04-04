@@ -34,4 +34,5 @@ calcLogPrior = function( params, placeholders ) {
     return( lprior )
 }
 
-sgldCV( calcLogLik, calcLogPrior, data, params, stepsizes, minibatch_size, 10^4 )
+storage = sgldCV( calcLogLik, calcLogPrior, data, params, stepsizes, minibatch_size, 10^4 )
+print( storage$beta )
