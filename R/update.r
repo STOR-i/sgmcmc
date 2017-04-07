@@ -38,44 +38,26 @@ feedFullDataset = function( data, placeholders ) {
     return( feed_dict )
 }
 
-updateSGLD = function( sess, stepList, data, placeholders, minibatch_size ) {
-    # Perform one step of the declared dynamics
-    feedCurr = data_feed( data, placeholders, minibatch_size )
-    for ( step in stepList ) {
-        sess$run( step, feed_dict = feedCurr )
+initSess = function() { 
+    # Initialise tensorflow session
+    sess = tf$Session()
+    init = tf$global_variables_initializer()
+    sess$run(init)
+    return(sess)
+}
+
+checkDivergence = function( sess, sgmcmc, iter, verbose ) {
+    # check divergence of chain and print progress if verbose == TRUE
+    currentEstimate = sess$run( sgmcmc$estLogPost, feed_dict = data_feed( 
+            sgmcmc$data, sgmcmc$placeholders, sgmcmc$n ) )
+    if ( is.nan( currentEstimate ) ) {
+        stop("Chain diverged")
+    }
+    if ( verbose ) {
+        writeLines( paste0( "Iteration: ", iter, "\t\tLog posterior estimate: ", currentEstimate ) )
     }
 }
 
-updateSGHMC = function( sess, dynamics, data, placeholders, minibatch_size, L ) {
-    # Perform one step of SGHMC
-    for ( pname in dynamics$momentum ) {
-        sess$run( dynamics$refresh )
-    }
-    for ( l in 1:L ) {
-        feedCurr = data_feed( data, placeholders, minibatch_size )
-        for ( pname in names( dynamics$momentum ) ) {
-            sess$run( dynamics$momentum[[pname]], feed_dict = feedCurr )
-            sess$run( dynamics$dynamics[[pname]], feed_dict = feedCurr )
-        }
-    }
-}
-
-printProgress = function( sess, estLogPost, data, placeholders, iter, minibatch_size, params ) {
-    # Print progress of algorithm
-    currentEstimate = sess$run( estLogPost, feed_dict = data_feed( 
-            data, placeholders, minibatch_size ) )
-    writeLines( paste0( "Iteration: ", iter, "\t\tLog posterior estimate: ", currentEstimate ) )
-}
-
-optUpdate = function( sess, optSteps, data, placeholders, minibatch_size ) {
-    # Perform one optimization step
-    sess$run(optSteps$update, feed_dict = data_feed( data, placeholders, minibatch_size ) )
-}
-
-calcFullGrads = function( sess, optSteps, data, placeholders ) {
-    # Calculate full gradient information at MAP estimate
-    for ( pname in names( optSteps$fullCalc ) ) {
-        sess$run( optSteps$fullCalc[[pname]], feed_dict = feedFullDataset( data, placeholders ) )
-        sess$run( optSteps$reassign[[pname]] )
-    }
+getParams = function( sess, sgmcmc ) {
+    return( sess$run( sgmcmc$params ) )
 }

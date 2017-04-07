@@ -36,5 +36,4 @@ calcLogPrior = function( params, placeholders ) {
     return( lprior )
 }
 
-storage = sghmc( calcLogLik, calcLogPrior, data, params, eta, alpha, L, minibatch_size )
-print( storage$beta )
+storage = runSGHMC( calcLogLik, calcLogPrior, data, params, eta, alpha, L, minibatch_size )

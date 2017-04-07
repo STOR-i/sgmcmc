@@ -8,12 +8,12 @@ initStorage = function( paramsRaw, n_iters ) {
     return( paramStorage )
 }
 
-storeState = function( sess, iter, params, paramStorage ) {
-    for ( pname in names( params ) ) {
-        paramCurrent = params[[pname]]$eval( sess )
-        paramStorage[[pname]] = updateStorage( paramStorage[[pname]], iter, paramCurrent )
+storeState = function( sess, iter, sgld, storage ) {
+    for ( pname in names( sgld$params ) ) {
+        paramCurrent = sgld$params[[pname]]$eval( sess )
+        storage[[pname]] = updateStorage( storage[[pname]], iter, paramCurrent )
     }
-    return( paramStorage )
+    return( storage )
 }
 
 updateStorage = function( storage, index, params ) {

@@ -12,6 +12,7 @@ library(tensorflow)
 source("setup.r")
 source("update.r")
 source("storage.r")
+source("controlVariates.r")
 
 calcCVGradient = function( estLogPost, estLogPostOpt, gradFull, params, paramsOpt ) {
     # Calculate reduced variance gradient estimate using control variates
@@ -48,31 +49,20 @@ declareDynamics = function( estLogPost, estLogPostOpt, gradFull, params, paramsO
     return( step_list )
 }
 
-declareOptimizer = function( estLogPost, fullLogPost, paramsOpt, params, gradFull, optStepsize ) {
-    # Initialize optimizer for MAP estimation step
-    #
-    optSteps = list()
-    optimizer = tf$train$AdamOptimizer( 0.001 )
-    optSteps[["update"]] = optimizer$minimize( -estLogPost)
-    # Steps for calculating full gradient and setting initial parameter values at MAP estimate
-    optSteps[["fullCalc"]] = list()
-    optSteps[["reassign"]] = list()
-    for ( pname in names( paramsOpt ) ) {
-        paramOptCurr = paramsOpt[[pname]]
-        paramCurr = params[[pname]]
-        grad = tf$gradients( fullLogPost, paramOptCurr )[[1]]
-        optSteps$fullCalc[[pname]] = gradFull[[pname]]$assign( grad )
-        optSteps$reassign[[pname]] = paramCurr$assign( paramOptCurr )
-    }
-    return( optSteps )
+optUpdate2 = function( sess, optSteps, data, placeholders, n ) {
+    sess$run( optSteps$update, feed_dict = data_feed( data, placeholders, n ) )
+}
+
+printProgress = function( sess, estLogPostOpt, data, placeholders, i, n, params ) {
+    currentEstimate = sess$run( estLogPostOpt, feed_dict = data_feed( data, placeholders, n ) )
+    writeLines( paste0( "Iteration: ",i,"\t\tLog posterior estimate: ",currentEstimate ) )
 }
 
 # Add option to include a summary measure??
-sghmcCV = function( calcLogLik, calcLogPrior, data, paramsRaw, eta, alpha, L, minibatch_size, 
+sghmcCV = function( calcLogLik, calcLogPrior, data, paramsRaw, eta, alpha, L, n, 
         n_iters = 10^4 ) {
     # 
     # Get key sizes and declare correction term for log posterior estimate
-    n = getMinibatchSize( minibatch_size )
     N = dim( data[[1]] )[1]
     correction = tf$constant( N / minibatch_size, dtype = tf$float32 )
     # Convert params and data to tensorflow variables and placeholders
@@ -105,7 +95,7 @@ sghmcCV = function( calcLogLik, calcLogPrior, data, paramsRaw, eta, alpha, L, mi
     # Initial optimization of parameters
     writeLines( "Finding initial MAP estimates" )
     for ( i in 1:n_iters ) {
-        optUpdate( sess, optSteps, data, placeholders, minibatch_size )
+        optUpdate2( sess, optSteps, data, placeholders, n )
         if ( i %% 100 == 0 ) {
             printProgress( sess, estLogPostOpt, data, placeholders, i, minibatch_size, params )
         }

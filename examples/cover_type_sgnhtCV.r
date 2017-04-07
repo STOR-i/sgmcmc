@@ -1,6 +1,6 @@
 library(tensorflow)
 setwd("../R/")
-source("sgld.r")
+source("sgnhtCV.r")
 
 # Load in data
 X_train = as.matrix( read.table( "../data/cover_type_small/X_train.dat" ) )[,c(-2)]
@@ -14,11 +14,12 @@ d = dim( X_train )[2]
 minibatch_size = 500
 
 # Declare initial parameter values
-beta = matrix( rep( 0.1, d ), nrow = d )
-bias = 0.1
+beta = matrix( rnorm( d ), nrow = d )
+bias = rnorm(1)
 params = list( "beta" = beta, "bias" = bias )
 # Declare parameter stepsizes
-stepsizes = list( "beta" = 1e-4, "bias" = 1e-4 )
+stepsizes = list( "beta" = 1e-6, "bias" = 1e-6 )
+a = list( "beta" = 1e-2, "bias" = 1e-2 )
 
 calcLogLik = function( params, placeholders ) {
     # Declare log likelihood estimate -- uses tensorflow built in distributions etc
@@ -34,4 +35,4 @@ calcLogPrior = function( params, placeholders ) {
     return( lprior )
 }
 
-paramStorage = runSGLD( calcLogLik, calcLogPrior, data, params, stepsizes, minibatch_size )
+storage = sgnhtCV( calcLogLik, calcLogPrior, data, params, stepsizes, a, minibatch_size )

@@ -19,6 +19,7 @@ bias = 0
 params = list( "beta" = beta, "bias" = bias )
 # Declare parameter stepsizes
 stepsizes = list( "beta" = 1e-4, "bias" = 1e-4 )
+optStepsize = 5e-6
 
 calcLogLik = function( params, placeholders ) {
     # Declare log likelihood estimate -- uses tensorflow built in distributions etc
@@ -34,5 +35,5 @@ calcLogPrior = function( params, placeholders ) {
     return( lprior )
 }
 
-storage = sgldCV( calcLogLik, calcLogPrior, data, params, stepsizes, minibatch_size, 10^4 )
+storage = runSGLDCV( calcLogLik, calcLogPrior, data, params, stepsizes, optStepsize, minibatch_size )
 print( storage$beta )

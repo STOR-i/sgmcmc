@@ -13,47 +13,58 @@ source("setup.r")
 source("update.r")
 source("storage.r")
 
-declareDynamics = function( lpost, params, stepsize ) {
+declareDynamics = function( estLogPost, params, stepsize ) {
     # Initialize SGLD tensorflow by declaring Langevin Dynamics
     #
-    param_names = names( params )
     # List contains operations consisting of one SGLD update across all parameters
-    step_list = list()
+    dynamics = list()
     # Declare SGLD dynamics using tensorflow autodiff
-    for ( param_name in param_names ) {
-        param_current = params[[param_name]]
-        grad = tf$gradients( lpost, param_current )[[1]]
-        step_list$dynamics[[param_name]] = param_current$assign_add( 0.5 * stepsize[[param_name]] * grad + sqrt( stepsize[[param_name]] ) * tf$random_normal( param_current$get_shape() ) )
+    for ( pname in names( params ) ) {
+        theta = params[[pname]]
+        epsilon = stepsize[[pname]]
+        grad = tf$gradients( estLogPost, theta )[[1]]
+        dynamics[[pname]] = theta$assign_add( 0.5 * epsilon * grad + 
+                sqrt( epsilon ) * tf$random_normal( theta$get_shape() ) )
     }
-    return( step_list )
+    return( dynamics )
 }
 
-# Add option to include a summary measure??
-sgld = function( calcLogLik, calcLogPrior, data, paramsRaw, stepsize, minibatch_size, 
-        n_iters = 10^4 ) {
+updateSGLD = function( sess, sgld ) {
+    # Perform one step of the declared dynamics
+    feedCurr = data_feed( sgld$data, sgld$placeholders, sgld$n )
+    for ( step in sgld$dynamics ) {
+        sess$run( step, feed_dict = feedCurr )
+    }
+}
+
+setupSGLD = function( logLik, logPrior, data, paramsRaw, stepsize, n, gibbsParams ) {
     # 
-    # Get key sizes and declare correction term for log posterior estimate
-    n = getMinibatchSize( minibatch_size )
+    # Get dataset size
     N = dim( data[[1]] )[1]
-    correction = tf$constant( N / n, dtype = tf$float32 )
     # Convert params and data to tensorflow variables and placeholders
     params = setupParams( paramsRaw )
-    placeholders = setupPlaceholders( data, minibatch_size )
-    paramStorage = initStorage( paramsRaw, n_iters )
+    placeholders = setupPlaceholders( data, n )
     # Declare estimated log posterior tensor using declared variables and placeholders
-    logLik = calcLogLik( params, placeholders )
-    logPrior = calcLogPrior( params, placeholders )
-    estLogPost = logPrior + correction * logLik
+    estLogPost = setupEstLogPost( logLik, logPrior, params, placeholders, N, n, gibbsParams )
     # Declare SGLD dynamics
     dynamics = declareDynamics( estLogPost, params, stepsize )
-    # Initalize tensorflowsession
+    # Declare SGLD object
+    sgld = list( "dynamics" = dynamics, "data" = data, "n" = n, "placeholders" = placeholders, 
+            "params" = params, "estLogPost" = estLogPost )
+    return( sgld )
+}
+
+runSGLD = function( logLik, logPrior, data, paramsRaw, stepsize, n, nIters = 10^4, verbose = TRUE ) {
+    sgld = setupSGLD( logLik, logPrior, data, paramsRaw, stepsize, n, NULL )
+    paramStorage = initStorage( paramsRaw, nIters )
+    # Initialize tensorflow session
     sess = initSess()
     # Run Langevin dynamics on each parameter for n_iters
-    for ( i in 1:n_iters ) {
-        updateSGLD( sess, dynamics, data, placeholders, minibatch_size )
-        paramStorage = storeState( sess, i, params, paramStorage )
+    for ( i in 1:nIters ) {
+        updateSGLD( sess, sgld )
+        paramStorage = storeState( sess, i, sgld, paramStorage )
         if ( i %% 100 == 0 ) {
-            printProgress( sess, estLogPost, data, placeholders, i, minibatch_size, params )
+            checkDivergence( sess, sgld, i, verbose )
         }
     }
     return( paramStorage )

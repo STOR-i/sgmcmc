@@ -13,52 +13,71 @@ source("setup.r")
 source("update.r")
 source("storage.r")
 
-declareDynamics = function( lpost, params, eta, alpha ) {
-    # Initialize SGLD tensorflow by declaring Langevin Dynamics
+declareDynamics = function( estLogPost, params, etaList, alphaList ) {
+    # Initialize SGHMC for tensorflow by declaring Hamiltonian Dynamics
     #
-    param_names = names( params )
-    step_list = list( "dynamics" = list(), "momentum" = list(), "refresh" = list() )
-    vs = list()
-    for ( param_name in param_names ) {
-        # Declare momentum params and reparameterize
-        param_current = params[[param_name]]
-        vs[[param_name]] = tf$Variable( tf$random_normal( param_current$get_shape() ) )
-        v_current = vs[[param_name]]
-        step_list$refresh[[param_name]] = v_current$assign( sqrt( eta[[param_name]] ) * tf$random_normal( param_current$get_shape() ) )
-        grad = tf$gradients( lpost, param_current )[[1]]
-        step_list$momentum[[param_name]] = v_current$assign( eta[[param_name]]*grad + alpha[[param_name]]*v_current + sqrt( eta[[param_name]] * alpha[[param_name]] / 4 ) * tf$random_normal( param_current$get_shape() ) )
-        step_list$dynamics[[param_name]] = param_current$assign_add( v_current )
+    dynamics = list( "theta" = list(), "nu" = list(), "refresh" = list() )
+    for ( pname in names( params ) ) {
+        # Declare constants
+        eta = etaList[[pname]]
+        alpha = alphaList[[pname]]
+        # Declare parameters
+        theta = params[[pname]]
+        nu = tf$Variable( tf$random_normal( theta$get_shape() ) )
+        # Declare dynamics
+        gradU = tf$gradients( estLogPost, theta )[[1]]
+        dynamics$refresh[[pname]] = nu$assign( sqrt( eta ) * tf$random_normal( theta$get_shape() ) )
+        dynamics$nu[[pname]] = nu$assign( eta*gradU + alpha*nu + 
+                sqrt( eta * alpha / 4 ) * tf$random_normal( theta$get_shape() ) )
+        dynamics$theta[[pname]] = theta$assign_add( nu )
     }
-    return( step_list )
+    return( dynamics )
 }
 
+updateSGHMC = function( sess, sghmc ) {
+    # Perform one step of SGHMC
+    for ( step in sghmc$dynamics$refresh ) {
+        sess$run( step )
+    }
+    for ( l in 1:sghmc$L ) {
+        feedCurr = data_feed( sghmc$data, sghmc$placeholders, sghmc$n )
+        for ( pname in names( sghmc$params ) ) {
+            sess$run( sghmc$dynamics$nu[[pname]], feed_dict = feedCurr )
+            sess$run( sghmc$dynamics$theta[[pname]], feed_dict = feedCurr )
+        }
+    }
+}
 
-# Add option to include a summary measure??
-sghmc = function( calcLogLik, calcLogPrior, data, paramsRaw, eta, alpha, L, minibatch_size, 
-        n_iters = 10^4 ) {
+setupSGHMC = function( logLik, logPrior, data, paramsRaw, eta, alpha, L, n, gibbsParams ) {
     # 
-    # Get key sizes and declare correction term for log posterior estimate
-    n = getMinibatchSize( minibatch_size )
+    # Get dataset size
     N = dim( data[[1]] )[1]
-    correction = tf$constant( N / minibatch_size, dtype = tf$float32 )
     # Convert params and data to tensorflow variables and placeholders
     params = setupParams( paramsRaw )
-    placeholders = setupPlaceholders( data, minibatch_size )
-    paramStorage = initStorage( paramsRaw, n_iters )
+    placeholders = setupPlaceholders( data, n )
     # Declare estimated log posterior tensor using declared variables and placeholders
-    logLik = calcLogLik( params, placeholders )
-    logPrior = calcLogPrior( params, placeholders )
-    estLogPost = logPrior + correction * logLik
+    estLogPost = setupEstLogPost( logLik, logPrior, params, placeholders, N, n, gibbsParams )
     # Declare SGLD dynamics
     dynamics = declareDynamics( estLogPost, params, eta, alpha )
+    sghmc = list( "dynamics" = dynamics, "data" = data, "n" = n, "placeholders" = placeholders, 
+            "params" = params, "estLogPost" = estLogPost, "L" = L )
+    return( sghmc )
+}
+
+runSGHMC = function( logLik, logPrior, data, paramsRaw, eta, alpha, L, n, 
+        nIters = 10^4, verbose = TRUE ) {
+    # Setup SGHMC dynamics
+    sghmc = setupSGHMC( logLik, logPrior, data, paramsRaw, eta, alpha, L, n, NULL )
+    # Initialize storage
+    paramStorage = initStorage( paramsRaw, nIters )
     # Initalize tensorflowsession
     sess = initSess()
-    # Run Langevin dynamics on each parameter for n_iters
-    for ( i in 1:n_iters ) {
-        updateSGHMC( sess, dynamics, data, placeholders, minibatch_size, L )
-        paramStorage = storeState( sess, i, params, paramStorage )
+    # Perform SGHMC, storing parameters at each step
+    for ( i in 1:nIters ) {
+        updateSGHMC( sess, sghmc )
+        paramStorage = storeState( sess, i, sghmc, paramStorage )
         if ( i %% 100 == 0 ) {
-            printProgress( sess, estLogPost, data, placeholders, i, minibatch_size, params )
+            checkDivergence( sess, sghmc, i, verbose )
         }
     }
     return( paramStorage )
