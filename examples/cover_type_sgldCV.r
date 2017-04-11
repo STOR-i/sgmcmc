@@ -1,6 +1,6 @@
 library(tensorflow)
 setwd("../R/")
-source("sgldCV.r")
+source("sgld.r")
 
 # Load in data
 X_train = as.matrix( read.table( "../data/cover_type_small/X_train.dat" ) )[,c(-2)]

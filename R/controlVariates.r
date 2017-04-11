@@ -20,6 +20,15 @@ optUpdate = function( sess, sgmcmc ) {
     sess$run( sgmcmc$optimizer$update, feed_dict = feedCurr )
 }
 
+# Feeds the full dataset to the current operation
+feedFullDataset = function( data, placeholders ) {
+    feed_dict = dict()
+    for ( input in names( placeholders ) ) {
+        feed_dict[[ placeholders[[input]] ]] = data[[input]]
+    }
+    return( feed_dict )
+}
+
 setupFullLogPost = function( logLik, logPrior, params, placeholders, gibbsParams ) {
     # Declare full log posterior
     #
@@ -73,20 +82,6 @@ declareOptimizer = function( estLogPost, fullLogPost, paramsOpt, params, gradFul
         optSteps$reassign[[pname]] = paramCurr$assign( paramOptCurr )
     }
     return( optSteps )
-}
-
-calcCVGradient = function( estLogPost, estLogPostOpt, gradFull, params, paramsOpt ) {
-    # Calculate reduced variance gradient estimate using control variates
-    gradEst = list()
-    for ( pname in names( params ) ) {
-        paramCurr = params[[pname]]
-        optParamCurr = paramsOpt[[pname]]
-        gradCurr = tf$gradients( estLogPost, paramCurr )[[1]]
-        optGradCurr = tf$gradients( estLogPostOpt, optParamCurr )[[1]]
-        fullOptGradCurr = gradFull[[pname]]
-        gradEst[[pname]] = fullOptGradCurr - optGradCurr + gradCurr
-    }
-    return( gradEst )
 }
 
 calcFullGrads = function( sess, sgmcmc ) {

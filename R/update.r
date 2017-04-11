@@ -1,22 +1,124 @@
 library(tensorflow)
 
-data_feed = function( data, placeholders, minibatch_size ) {
-    # Creates the data drip feed to the algorithm.
+#' Perform a single MCMC step using the dynamics defined in the sgmcmc object
+#' 
+#' If you want to perform Gibbs updates alongside SGMCMC, you'll need to be able to declare
+#'  your own for loop, run those Gibbs updates for each iteration and then run a sinlge MCMC step.
+#'  This function performs a single update of the sgmcmc dynamics declared in the sgmcmc object,
+#'  and updates the sgmcmc$params objects accordingly.
+#'
+#' @param sgmcmc object as returned by sgld, sghmc or sgnht functions
+#' @param sess a Tensorflow Session
+#'
+#' @examples Tutorials available at [link to be added]
+#'
+mcmcStep = function( sgmcmc, sess ) UseMethod("mcmcStep")
+
+# Perform one step of SGLD
+mcmcStep.sgld = function( sgld, sess ) {
+    # Sample minibatch of data
+    feedCurr = dataFeed( sgld$data, sgld$placeholders, sgld$n )
+    for ( step in sgld$dynamics ) {
+        sess$run( step, feed_dict = feedCurr )
+    }
+}
+
+# Perform one step of SGHMC
+mcmcStep.sghmc = function( sghmc, sess ) {
+    # Refresh momentum
+    for ( step in sghmc$dynamics$refresh ) {
+        sess$run( step )
+    }
+    for ( l in 1:sghmc$L ) {
+        # Sample minibatch of data
+        feedCurr = dataFeed( sghmc$data, sghmc$placeholders, sghmc$n )
+        for ( pname in names( sghmc$params ) ) {
+            sess$run( sghmc$dynamics$nu[[pname]], feed_dict = feedCurr )
+            sess$run( sghmc$dynamics$theta[[pname]], feed_dict = feedCurr )
+        }
+    }
+}
+
+# Perform one step of SGNHT
+mcmcStep.sgnht = function( sgnht, sess ) {
+    # Refresh momentum
+    feedCurr = dataFeed( sgnht$data, sgnht$placeholders, sgnht$n )
+    for ( step in sgnht$dynamics$u ) {
+        sess$run( step, feed_dict = feedCurr )
+    }
+    for ( step in sgnht$dynamics$theta ) {
+        sess$run( step, feed_dict = feedCurr )
+    }
+    for ( step in sgnht$dynamics$alpha ) {
+        sess$run( step, feed_dict = feedCurr )
+    }
+}
+
+# Run stochastic gradient MCMC for declared dynamics
+# @param paramsRaw is the original list of numeric arrays used to define parameter starting points.
+#   This is needed to calculate the dimensions of the storage arrays.
+runSGMCMC = function( sgmcmc, paramsRaw, options ) UseMethod("runSGMCMC")
+
+# SGMCMC run when control variates are not used
+runSGMCMC.sgmcmc = function( sgmcmc, paramsRaw, options ) {
+    # Initialize storage
+    paramStorage = initStorage( paramsRaw, options$nIters )
+    # Initalize tensorflow session
+    sess = initSess()
+    # Perform SGMCMC for desired iterations, storing parameters at each step
+    for ( i in 1:options$nIters ) {
+        mcmcStep( sgmcmc, sess )
+        paramStorage = storeState( sess, i, sgmcmc, paramStorage )
+        if ( i %% 100 == 0 ) {
+            # If chain has diverged throw an error, this function also prints progress
+            checkDivergence( sess, sgmcmc, i, options$verbose )
+        }
+    }
+    return( paramStorage )
+}
+
+# Run stochastic gradient MCMC with Control Variates for declared dynamics
+runSGMCMC.sgmcmcCV = function( sgmcmcCV, paramsRaw, options ) {
+    # Initialize storage
+    paramStorage = initStorage( paramsRaw, options$nIters )
+    # Initalize tensorflow session
+    sess = initSess()
+    # Run initial optimization to find mode of parameters
+    getMode( sess, sgmcmcCV, options$nItersOpt, options$verbose )
+    # Perform SGMCMCCV for desired iterations, storing parameters at each step
+    if ( options$verbose ) {
+        writeLines( "\nSampling using SGMCMC..." )
+    }
+    for ( i in 1:options$nIters ) {
+        mcmcStep( sgmcmcCV, sess )
+        paramStorage = storeState( sess, i, sgmcmcCV, paramStorage )
+        if ( i %% 100 == 0 ) {
+            # If chain has diverged throw an error, this function also prints progress
+            checkDivergence( sess, sgmcmcCV, i, options$verbose )
+        }
+    }
+    return( paramStorage )
+}
+
+# Creates the feed_dict for each tensorflow placeholder to feed the minibatch of data
+dataFeed = function( data, placeholders, n ) {
     feed_dict = dict()
+    # Get dataset size
     N = dim( data[[1]] )[1]
-    selection = sample( N, minibatch_size )
-    input_names = names( placeholders )
-    for ( input in input_names ) {
+    # Get indices of subsample
+    selection = sample( N, n )
+    for ( input in names( placeholders ) ) {
+        # Slice datasets at selection
         feed_dict[[ placeholders[[input]] ]] = dataSelect( data[[input]], selection )
     }
     return( feed_dict )
 }
 
+# Subset data based on selection across general dimension containers
 dataSelect = function( data, selection ) {
-    # Subset data based on selection across general dimension containers
     dataDim = dim( data )
     d = length( dataDim )
-    # Handle the vector and 1d matrix case
+    # Handle the vector and 1d matrix edge case
     if ( d < 2 ) {
         return( data[selection] )
     }
@@ -29,35 +131,23 @@ dataSelect = function( data, selection ) {
     return( do.call( `[`, argList ) )
 }
 
-feedFullDataset = function( data, placeholders ) {
-    # Feeds the full dataset to the current operation
-    feed_dict = dict()
-    for ( input in names( placeholders ) ) {
-        feed_dict[[ placeholders[[input]] ]] = data[[input]]
-    }
-    return( feed_dict )
-}
-
+# Initialise tensorflow session and all global variables
 initSess = function() { 
-    # Initialise tensorflow session
     sess = tf$Session()
     init = tf$global_variables_initializer()
     sess$run(init)
     return(sess)
 }
 
+# Check for divergence of chain and print progress if verbose == TRUE
 checkDivergence = function( sess, sgmcmc, iter, verbose ) {
-    # check divergence of chain and print progress if verbose == TRUE
-    currentEstimate = sess$run( sgmcmc$estLogPost, feed_dict = data_feed( 
+    currentEstimate = sess$run( sgmcmc$estLogPost, feed_dict = dataFeed( 
             sgmcmc$data, sgmcmc$placeholders, sgmcmc$n ) )
+    # If chain diverged throw an error
     if ( is.nan( currentEstimate ) ) {
         stop("Chain diverged")
     }
     if ( verbose ) {
         writeLines( paste0( "Iteration: ", iter, "\t\tLog posterior estimate: ", currentEstimate ) )
     }
-}
-
-getParams = function( sess, sgmcmc ) {
-    return( sess$run( sgmcmc$params ) )
 }

@@ -1,6 +1,6 @@
 library(tensorflow)
 setwd("../R/")
-source("sghmcCV.r")
+source("sghmc.r")
 
 # Load in data
 X_train = as.matrix( read.table( "../data/cover_type_small/X_train.dat" ) )[,c(-2)]
@@ -21,6 +21,7 @@ params = list( "beta" = beta, "bias" = bias )
 eta = list( "beta" = 1e-5, "bias" = 1e-5 )
 alpha = list( "beta" = 1e-2, "bias" = 1e-2 )
 L = 5
+optStepsize = 1e-6
 
 calcLogLik = function( params, placeholders ) {
     # Declare log likelihood estimate -- uses tensorflow built in distributions etc
@@ -36,5 +37,5 @@ calcLogPrior = function( params, placeholders ) {
     return( lprior )
 }
 
-storage = sghmcCV( calcLogLik, calcLogPrior, data, params, eta, alpha, L, minibatch_size )
+storage = runSGHMCCV( calcLogLik, calcLogPrior, data, params, eta, alpha, L, optStepsize, minibatch_size )
 print( storage$beta )

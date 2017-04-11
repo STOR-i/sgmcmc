@@ -1,30 +1,60 @@
 library(tensorflow)
 
+# Define declareDynamics generic, defined for each SGMCMC method in their respective modules
+# @param sgmcmc a stochastic gradient mcmc object, as defined in the respective modules sgld.r etc.
+declareDynamics = function( sgmcmc ) UseMethod("declareDynamics")
+
+# getGradients generic defines different gradient estimates for 
+# control variate and non-control variate methods
+# @param sgmcmc a stochastic gradient mcmc object, as defined in the respective modules sgld.r etc.
+getGradients = function( sgmcmc ) UseMethod("getGradients")
+
+# Get gradient estimates for standard SGMCMC method
+getGradients.sgmcmc = function( sgmcmc ) {
+    estLogPostGrads = list()
+    for ( pname in names( sgmcmc$params ) ) {
+        estLogPostGrads[[pname]] = tf$gradients( sgmcmc$estLogPost, sgmcmc$params[[pname]] )[[1]]
+    }
+    return( estLogPostGrads )
+}
+
+# Get gradient estimates for control variate methods
+getGradients.sgmcmcCV = function( sgmcmcCV ) {
+    estLogPostGrads = list()
+    for ( pname in names( sgmcmcCV$params ) ) {
+        gradCurr = tf$gradients( sgmcmcCV$estLogPost, sgmcmcCV$params[[pname]] )[[1]]
+        optGradCurr = tf$gradients( sgmcmcCV$estLogPostOpt, sgmcmcCV$paramsOpt[[pname]] )[[1]]
+        optGradFull = sgmcmcCV$logPostOptGrad[[pname]]
+        estLogPostGrads[[pname]] = optGradFull - optGradCurr + gradCurr
+    }
+    return( estLogPostGrads )
+}
+
+# Redeclare parameters as tensorflow variables, keep starting values
 setupParams = function( params ) {
-    # Redeclare parameters as tensorflow variables
-    param_names = names( params )
     tfParams = list()
-    for ( pname in param_names ) {
+    for ( pname in names( params ) ) {
         tfParams[[pname]] = tf$Variable( params[[pname]], dtype = tf$float32 )
     }
     return( tfParams )
 }
 
-setupPlaceholders = function( data, minibatch_size ) {
-    # Declare placeholders for each dataset
-    data_names = names( data )
+# Declare tensorflow placeholders for each dataset based on data list and minibatch size n
+setupPlaceholders = function( data, n ) {
     tfPlaceholders = list()
-    for ( dname in data_names ) {
-        current_size = dim( data[[dname]] )
-        current_size[1] = minibatch_size
-        tfPlaceholders[[dname]] = tf$placeholder( tf$float32, current_size )
+    for ( dname in names( data ) ) {
+        shapeCurr = dim( data[[dname]] )
+        shapeCurr[1] = n
+        tfPlaceholders[[dname]] = tf$placeholder( tf$float32, shapeCurr )
     }
     return( tfPlaceholders )
 }
 
+# Use defined logLik & logPrior functions to declare unbiased estimate of log posterior
 setupEstLogPost = function( logLik, logPrior, params, placeholders, N, n, gibbsParams ) {
-    # Declare log posterior estimate
     correction = tf$constant( N / n, dtype = tf$float32 )
+    # If parameters are declared that will updated using Gibbs then the passed logPrior & logLik 
+    # functions will also take gibbsParams as arguments
     if ( is.null( gibbsParams ) ) {
         estLogPost = logPrior( params, placeholders ) + 
                 correction * logLik( params, placeholders )
@@ -35,17 +65,9 @@ setupEstLogPost = function( logLik, logPrior, params, placeholders, N, n, gibbsP
     return( estLogPost )
 }
 
-setupGrads = function( params ) {
-    # Create placeholders to hold current gradients, used for storage
-    tfGrads = list()
-    for ( pname in names( params ) ) {
-        tfGrads[[pname]] = tf$Variable( params[[pname]], dtype = tf$float32 )
-    }
-    return( tfGrads )
-}
-
+# Get the rank of each of the parameter objects, needed for sghmc
+# @assume paramsRaw object is the original list of numeric R arrays, not tensorflow tensors
 getRanks = function( paramsRaw ) {
-    # Get the rank of each of the parameter objects
     ranks = list()
     for ( pname in names( paramsRaw ) ) {
         param = paramsRaw[[pname]]
