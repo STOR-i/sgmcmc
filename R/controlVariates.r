@@ -1,37 +1,45 @@
 library(tensorflow)
 
+#' Perform one optimization step on control variate parameters
+#' 
+#' If you want to perform Gibbs updates alongside SGMCMCCV, you'll need to be able to declare
+#'  your own for loop, run those Gibbs updates for that iteration and then run a single MCMC
+#'  or optimization step alongside those updates.
+#'  This function performs a single optimization step on the control variate parameters.
+#'  This initial optimization procedure is needed before SGMCMCCV is applied in order to
+#'  ensure the control variate parameters estimate the mode well.
+#'
+#' @param sgmcmcCV object as returned by sgldCV, sghmcCV or sgnhtCV functions
+#' @param sess a Tensorflow Session
+#'
+#' @examples Tutorials available at [link to be added]
+#'
+optUpdate = function( sess, sgmcmc ) {
+    feedCurr = data_feed( sgmcmc$data, sgmcmc$placeholders, sgmcmc$n )
+    sess$run( sgmcmc$optimizer$update, feed_dict = feedCurr )
+}
+
+# Initial optimization of parameters for Control Variate methods.
+# Needed to ensure control variate parameters estimate posterior mode.
 getMode = function( sess, sgmcmc, nIters = 10^4, verbose = TRUE ) {
-    # Initial optimization of parameters
+    # If verbose parameter is TRUE, print progress
     if ( verbose ) {
         writeLines( "\nFinding initial MAP estimates..." )
     }
     for ( i in 1:nIters ) {
+        # Single update of optimization
         optUpdate( sess, sgmcmc )
         if ( i %% 100 == 0 ) {
             checkOptDivergence( sess, sgmcmc, i, verbose )
         }
     }
+    # Calculate the full gradient of the log posterior (i.e. using the full dataset) 
+    #   at the mode estimates
     calcFullGrads( sess, sgmcmc )
 }
 
-optUpdate = function( sess, sgmcmc ) {
-    # Perform one optimization step
-    feedCurr = data_feed( sgmcmc$data, sgmcmc$placeholders, sgmcmc$n )
-    sess$run( sgmcmc$optimizer$update, feed_dict = feedCurr )
-}
-
-# Feeds the full dataset to the current operation
-feedFullDataset = function( data, placeholders ) {
-    feed_dict = dict()
-    for ( input in names( placeholders ) ) {
-        feed_dict[[ placeholders[[input]] ]] = data[[input]]
-    }
-    return( feed_dict )
-}
-
+# Declare full log posterior density from logLik and logPrior functions
 setupFullLogPost = function( logLik, logPrior, params, placeholders, gibbsParams ) {
-    # Declare full log posterior
-    #
     # Separate function from setupEstLogPost avoids float precision errors from correction term
     if ( is.null( gibbsParams ) ) {
         logPost = logPrior( params, placeholders ) + logLik( params, placeholders )
@@ -42,50 +50,47 @@ setupFullLogPost = function( logLik, logPrior, params, placeholders, gibbsParams
     return( logPost )
 }
 
+# Create tensorflow placeholders to hold full dataset for full log posterior calculation
 setupFullPlaceholders = function( data ) {
-    # Create placeholders to hold full dataset for full log posterior calculation
-    data_names = names( data )
     tfPlaceholders = list()
-    for ( dname in data_names ) {
+    for ( dname in names( data ) ) {
         current_size = dim( data[[dname]] )
         tfPlaceholders[[dname]] = tf$placeholder( tf$float32, current_size )
     }
     return( tfPlaceholders )
 }
 
+# Create tensorflow variables to hold estimates of the full log posterior gradient at the mode
 setupFullGradients = function( params ) {
-    # Create container for the full gradient value after optimization
-    #
-    # Declare containers as tensorflow variables. Gradients will be same shape as parameters
-    param_names = names( params )
     gradientContainer = list()
-    for ( pname in param_names ) {
+    for ( pname in names( params ) ) {
         gradientContainer[[pname]] = tf$Variable( params[[pname]], dtype = tf$float32 )
     }
     return( gradientContainer )
 }
 
+# Initialize optimizer which finds estimates of the mode of the log posterior
 declareOptimizer = function( estLogPost, fullLogPost, paramsOpt, params, gradFull, optStepsize ) {
-    # Initialize optimizer for MAP estimation step
-    #
     optSteps = list()
     optimizer = tf$train$AdamOptimizer( 0.001 )
     optSteps[["update"]] = optimizer$minimize( -estLogPost)
-    # Steps for calculating full gradient and setting initial parameter values at MAP estimate
     optSteps[["fullCalc"]] = list()
     optSteps[["reassign"]] = list()
     for ( pname in names( paramsOpt ) ) {
+        # Declare current parameters
         paramOptCurr = paramsOpt[[pname]]
         paramCurr = params[[pname]]
+        # Declare procedure to calculate the full log posterior gradient at the mode
         grad = tf$gradients( fullLogPost, paramOptCurr )[[1]]
         optSteps$fullCalc[[pname]] = gradFull[[pname]]$assign( grad )
+        # This procedure assigns the MCMC starting values to the mode estimates
         optSteps$reassign[[pname]] = paramCurr$assign( paramOptCurr )
     }
     return( optSteps )
 }
 
+# Calculates full log posterior gradient estimate at the mode
 calcFullGrads = function( sess, sgmcmc ) {
-    # Calculate full gradient information at MAP estimate
     feedCurr = feedFullDataset( sgmcmc$data, sgmcmc$placeholdersFull )
     for ( pname in names( sgmcmc$params ) ) {
         sess$run( sgmcmc$optimizer$fullCalc[[pname]], feed_dict = feedCurr  )
@@ -93,10 +98,11 @@ calcFullGrads = function( sess, sgmcmc ) {
     }
 }
 
+# Check divergence of optimization procedure and print progress if verbose == TRUE
 checkOptDivergence = function( sess, sgmcmc, iter, verbose ) {
-    # Check divergence of optimization procedure and print progress if verbose == TRUE
     currentEstimate = sess$run( sgmcmc$estLogPostOpt, feed_dict = data_feed( 
             sgmcmc$data, sgmcmc$placeholders, sgmcmc$n ) )
+    # If log posterior estimate is NAN, chain is diverged, stop
     if ( is.nan( currentEstimate ) ) {
         stop("Chain diverged")
     }
@@ -104,3 +110,13 @@ checkOptDivergence = function( sess, sgmcmc, iter, verbose ) {
         writeLines( paste0( "Iteration: ", iter, "\t\tLog posterior estimate: ", currentEstimate ) )
     }
 }
+
+# Feeds the full dataset to the current operation, used by calcFullGrads
+feedFullDataset = function( data, placeholders ) {
+    feed_dict = dict()
+    for ( input in names( placeholders ) ) {
+        feed_dict[[ placeholders[[input]] ]] = data[[input]]
+    }
+    return( feed_dict )
+}
+

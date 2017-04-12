@@ -7,7 +7,7 @@ library(tensorflow)
 #'  This function performs a single update of the sgmcmc dynamics declared in the sgmcmc object,
 #'  and updates the sgmcmc$params objects accordingly.
 #'
-#' @param sgmcmc object as returned by sgld, sghmc or sgnht functions
+#' @param sgmcmc or sgmcmcCV object as returned by sgld, sghmc or sgnht functions
 #' @param sess a Tensorflow Session
 #'
 #' @examples Tutorials available at [link to be added]
