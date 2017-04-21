@@ -121,7 +121,7 @@ runSGLDCV = function( logLik, logPrior, data, paramsRaw, stepsize, optStepsize,
 #'
 sgld = function( logLik, logPrior, data, params, stepsize, n, gibbsParams ) {
     # Get dataset size
-    N = dim( data[[1]] )[1]
+    N = getDatasetSize( data )
     # Convert params and data to tensorflow variables and placeholders
     paramstf = setupParams( params )
     placeholders = setupPlaceholders( data, n )
@@ -172,7 +172,7 @@ sgld = function( logLik, logPrior, data, params, stepsize, n, gibbsParams ) {
 #'
 sgldCV = function( logLik, logPrior, data, params, stepsize, optStepsize, n, gibbsParams ) {
     # Get dataset size
-    N = dim( data[[1]] )[1]
+    N = getDatasetSize( data )
     # Convert params and data to tensorflow variables and placeholders
     paramstf = setupParams( params )
     placeholders = setupPlaceholders( data, n )
@@ -208,7 +208,7 @@ declareDynamics.sgld = function( sgld ) {
     dynamics = list()
     # Get the correct gradient estimate given the sgld object (i.e. standard sgld or sgldcv) 
     estLogPostGrads = getGradients( sgld )
-    for ( pname in names( params ) ) {
+    for ( pname in names( sgld$params ) ) {
         # Declare simulation parameters
         theta = sgld$params[[pname]]
         epsilon = sgld$stepsize[[pname]]

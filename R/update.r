@@ -64,7 +64,7 @@ runSGMCMC.sgmcmc = function( sgmcmc, paramsRaw, options ) {
     # Initialize storage
     paramStorage = initStorage( paramsRaw, options$nIters )
     # Initalize tensorflow session
-    sess = initSess()
+    sess = initSess( options$verbose )
     # Perform SGMCMC for desired iterations, storing parameters at each step
     for ( i in 1:options$nIters ) {
         mcmcStep( sgmcmc, sess )
@@ -82,7 +82,7 @@ runSGMCMC.sgmcmcCV = function( sgmcmcCV, paramsRaw, options ) {
     # Initialize storage
     paramStorage = initStorage( paramsRaw, options$nIters )
     # Initalize tensorflow session
-    sess = initSess()
+    sess = initSess( options$verbose )
     # Run initial optimization to find mode of parameters
     getMode( sess, sgmcmcCV, options$nItersOpt, options$verbose )
     # Perform SGMCMCCV for desired iterations, storing parameters at each step
@@ -104,7 +104,7 @@ runSGMCMC.sgmcmcCV = function( sgmcmcCV, paramsRaw, options ) {
 dataFeed = function( data, placeholders, n ) {
     feed_dict = dict()
     # Get dataset size
-    N = dim( data[[1]] )[1]
+    N = getDatasetSize( data )
     # Get indices of subsample
     selection = sample( N, n )
     for ( input in names( placeholders ) ) {
@@ -132,7 +132,7 @@ dataSelect = function( data, selection ) {
 }
 
 # Initialise tensorflow session and all global variables
-initSess = function() { 
+initSess = function( verbose ) { 
     sess = tf$Session()
     init = tf$global_variables_initializer()
     sess$run(init)
@@ -145,7 +145,7 @@ checkDivergence = function( sess, sgmcmc, iter, verbose ) {
             sgmcmc$data, sgmcmc$placeholders, sgmcmc$n ) )
     # If chain diverged throw an error
     if ( is.nan( currentEstimate ) ) {
-        stop("Chain diverged")
+        stop("Chain diverged, try decreasing stepsize")
     }
     if ( verbose ) {
         writeLines( paste0( "Iteration: ", iter, "\t\tLog posterior estimate: ", currentEstimate ) )

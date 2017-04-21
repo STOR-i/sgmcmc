@@ -30,6 +30,26 @@ getGradients.sgmcmcCV = function( sgmcmcCV ) {
     return( estLogPostGrads )
 }
 
+# Calculate size of dataset
+getDatasetSize = function( data ) {
+    N = dim( data[[1]] )[1]
+    # Check edge case that data[[1]] is 1d
+    if ( is.null( N ) ) {
+        N = length( data[[1]] )
+    }
+    return( N )
+}
+
+# Calculate shape of dataset and params
+getShape = function( input ) {
+    shapeInput = dim( input )
+    # Check edge case that input[[1]] is 1d
+    if ( is.null( shapeInput ) ) {
+        shapeInput = c( length( input ) )
+    }
+    return( shapeInput )
+}
+
 # Redeclare parameters as tensorflow variables, keep starting values
 setupParams = function( params ) {
     tfParams = list()
@@ -43,7 +63,7 @@ setupParams = function( params ) {
 setupPlaceholders = function( data, n ) {
     tfPlaceholders = list()
     for ( dname in names( data ) ) {
-        shapeCurr = dim( data[[dname]] )
+        shapeCurr = getShape( data[[dname]] )
         shapeCurr[1] = n
         tfPlaceholders[[dname]] = tf$placeholder( tf$float32, shapeCurr )
     }
@@ -71,7 +91,7 @@ getRanks = function( paramsRaw ) {
     ranks = list()
     for ( pname in names( paramsRaw ) ) {
         param = paramsRaw[[pname]]
-        ranks[[pname]] = length( dim( param ) )
+        ranks[[pname]] = length( getShape( param ) )
     }
     return( ranks )
 }

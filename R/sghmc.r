@@ -136,7 +136,7 @@ runSGHMCCV = function( logLik, logPrior, data, params, eta, alpha, L, optStepsiz
 #'
 sghmc = function( logLik, logPrior, data, params, eta, alpha, L, n, gibbsParams ) {
     # Get dataset size
-    N = dim( data[[1]] )[1]
+    N = getDatasetSize( data )
     # Convert params and data to tensorflow variables and placeholders
     paramstf = setupParams( params )
     placeholders = setupPlaceholders( data, n )
@@ -185,22 +185,21 @@ sghmc = function( logLik, logPrior, data, params, eta, alpha, L, n, gibbsParams 
 #' @examples Tutorials available at [link to be added]
 #'
 sghmcCV = function( logLik, logPrior, data, params, eta, alpha, L, optStepsize, n, gibbsParams ) {
-    # 
     # Get dataset size
-    N = dim( data[[1]] )[1]
+    N = getDatasetSize( data )
     # Convert params and data to tensorflow variables and placeholders
     paramstf = setupParams( params )
     placeholders = setupPlaceholders( data, n )
     # Declare tensorflow variables for initial optimizer
     paramsOpt = setupParams( params )
     placeholdersFull = setupFullPlaceholders( data )
-    # Declare container for full gradient
+    # Declare container for full gradients at mode
     logPostOptGrad = setupFullGradients( params )
-    # Declare estimated log posterior tensor for running SGHMCCV
+    # Declare estimated log posterior tensor using declared variables and placeholders
     estLogPost = setupEstLogPost( logLik, logPrior, paramstf, placeholders, N, n, gibbsParams )
     # Declare estimated log posterior tensor for optimization
     estLogPostOpt = setupEstLogPost( logLik, logPrior, paramsOpt, placeholders, N, n, gibbsParams )
-    # Declare full log posterior for calculation at MAP estimates
+    # Declare full log posterior for calculation at MAP estimate
     fullLogPostOpt = setupFullLogPost( logLik, logPrior, paramsOpt, placeholdersFull, gibbsParams )
     # Declare optimizer
     optimizer = declareOptimizer( estLogPostOpt, fullLogPostOpt, paramsOpt, 
@@ -209,7 +208,8 @@ sghmcCV = function( logLik, logPrior, data, params, eta, alpha, L, optStepsize, 
     sghmcCV = list( "optimizer" = optimizer, "data" = data, "n" = n, "eta" = eta, "alpha" = alpha, 
             "L" = L, "placeholders" = placeholders, "placeholdersFull" = placeholdersFull, 
             "params" = paramstf, "paramsOpt" = paramsOpt, "estLogPost" = estLogPost, 
-            "estLogPostOpt" = estLogPostOpt, "logPostOptGrad" = logPostOptGrad )
+            "estLogPostOpt" = estLogPostOpt, "logPostOptGrad" = logPostOptGrad, 
+            "fullLogPostOpt" = fullLogPostOpt )
     class(sghmcCV) = c( "sghmc", "sgmcmcCV" )
     sghmcCV$dynamics = declareDynamics( sghmcCV )
     return( sghmcCV )
@@ -218,21 +218,22 @@ sghmcCV = function( logLik, logPrior, data, params, eta, alpha, L, optStepsize, 
 # Declare the tensorflow steps needed for one step of SGHMC, input SGHMC object
 # @param is an sghmc object
 declareDynamics.sghmc = function( sghmc) {
-    dynamics = list( "theta" = list(), "nu" = list(), "refresh" = list() )
+    dynamics = list( "theta" = list(), "nu" = list(), "refresh" = list(), "grad" = list() )
     # Get the correct gradient estimate given the sgld object (i.e. standard sgld or sgldcv) 
     estLogPostGrads = getGradients( sghmc )
     for ( pname in names( sghmc$params ) ) {
+        dynamics$grad[[pname]] = tf$gradients( sghmc$estLogPost, sghmc$params[[pname]] )[[1]]
         # Declare tuning constants
         eta = sghmc$eta[[pname]]
         alpha = sghmc$alpha[[pname]]
         # Declare parameters
         theta = sghmc$params[[pname]]
-        nu = tf$Variable( tf$random_normal( theta$get_shape() ) )
+        nu = tf$Variable( sqrt( eta ) * tf$random_normal( theta$get_shape() ) )
         # Declare dynamics
         gradU = estLogPostGrads[[pname]]
         dynamics$refresh[[pname]] = nu$assign( sqrt( eta ) * tf$random_normal( theta$get_shape() ) )
-        dynamics$nu[[pname]] = nu$assign( eta*gradU + alpha*nu + 
-                sqrt( eta * alpha / 4 ) * tf$random_normal( theta$get_shape() ) )
+        dynamics$nu[[pname]] = nu$assign_add( eta*gradU - alpha*nu + 
+                sqrt( 2 * eta * alpha ) * tf$random_normal( theta$get_shape() ) )
         dynamics$theta[[pname]] = theta$assign_add( nu )
     }
     return( dynamics )

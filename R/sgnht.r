@@ -137,7 +137,7 @@ runSGNHTCV = function( logLik, logPrior, data, params, eta, a, optStepsize, n,
 sgnht = function( logLik, logPrior, data, params, eta, a, n, gibbsParams ) {
     # 
     # Get dataset size
-    N = dim( data[[1]] )[1]
+    N = getDatasetSize( data )
     # Convert params and data to tensorflow variables and placeholders
     paramstf = setupParams( params )
     placeholders = setupPlaceholders( data, n )
@@ -195,11 +195,11 @@ sgnht = function( logLik, logPrior, data, params, eta, a, n, gibbsParams ) {
 sgnhtCV = function( logLik, logPrior, data, params, eta, a, 
             optStepsize, n, gibbsParams, n_iters = 10^4 ) {
     # Get key sizes and declare correction term for log posterior estimate
-    N = dim( data[[1]] )[1]
+    N = getDatasetSize( data )
     correction = tf$constant( N / n, dtype = tf$float32 )
     # Convert params and data to tensorflow variables and placeholders
     paramstf = setupParams( params )
-    placeholders = setupPlaceholders( data, minibatch_size )
+    placeholders = setupPlaceholders( data, n )
     # Declare tensorflow variables for initial optimizer
     paramsOpt = setupParams( params )
     placeholdersFull = setupFullPlaceholders( data )
@@ -224,7 +224,7 @@ sgnhtCV = function( logLik, logPrior, data, params, eta, a,
             "logPostOptGrad" = logPostOptGrad )
     class(sgnhtCV) = c( "sgnht", "sgmcmcCV" )
     # Declare SGNHT dynamics
-    sgnht$dynamics = declareDynamics( sgnht )
+    sgnhtCV$dynamics = declareDynamics( sgnhtCV )
     return( sgnhtCV )
 }
 

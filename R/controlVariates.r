@@ -15,7 +15,7 @@ library(tensorflow)
 #' @examples Tutorials available at [link to be added]
 #'
 optUpdate = function( sess, sgmcmc ) {
-    feedCurr = data_feed( sgmcmc$data, sgmcmc$placeholders, sgmcmc$n )
+    feedCurr = dataFeed( sgmcmc$data, sgmcmc$placeholders, sgmcmc$n )
     sess$run( sgmcmc$optimizer$update, feed_dict = feedCurr )
 }
 
@@ -72,8 +72,8 @@ setupFullGradients = function( params ) {
 # Initialize optimizer which finds estimates of the mode of the log posterior
 declareOptimizer = function( estLogPost, fullLogPost, paramsOpt, params, gradFull, optStepsize ) {
     optSteps = list()
-    optimizer = tf$train$AdamOptimizer( 0.001 )
-    optSteps[["update"]] = optimizer$minimize( -estLogPost)
+    optimizer = tf$train$AdamOptimizer( optStepsize )
+    optSteps[["update"]] = optimizer$minimize( -estLogPost )
     optSteps[["fullCalc"]] = list()
     optSteps[["reassign"]] = list()
     for ( pname in names( paramsOpt ) ) {
@@ -100,8 +100,8 @@ calcFullGrads = function( sess, sgmcmc ) {
 
 # Check divergence of optimization procedure and print progress if verbose == TRUE
 checkOptDivergence = function( sess, sgmcmc, iter, verbose ) {
-    currentEstimate = sess$run( sgmcmc$estLogPostOpt, feed_dict = data_feed( 
-            sgmcmc$data, sgmcmc$placeholders, sgmcmc$n ) )
+    currentEstimate = sess$run( sgmcmc$estLogPostOpt, feed_dict = dataFeed( sgmcmc$data, 
+            sgmcmc$placeholders, sgmcmc$n ) )
     # If log posterior estimate is NAN, chain is diverged, stop
     if ( is.nan( currentEstimate ) ) {
         stop("Chain diverged")

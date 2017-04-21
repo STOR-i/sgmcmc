@@ -2,7 +2,7 @@
 initStorage = function( paramsRaw, n_iters ) {
     paramStorage = list()
     for ( pname in names( paramsRaw ) ) {
-        shapeCurrent = dim( paramsRaw[[pname]] )
+        shapeCurrent = getShape( paramsRaw[[pname]] )
         # Add new dimension to parameter's current shape which holds each iteration
         shapeCurrent = c( n_iters, shapeCurrent )
         paramStorage[[pname]] = array( 0, dim = shapeCurrent )
