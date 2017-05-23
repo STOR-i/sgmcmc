@@ -1,0 +1,15 @@
+Package: sgmcmc
+Type: Package
+Title: Stochastic Gradient Markov Chain Monte Carlo
+Version: 0.1
+Author: Jack Baker, Christopher Nemeth, Paul Fearnhead
+Maintainer: Jack Baker <j.baker1@lancaster.ac.uk>
+Description: R library for performing stochastic gradient MCMC
+  including SGLD, SGHMC, SGNHT. Library is built on 'TensorFlow' 
+  <https://www.tensorflow.org/>, a library for efficient numerical computation.
+License: MIT
+URL: CHANGEME
+BugReports: CHANGEME
+Encoding: UTF-8
+Depends: R (>= 3.0), tensorflow
+RoxygenNote: 6.0.1
