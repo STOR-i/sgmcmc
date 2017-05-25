@@ -26,6 +26,8 @@
 #' @return List of arrays for each parameter containing the MCMC chain.
 #'  Dimension of the form (nIters,paramDim1,paramDim2,...)
 #'
+#' @import tensorflow
+#'
 sgld = function( logLik, logPrior, data, params, stepsize, n, nIters = 10^4, verbose = TRUE ) {
     # Create SGLD object
     sgmcmc = genSGLD( logLik, logPrior, data, params, stepsize, n, NULL )
@@ -68,6 +70,8 @@ sgld = function( logLik, logPrior, data, params, stepsize, n, nIters = 10^4, ver
 #'
 #' @return List of arrays for each parameter containing the MCMC chain.
 #'  Dimension of the form (nIters,paramDim1,paramDim2,...)
+#'
+#' @import tensorflow
 #'
 sgldcv = function( logLik, logPrior, data, paramsRaw, stepsize, optStepsize, 
             n, nIters = 10^4, nItersOpt = 10^4, verbose = TRUE ) {
