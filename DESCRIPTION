@@ -16,5 +16,8 @@ Imports: tensorflow
 Suggests:
     testthat,
     MASS,
-    ggplot2
+    knitr,
+    ggplot2,
+    rmarkdown
+VignetteBuilder: knitr
 RoxygenNote: 6.0.1
