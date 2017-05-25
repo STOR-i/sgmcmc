@@ -1,0 +1,47 @@
+## ------------------------------------------------------------------------
+library(MASS)
+# Declare number of observations
+N = 10^4
+# Set theta to be 0 and simulate the data
+theta = c( 0, 0 )
+Sigma = diag(2)
+X = mvrnorm( N, theta, Sigma )
+
+## ------------------------------------------------------------------------
+data = list( "X" = X )
+
+## ------------------------------------------------------------------------
+params = list( "theta" = c( 0, 0 ) )
+
+## ------------------------------------------------------------------------
+logLik = function( params, data ) {
+    # Declare Sigma as a tensorflow object
+    Sigma = tf$constant( diag(2), dtype = tf$float32 )
+    # Declare distribution of each observation
+    baseDist = tf$contrib$distributions$MultivariateNormalFull( params$theta, Sigma )
+    # Declare log likelihood function and return
+    logLik = tf$reduce_sum( baseDist$log_pdf( data$X ) )
+    return( logLik )
+}
+
+## ------------------------------------------------------------------------
+logPrior = function( params, data ) {
+    baseDist = tf$contrib$distributions$Normal( 0, 10 )
+    logPrior = tf$reduce_sum( baseDist$log_pdf( params$theta ) )
+    return( logPrior )
+}
+
+## ------------------------------------------------------------------------
+stepsize = list( "theta" = 1e-5 )
+n = 100
+
+## ------------------------------------------------------------------------
+chains = sgld( logLik, logPrior, data, params, stepsize, n, nIters = 10^4, verbose = FALSE )
+
+## ------------------------------------------------------------------------
+library(ggplot2)
+burnIn = 10^3
+thetaOut = as.data.frame( chains$theta[-c(1:burnIn),] )
+ggplot( thetaOut, aes( x = V1, y = V2 ) ) +
+    stat_density2d( size = 1.5 )
+
