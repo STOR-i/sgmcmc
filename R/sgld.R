@@ -1,5 +1,3 @@
-library(tensorflow)
-
 #' Stochastic Gradient Langevin Dynamics
 #' 
 #' Simulates from the posterior defined by the functions logLik & logPrior using

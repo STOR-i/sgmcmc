@@ -1,5 +1,3 @@
-library(tensorflow)
-
 # Define declareDynamics generic, defined for each SGMCMC method in their respective modules
 # @param sgmcmc a stochastic gradient mcmc object, as defined in the respective modules sgld.r etc.
 declareDynamics = function( sgmcmc ) UseMethod("declareDynamics")

@@ -1,5 +1,3 @@
-library(tensorflow)
-
 # Perform a single MCMC step using the dynamics defined in the sgmcmc object
 # 
 # This function performs a single update of the sgmcmc dynamics declared in the sgmcmc object,

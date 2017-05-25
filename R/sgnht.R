@@ -1,5 +1,3 @@
-library(tensorflow)
-
 #' Stochastic Gradient Nose Hoover Thermostat
 #' 
 #' Simulates from the posterior defined by the functions logLik & logPrior using

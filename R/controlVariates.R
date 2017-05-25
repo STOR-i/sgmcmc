@@ -1,5 +1,3 @@
-library(tensorflow)
-
 # This function performs a single optimization step on the control variate parameters.
 # This initial optimization procedure is needed before SGMCMCCV is applied in order to
 # ensure the control variate parameters estimate the mode well.
