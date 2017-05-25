@@ -91,7 +91,7 @@ getRanks = function( paramsRaw ) {
     ranks = list()
     for ( pname in names( paramsRaw ) ) {
         param = paramsRaw[[pname]]
-        ranks[[pname]] = length( getShape( param ) )
+        ranks[[pname]] = length( dim( param ) )
     }
     return( ranks )
 }
