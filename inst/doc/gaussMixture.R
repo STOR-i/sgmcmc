@@ -52,7 +52,7 @@ logPrior = function( params, data ) {
 }
 
 ## ------------------------------------------------------------------------
-eta = list( "theta1" = 7e-5, "theta2" = 7e-5 )
+eta = list( "theta1" = 5e-5, "theta2" = 7e-5 )
 alpha = list( "theta1" = 0.1, "theta2" = 0.1 )
 L = 3
 minibatchSize = 200
