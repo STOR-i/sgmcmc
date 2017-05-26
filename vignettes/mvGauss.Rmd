@@ -35,10 +35,10 @@ The parameters are declared very similarly, but this time the value associated w
 params = list( "theta" = c( 0, 0 ) )
 ```
 
-Next we'll declare the log likelihood for the problem. This is a function which takes `params` as the first input and `data` as the second. The function should calculate the log likelihood using standard tensorflow functions. Assume that `params` is a list of tensor variables each with the same names and shape as those declared in the list you made. Similarly `data` is a placeholder with the same names as the one in the list you declared. You'll want to sum over the different observations in `data`, which can be done using the tensorflow function `tf$reduce_sum`. So the likelihood function for our Gaussian example is
+Next we'll declare the log-likelihood for the problem. This is a function which takes `params` as the first input and `data` as the second. The function should calculate the log likelihood using standard Tensorflow functions. Assume that `params` is a list of tensor variables each with the same names and shape as those declared in the list you made. Similarly `data` is a placeholder with the same names as the one in the list you declared. You'll want to sum over the different observations in `data`, which can be done using the Tensorflow function `tf$reduce_sum`. So the log-likelihood function for our Gaussian example is
 ```{r}
 logLik = function( params, data ) {
-    # Declare Sigma as a tensorflow object
+    # Declare Sigma as a Tensorflow object
     Sigma = tf$constant( diag(2), dtype = tf$float32 )
     # Declare distribution of each observation
     baseDist = tf$contrib$distributions$MultivariateNormalFull( params$theta, Sigma )
@@ -49,7 +49,7 @@ logLik = function( params, data ) {
 ```
 So this function basically states that our likelihood is $\sum_{i=1}^N \log \mathcal N( x_i | \theta, I_2 )$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$.
 
-Next we want to define our log prior, which we assume is $\log p( \theta_j ) = \mathcal N(\theta_j | 0,10)$, for each dimension $j$ of $\theta$. As for the log likelihood definition, the log prior is defined as a function with input `params` and `data`. In our case the definition is
+Next we want to define our log-prior, which we assume is $\log p( \theta_j ) = \mathcal N(\theta_j | 0,10)$, for each dimension $j$ of $\theta$. As for the log-likelihood definition, the log-prior is defined as a function with input `params` and `data`. In our case the definition is
 ```{r}
 logPrior = function( params, data ) {
     baseDist = tf$contrib$distributions$Normal( 0, 10 )
