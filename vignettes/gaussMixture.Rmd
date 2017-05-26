@@ -81,7 +81,7 @@ logPrior = function( params, data ) {
 
 Finally we set the tuning parameters for SGHMC and the minibatch size. Both the tuning parameters for SGHMC, momentum term `alpha` and stepsize term `eta`, are set for each parameter, and so are each lists with the same names as `params`. Following the advice in the [original paper](https://arxiv.org/pdf/1402.4102v2.pdf) we fix `alpha` at a small value like $0.1$ and then find a good value for `eta`. We set the trajectory `L` to be 3.
 ```{r}
-eta = list( "theta1" = 7e-5, "theta2" = 7e-5 )
+eta = list( "theta1" = 1e-5, "theta2" = 7e-5 )
 alpha = list( "theta1" = 0.1, "theta2" = 0.1 )
 L = 3
 minibatchSize = 200
