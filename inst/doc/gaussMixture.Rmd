@@ -1,6 +1,6 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
+title: "Gaussian Mixture"
+author: "Jack Baker"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -9,50 +9,102 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+# Gaussian Mixture
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
-
-## Vignette Info
-
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r echo=FALSE}
+library(tensorflow)
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+In this example we use the package to infer the modes of a bimodal, 2d Gaussian using [stochastic gradient Hamiltonian Monte Carlo](https://arxiv.org/pdf/1402.4102v2.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $x_i | \theta \sim 0.7 N( \theta_1, I_2 ) + 0.3 N( \theta_2, I_2 )$, and we want to infer $\theta_1$ and $\theta_2$.
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+First let's simulate the data with the following code, we set $N$ to be $10^4$
+```{r}
+library(MASS)
+# Declare number of observations
+N = 10^4
+# Set locations of two modes, theta1 and theta2
+theta1 = c( 0, 0 )
+theta2 = c( 0.25, 0.25 )
+# Allocate observations to each component
+z = sample( 2, N, replace = TRUE, prob = c( 0.7, 0.3 ) )
+# Predeclare data matrix
+X = matrix( rep( NA, 2*N ), ncol = 2 )
+# Simulate each observation depending on the component its been allocated
+for ( i in 1:N ) {
+    if ( z[i] == 1 ) {
+        X[i,] = mvrnorm( 1, theta1, diag(2) )
+    } else {
+        X[i,] = mvrnorm( 1, theta2, diag(2) )
+    }
+}
 ```
 
-Also a quote using `>`:
+Now we'll declare the data associated with our problem. This takes the form of a list with the name of the object and its associated value. It is used in our declaration of the log likelihood. In our problem, we have one entry `X` which has the values we just simulated.
+```{r}
+data = list( "X" = X )
+```
+We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+The parameters are declared very similarly, but this time the value associated with each entry is its starting point. We have two parameters `theta1` and `theta2`, which we'll just start at 0.
+```{r}
+params = list( "theta1" = c( 0, 0 ), "theta2" = c( 0.25, 0.25 ) )
+```
+
+Next we'll declare the log likelihood for the problem. This is a function which takes `params` as the first input and `data` as the second. The function should calculate the log likelihood using standard tensorflow functions, full details on the tensorflow library can be found [here](https://tensorflow.rstudio.com/). The library contains a lot of statistical distributions as standard. Assume that `params` is a list of tensor variables each with the same names and shape as those declared in the list you made. Similarly `data` is a placeholder with the same names as the one in the list you declared. You'll want to sum over the different observations in `data`, which can be done using the tensorflow function `tf$reduce_sum`. So the likelihood function for our mixture example is
+```{r}
+logLik = function( params, data ) {
+    # Declare Sigma as tensorflow constant (assumed known)
+    Sigma = tf$constant( diag(2), dtype = tf$float32 )
+    # Declare distribution of each component
+    component1 = tf$contrib$distributions$MultivariateNormalFull( params$theta1, Sigma )
+    component2 = tf$contrib$distributions$MultivariateNormalFull( params$theta2, Sigma )
+    # Declare log likelihood
+    logLik = tf$reduce_sum( tf$log( 0.7 * component1$pdf(data$X) + 0.3 * component2$pdf(data$X) ) )
+    return( logLik )
+}
+```
+So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$.
+
+Next we want to define our log prior, which we assume is $\log p( \theta ) = \mathcal N(\theta | 0,10I_2)$. As for the log likelihood definition, the log prior is defined as a function with input `params` and `data`. In our case the definition is
+```{r}
+logPrior = function( params, data ) {
+    # Declare hyperparameters mu0 and Sigma0 as tensorflow constants
+    mu0 = tf$constant( c( 0, 0 ), dtype = tf$float32 )
+    Sigma0 = tf$constant( 10 * diag(2), dtype = tf$float32 )
+    # Declare prior distribution
+    priorDistn = tf$contrib$distributions$MultivariateNormalFull( mu0, Sigma0 )
+    # Declare log prior density and return
+    logPrior = priorDistn$log_pdf( params$theta1 ) + priorDistn$log_pdf( params$theta2 )
+    return( logPrior )
+}
+```
+
+Finally we set the tuning parameters for SGHMC and the minibatch size. Both the tuning parameters for SGHMC, momentum term `alpha` and stepsize term `eta`, are set for each parameter, and so are each lists with the same names as `params`. Following the advice in the [original paper](https://arxiv.org/pdf/1402.4102v2.pdf) we fix `alpha` at a small value like $0.1$ and then find a good value for `eta`. We set the trajectory `L` to be 3.
+```{r}
+eta = list( "theta1" = 7e-5, "theta2" = 7e-5 )
+alpha = list( "theta1" = 0.1, "theta2" = 0.1 )
+L = 3
+minibatchSize = 200
+```
+
+Now we can run our SGHMC algorithm using the `sgmcmc` function `sghmc`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function.
+```{r}
+chains = sghmc( logLik, logPrior, data, params, eta, alpha, L, minibatchSize, nIters = 10^4, verbose = FALSE )
+```
+
+Finally we'll plot the results after removing burn-in
+```{r}
+library(ggplot2)
+# Remove burn in
+burnIn = 10^3
+chains = list( "theta1" = as.data.frame( chains$theta1[-c(1:burnIn),] ),
+               "theta2" = as.data.frame( chains$theta2[-c(1:burnIn),] ) )
+# # Setup data for plotting
+# chains$theta1$parameter = "theta1"
+# chains$theta2$parameter = "theta2"
+plotData = chains$theta1
+ggplot( plotData, aes( x = V1, y = V2 ) ) +
+    stat_density2d( size = 1.5, alpha = 0.7 )
+```
+
+There are lots of other sgmcmc algorithms implemented that can be used by simply changing the tuning parameters slightly including `sgldcv`, `sghmc`, `sgnht`, etc.
