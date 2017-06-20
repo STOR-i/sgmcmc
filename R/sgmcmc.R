@@ -16,16 +16,16 @@
 #' @docType package
 #' @name sgmcmc
 #'
-#'  @references Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017) 
+#' @references Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017) 
 #'      control variates for stochastic gradient Langevin dynamics. Preprint.
 #'
-#'  @references Welling, M., & Teh, Y. W. (2011). 
+#' @references Welling, M., & Teh, Y. W. (2011). 
 #'      Bayesian learning via stochastic gradient Langevin dynamics. ICML (pp. 681-688).
 #'
-#'  @references Chen, T., Fox, E. B., & Guestrin, C. (2014). 
+#' @references Chen, T., Fox, E. B., & Guestrin, C. (2014). 
 #'      stochastic gradient Hamiltonian Monte Carlo. In ICML (pp. 1683-1691).
 #'
-#'  @references Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., & Neven, H. (2014). 
+#' @references Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., & Neven, H. (2014). 
 #'      Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).
 #'
 NULL

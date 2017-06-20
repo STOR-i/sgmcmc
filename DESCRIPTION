@@ -11,13 +11,13 @@ License: GPL-3
 URL: CHANGEME
 BugReports: CHANGEME
 Encoding: UTF-8
-Depends: R (>= 3.0)
-Imports: tensorflow
+Depends: R (>= 3.0), tensorflow
 Suggests:
     testthat,
     MASS,
     knitr,
     ggplot2,
     rmarkdown
+LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1

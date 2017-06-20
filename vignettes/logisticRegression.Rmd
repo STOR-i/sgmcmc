@@ -1,0 +1,36 @@
+---
+title: "Logistic Regression"
+author: "Jack Baker"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Logistic Regression
+
+In this example we use the package to infer the bias and coefficients in a logistic regression model using [stochastic gradient Langevin Dynamics with control variates](http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf). So we assume we have data $\mathbf x_1, \dots, \mathbf x_N$ and response variables $y_1, \dots, y_N$ with likelihood
+\[
+    p(\mathbf X, \mathbf y | \beta, \beta_0 ) = \prod_{i=1}^N \left[ \frac{1}{1+e^{-\beta_0 + \mathbf x_i \beta}} \right]^{y_i} \left[ 1 - \frac{1}{1+e^{-\beta_0 + \mathbf x_i \beta}} \right]^{1-y_i}
+\]
+
+First let's load in the data, we will use the [cover type dataset](https://archive.ics.uci.edu/ml/datasets/covertype) commonly used to benchmark classification models. We use the [dataset from LIBSVM](https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html), which transforms the problem from multiclass to binary.
+```
+library(sgmcmc)
+# Load data from package
+data("covertype")
+```
+
+```{r, echo=FALSE}
+data("covertype")
+```
+
+We'll separate out the response variable `y` and the explanatory variables `X`. The response variable is the first column in the dataset. Then we'll put both in our list of data for the model which we pass to the function. So in our list we'll have two entries, for `y` and `X`.
+```{r}
+X = covertype[,2:ncol(covertype)]
+y = covertype[,1]
+datasets = list( "X" = X, "y" = y )
+```
+We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.

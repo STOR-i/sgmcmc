@@ -31,8 +31,6 @@
 #' @return List of arrays for each parameter containing the MCMC chain.
 #'  Dimension of the form (nIters,paramDim1,paramDim2,...)
 #'
-#' @import tensorflow
-#'
 sgnht = function( logLik, logPrior, data, params, eta, a, n, 
         nIters = 10^4, verbose = TRUE ) {
     # Declare SGNHT object
@@ -81,8 +79,6 @@ sgnht = function( logLik, logPrior, data, params, eta, a, n,
 #'
 #' @return List of arrays for each parameter containing the MCMC chain.
 #'  Dimension of the form (nIters,paramDim1,paramDim2,...)
-#'
-#' @import tensorflow
 #'
 sgnhtcv = function( logLik, logPrior, data, params, eta, a, optStepsize, n, 
             nIters = 10^4, nItersOpt = 10^4, verbose = TRUE ) {

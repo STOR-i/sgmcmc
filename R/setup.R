@@ -74,10 +74,10 @@ setupEstLogPost = function( logLik, logPrior, params, placeholders, N, n, gibbsP
     # If parameters are declared that will updated using Gibbs then the passed logPrior & logLik 
     # functions will also take gibbsParams as arguments
     if ( is.null( gibbsParams ) ) {
-        estLogPost = logPrior( params, placeholders ) + 
+        estLogPost = logPrior( params ) + 
                 correction * logLik( params, placeholders )
     } else {
-        estLogPost = logPrior( params, placeholders, gibbsParams ) + 
+        estLogPost = logPrior( params, gibbsParams ) + 
                 correction * logLik( params, placeholders, gibbsParams )
     }
     return( estLogPost )

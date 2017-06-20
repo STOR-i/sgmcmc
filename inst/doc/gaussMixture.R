@@ -1,6 +1,3 @@
-## ----echo=FALSE----------------------------------------------------------
-library(tensorflow)
-
 ## ------------------------------------------------------------------------
 library(MASS)
 # Declare number of observations
@@ -40,7 +37,7 @@ logLik = function( params, data ) {
 }
 
 ## ------------------------------------------------------------------------
-logPrior = function( params, data ) {
+logPrior = function( params ) {
     # Declare hyperparameters mu0 and Sigma0 as tensorflow constants
     mu0 = tf$constant( c( 0, 0 ), dtype = tf$float32 )
     Sigma0 = tf$constant( 10 * diag(2), dtype = tf$float32 )

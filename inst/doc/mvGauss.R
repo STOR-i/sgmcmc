@@ -25,7 +25,7 @@ logLik = function( params, data ) {
 }
 
 ## ------------------------------------------------------------------------
-logPrior = function( params, data ) {
+logPrior = function( params ) {
     baseDist = tf$contrib$distributions$Normal( 0, 10 )
     logPrior = tf$reduce_sum( baseDist$log_pdf( params$theta ) )
     return( logPrior )

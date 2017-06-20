@@ -8,8 +8,8 @@ The package is built on top of the [tensorflow library for R](https://tensorflow
 
 To start with, tensorflow for R needs to be properly installed, this requires dependencies that can't be handled by the standard `install.packages` framework, so follow the tensorflow for R library [installation instructions](https://tensorflow.rstudio.com/installation.html).
 
-To install the `sgmcmc` library, ensure `devtools` are installed and run `devtools::install_github("jbaker92/sgmcmc")`
+To install the `sgmcmc` library, ensure `devtools` are installed and run `devtools::install_github("jbaker92/sgmcmc")`.
 
 ## Documentation
 
-TO BE ADDED, for now see the vignettes and man documentation for the API and example usage.
+TO BE ADDED, for now see the vignettes and man documentation for the API and example usage. `inst/doc` contains vignettes that have already been built.

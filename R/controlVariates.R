@@ -29,9 +29,9 @@ getMode = function( sess, sgmcmc, nIters = 10^4, verbose = TRUE ) {
 setupFullLogPost = function( logLik, logPrior, params, placeholders, gibbsParams ) {
     # Separate function from setupEstLogPost avoids float precision errors from correction term
     if ( is.null( gibbsParams ) ) {
-        logPost = logPrior( params, placeholders ) + logLik( params, placeholders )
+        logPost = logPrior( params ) + logLik( params, placeholders )
     } else {
-        logPost = logPrior( params, placeholders, gibbsParams ) + 
+        logPost = logPrior( params, gibbsParams ) + 
                 logLik( params, placeholders, gibbsParams )
     }
     return( logPost )

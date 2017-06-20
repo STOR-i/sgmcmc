@@ -11,14 +11,11 @@ vignette: >
 
 # Gaussian Mixture
 
-```{r echo=FALSE}
-library(tensorflow)
-```
-
 In this example we use the package to infer the modes of a bimodal, 2d Gaussian using [stochastic gradient Hamiltonian Monte Carlo](https://arxiv.org/pdf/1402.4102v2.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $x_i | \theta \sim 0.7 N( \theta_1, I_2 ) + 0.3 N( \theta_2, I_2 )$, and we want to infer $\theta_1$ and $\theta_2$.
 
 First let's simulate the data with the following code, we set $N$ to be $10^4$
 ```{r}
+library(sgmcmc)
 library(MASS)
 # Declare number of observations
 N = 10^4
@@ -65,9 +62,9 @@ logLik = function( params, data ) {
 ```
 So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$.
 
-Next we want to define our log prior, which we assume is $\log p( \theta ) = \mathcal N(\theta | 0,10I_2)$. As for the log likelihood definition, the log prior is defined as a function with input `params` and `data`. In our case the definition is
+Next we want to define our log prior, which we assume is $\log p( \theta ) = \mathcal N(\theta | 0,10I_2)$. Similar to the log likelihood definition, the log prior is defined as a function with input `params`. In our case the definition is
 ```{r}
-logPrior = function( params, data ) {
+logPrior = function( params ) {
     # Declare hyperparameters mu0 and Sigma0 as tensorflow constants
     mu0 = tf$constant( c( 0, 0 ), dtype = tf$float32 )
     Sigma0 = tf$constant( 10 * diag(2), dtype = tf$float32 )

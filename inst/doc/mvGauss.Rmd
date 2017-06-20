@@ -49,9 +49,9 @@ logLik = function( params, data ) {
 ```
 So this function basically states that our likelihood is $\sum_{i=1}^N \log \mathcal N( x_i | \theta, I_2 )$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$.
 
-Next we want to define our log prior, which we assume is $\log p( \theta_j ) = \mathcal N(\theta_j | 0,10)$, for each dimension $j$ of $\theta$. As for the log likelihood definition, the log prior is defined as a function with input `params` and `data`. In our case the definition is
+Next we want to define our log prior, which we assume is $\log p( \theta_j ) = \mathcal N(\theta_j | 0,10)$, for each dimension $j$ of $\theta$. Similarly to the log likelihood definition, the log prior is defined as a function with input `params`. In our case the definition is
 ```{r}
-logPrior = function( params, data ) {
+logPrior = function( params ) {
     baseDist = tf$contrib$distributions$Normal( 0, 10 )
     logPrior = tf$reduce_sum( baseDist$log_pdf( params$theta ) )
     return( logPrior )

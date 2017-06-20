@@ -17,10 +17,12 @@ declareConsts = function() {
 }
 
 logLik = function( params, data ) {
-    return( tf$reduce_sum( - ( data$x - params$theta )^2 / 2 ) )
+    sigma = tf$constant(1, dtype = tf$float32)
+    baseDist = Normal(params$theta, sigma)
+    return(tf$reduce_sum(baseDist$log_pdf(data$x)))
 }
 
-logPrior = function( params, data ) {
+logPrior = function( params ) {
     return( 1 )
 }
 
