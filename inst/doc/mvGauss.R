@@ -19,7 +19,7 @@ logLik = function( params, data ) {
     # Declare Sigma as a Tensorflow object
     Sigma = tf$constant( diag(2), dtype = tf$float32 )
     # Declare distribution of each observation
-    baseDist = tf$contrib$distributions$MultivariateNormalFull( params$theta, Sigma )
+    baseDist = MultivariateNormalFull( params$theta, Sigma )
     # Declare log likelihood function and return
     logLik = tf$reduce_sum( baseDist$log_pdf( data$X ) )
     return( logLik )
@@ -27,7 +27,7 @@ logLik = function( params, data ) {
 
 ## ------------------------------------------------------------------------
 logPrior = function( params, data ) {
-    baseDist = tf$contrib$distributions$Normal( 0, 10 )
+    baseDist = Normal( 0, 10 )
     logPrior = tf$reduce_sum( baseDist$log_pdf( params$theta ) )
     return( logPrior )
 }

@@ -30,8 +30,8 @@ logLik = function( params, data ) {
     # Declare Sigma as tensorflow constant (assumed known)
     Sigma = tf$constant( diag(2), dtype = tf$float32 )
     # Declare distribution of each component
-    component1 = tf$contrib$distributions$MultivariateNormalFull( params$theta1, Sigma )
-    component2 = tf$contrib$distributions$MultivariateNormalFull( params$theta2, Sigma )
+    component1 = MultivariateNormalFull( params$theta1, Sigma )
+    component2 = MultivariateNormalFull( params$theta2, Sigma )
     # Declare log likelihood
     logLik = tf$reduce_sum( tf$log( 0.7 * component1$pdf(data$X) + 0.3 * component2$pdf(data$X) ) )
     return( logLik )
@@ -43,7 +43,7 @@ logPrior = function( params ) {
     mu0 = tf$constant( c( 0, 0 ), dtype = tf$float32 )
     Sigma0 = tf$constant( 10 * diag(2), dtype = tf$float32 )
     # Declare prior distribution
-    priorDistn = tf$contrib$distributions$MultivariateNormalFull( mu0, Sigma0 )
+    priorDistn = MultivariateNormalFull( mu0, Sigma0 )
     # Declare log prior density and return
     logPrior = priorDistn$log_pdf( params$theta1 ) + priorDistn$log_pdf( params$theta2 )
     return( logPrior )

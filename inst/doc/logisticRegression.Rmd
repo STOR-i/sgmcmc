@@ -52,6 +52,7 @@ logLik = function(params, data) {
     return(logLik)
 }
 ```
+ `R` does not play nicely with the tensorflow type system, so make sure you set all your constants in the `logLik` and `logPrior` functions to `tf$float32`. Otherwise you will encounter an error.
 
 Next we want to define our log prior, we assume each $\beta_i$ have independent prior Laplace distribution, so that $\log p( \beta ) = - \sum_{i=0}^d | \beta_i|$. Similar to the log likelihood definition, the log prior is defined as a function with input `params`. In our case the definition is
 ```{r}
@@ -60,6 +61,7 @@ logPrior = function(params) {
     return(logPrior)
 }
 ```
+Again make sure you set all your constants inside the function to `tf$float32`.
 
 Finally we'll set the stepsize parameters for the algorithm, along with the minibatch size. `sgldcv` relies on two stepsize parameters, one for the optimization step and one for the MCMC step. The values of the optimization and MCMC stepsizes will generally be quite similar. To allow stepsizes to be set for different parameters, the form of the stepsizes for the MCMC will be lists with names corresponding to each of the names in `params`. The optimization step will just be one value as the stepsize is automatically tuned
 ```{r}
