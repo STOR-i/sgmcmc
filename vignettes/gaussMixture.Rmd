@@ -53,14 +53,14 @@ logLik = function( params, data ) {
     # Declare Sigma as tensorflow constant (assumed known)
     Sigma = tf$constant( diag(2), dtype = tf$float32 )
     # Declare distribution of each component
-    component1 = tf$contrib$distributions$MultivariateNormalFull( params$theta1, Sigma )
-    component2 = tf$contrib$distributions$MultivariateNormalFull( params$theta2, Sigma )
+    component1 = MultivariateNormalFull( params$theta1, Sigma )
+    component2 = MultivariateNormalFull( params$theta2, Sigma )
     # Declare log likelihood
     logLik = tf$reduce_sum( tf$log( 0.7 * component1$pdf(data$X) + 0.3 * component2$pdf(data$X) ) )
     return( logLik )
 }
 ```
-So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$.
+So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. `R` does not play nicely with the tensorflow type system, so make sure you set all your constants in the `logLik` and `logPrior` functions to `tf$float32`, as we have done. Otherwise you will encounter an error. Notice that we simply used `MultivariateNormalFull` rather than the less wieldy `tf$contrib$distributions$MultivariateNormalFull`. This is because we have built aliases for all the distributions in `tf$contrib$distributions`. For a full list, see the package documentation.
 
 Next we want to define our log prior, which we assume is $\log p( \theta ) = \mathcal N(\theta | 0,10I_2)$. Similar to the log likelihood definition, the log prior is defined as a function with input `params`. In our case the definition is
 ```{r}
@@ -69,12 +69,13 @@ logPrior = function( params ) {
     mu0 = tf$constant( c( 0, 0 ), dtype = tf$float32 )
     Sigma0 = tf$constant( 10 * diag(2), dtype = tf$float32 )
     # Declare prior distribution
-    priorDistn = tf$contrib$distributions$MultivariateNormalFull( mu0, Sigma0 )
+    priorDistn = MultivariateNormalFull( mu0, Sigma0 )
     # Declare log prior density and return
     logPrior = priorDistn$log_pdf( params$theta1 ) + priorDistn$log_pdf( params$theta2 )
     return( logPrior )
 }
 ```
+Again make sure you set all your constants inside the function to `tf$float32`, as we have done.
 
 Finally we set the tuning parameters for SGHMC and the minibatch size. Both the tuning parameters for SGHMC, momentum term `alpha` and stepsize term `eta`, are set for each parameter, and so are each lists with the same names as `params`. Following the advice in the [original paper](https://arxiv.org/pdf/1402.4102v2.pdf) we fix `alpha` at a small value like $0.1$ and then find a good value for `eta`. We set the trajectory `L` to be 3.
 ```{r}
@@ -101,4 +102,4 @@ ggplot( plotData, aes( x = V1, y = V2 ) ) +
     stat_density2d( size = 1.5, alpha = 0.7 )
 ```
 
-There are lots of other sgmcmc algorithms implemented that can be used by simply changing the tuning parameters slightly including `sgldcv`, `sghmc`, `sgnht`, etc.
+There are lots of other sgmcmc algorithms implemented that can be used by simply changing the tuning parameters slightly including `sgld` and `sgnht`; as well as their [control variate counterparts](https://arxiv.org/pdf/1706.05439.pdf) for improved efficiency.

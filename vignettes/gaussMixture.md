@@ -1,7 +1,7 @@
 ---
 title: "Gaussian Mixture"
 author: "Jack Baker"
-date: "`r Sys.Date()`"
+date: "2017-06-23"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -14,7 +14,8 @@ vignette: >
 In this example we use the package to infer the modes of a bimodal, 2d Gaussian using [stochastic gradient Hamiltonian Monte Carlo](https://arxiv.org/pdf/1402.4102v2.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $x_i | \theta \sim 0.7 N( \theta_1, I_2 ) + 0.3 N( \theta_2, I_2 )$, and we want to infer $\theta_1$ and $\theta_2$.
 
 First let's simulate the data with the following code, we set $N$ to be $10^4$
-```{r}
+
+```r
 library(sgmcmc)
 library(MASS)
 # Declare number of observations
@@ -37,47 +38,53 @@ for ( i in 1:N ) {
 ```
 
 Now we'll declare the data associated with our problem. This takes the form of a list with the name of the object and its associated value. It is used in our declaration of the log likelihood. In our problem, we have one entry `X` which has the values we just simulated.
-```{r}
+
+```r
 data = list( "X" = X )
 ```
 We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.
 
 The parameters are declared very similarly, but this time the value associated with each entry is its starting point. We have two parameters `theta1` and `theta2`, which we'll just start at 0.
-```{r}
+
+```r
 params = list( "theta1" = c( 0, 0 ), "theta2" = c( 0.25, 0.25 ) )
 ```
 
 Next we'll declare the log likelihood for the problem. This is a function which takes `params` as the first input and `data` as the second. The function should calculate the log likelihood using standard tensorflow functions, full details on the tensorflow library can be found [here](https://tensorflow.rstudio.com/). The library contains a lot of statistical distributions as standard. Assume that `params` is a list of tensor variables each with the same names and shape as those declared in the list you made. Similarly `data` is a placeholder with the same names as the one in the list you declared. You'll want to sum over the different observations in `data`, which can be done using the tensorflow function `tf$reduce_sum`. So the likelihood function for our mixture example is
-```{r}
+
+```r
 logLik = function( params, data ) {
     # Declare Sigma as tensorflow constant (assumed known)
     Sigma = tf$constant( diag(2), dtype = tf$float32 )
     # Declare distribution of each component
-    component1 = tf$contrib$distributions$MultivariateNormalFull( params$theta1, Sigma )
-    component2 = tf$contrib$distributions$MultivariateNormalFull( params$theta2, Sigma )
+    component1 = MultivariateNormalFull( params$theta1, Sigma )
+    component2 = MultivariateNormalFull( params$theta2, Sigma )
     # Declare log likelihood
     logLik = tf$reduce_sum( tf$log( 0.7 * component1$pdf(data$X) + 0.3 * component2$pdf(data$X) ) )
     return( logLik )
 }
 ```
-So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$.
+So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. `R` does not play nicely with the tensorflow type system, so make sure you set all your constants in the `logLik` and `logPrior` functions to `tf$float32`, as we have done. Otherwise you will encounter an error. Notice that we simply used `MultivariateNormalFull` rather than the less wieldy `tf$contrib$distributions$MultivariateNormalFull`. This is because we have built aliases for all the distributions in `tf$contrib$distributions`. For a full list, see the package documentation.
 
 Next we want to define our log prior, which we assume is $\log p( \theta ) = \mathcal N(\theta | 0,10I_2)$. Similar to the log likelihood definition, the log prior is defined as a function with input `params`. In our case the definition is
-```{r}
+
+```r
 logPrior = function( params ) {
     # Declare hyperparameters mu0 and Sigma0 as tensorflow constants
     mu0 = tf$constant( c( 0, 0 ), dtype = tf$float32 )
     Sigma0 = tf$constant( 10 * diag(2), dtype = tf$float32 )
     # Declare prior distribution
-    priorDistn = tf$contrib$distributions$MultivariateNormalFull( mu0, Sigma0 )
+    priorDistn = MultivariateNormalFull( mu0, Sigma0 )
     # Declare log prior density and return
     logPrior = priorDistn$log_pdf( params$theta1 ) + priorDistn$log_pdf( params$theta2 )
     return( logPrior )
 }
 ```
+Again make sure you set all your constants inside the function to `tf$float32`, as we have done.
 
 Finally we set the tuning parameters for SGHMC and the minibatch size. Both the tuning parameters for SGHMC, momentum term `alpha` and stepsize term `eta`, are set for each parameter, and so are each lists with the same names as `params`. Following the advice in the [original paper](https://arxiv.org/pdf/1402.4102v2.pdf) we fix `alpha` at a small value like $0.1$ and then find a good value for `eta`. We set the trajectory `L` to be 3.
-```{r}
+
+```r
 eta = list( "theta1" = 1e-5, "theta2" = 1e-5 )
 alpha = list( "theta1" = 0.01, "theta2" = 0.01 )
 L = 3
@@ -85,12 +92,14 @@ minibatchSize = 200
 ```
 
 Now we can run our SGHMC algorithm using the `sgmcmc` function `sghmc`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function.
-```{r}
+
+```r
 chains = sghmc( logLik, logPrior, data, params, eta, alpha, L, minibatchSize, nIters = 10^4, verbose = FALSE )
 ```
 
 Finally we'll plot the results after removing burn-in
-```{r}
+
+```r
 library(ggplot2)
 # Remove burn in
 burnIn = 10^3
@@ -101,4 +110,6 @@ ggplot( plotData, aes( x = V1, y = V2 ) ) +
     stat_density2d( size = 1.5, alpha = 0.7 )
 ```
 
-There are lots of other sgmcmc algorithms implemented that can be used by simply changing the tuning parameters slightly including `sgldcv`, `sghmc`, `sgnht`, etc.
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png)
+
+There are lots of other sgmcmc algorithms implemented that can be used by simply changing the tuning parameters slightly including `sgld` and `sgnht`; as well as their [control variate counterparts](https://arxiv.org/pdf/1706.05439.pdf) for improved efficiency.

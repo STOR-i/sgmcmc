@@ -50,8 +50,8 @@ logPrior = function( params ) {
 }
 
 ## ------------------------------------------------------------------------
-eta = list( "theta1" = 5e-5, "theta2" = 7e-5 )
-alpha = list( "theta1" = 0.1, "theta2" = 0.1 )
+eta = list( "theta1" = 1e-5, "theta2" = 1e-5 )
+alpha = list( "theta1" = 0.01, "theta2" = 0.01 )
 L = 3
 minibatchSize = 200
 
@@ -64,9 +64,6 @@ library(ggplot2)
 burnIn = 10^3
 chains = list( "theta1" = as.data.frame( chains$theta1[-c(1:burnIn),] ),
                "theta2" = as.data.frame( chains$theta2[-c(1:burnIn),] ) )
-# # Setup data for plotting
-# chains$theta1$parameter = "theta1"
-# chains$theta2$parameter = "theta2"
 plotData = chains$theta1
 ggplot( plotData, aes( x = V1, y = V2 ) ) +
     stat_density2d( size = 1.5, alpha = 0.7 )

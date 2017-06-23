@@ -1,7 +1,7 @@
 ---
 title: "Logistic Regression"
 author: "Jack Baker"
-date: "`r Sys.Date()`"
+date: "2017-06-23"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -23,12 +23,11 @@ library(sgmcmc)
 data("covertype")
 ```
 
-```{r, echo=FALSE}
-data("covertype")
-```
+
 
 First we'll remove about 10000 observations from the original dataset, this will be used to check that our algorithm did okay. Then we'll separate out the response variable `y` and the explanatory variables `X`. The response variable is the first column in the dataset. Then we'll put both in our list of data for the model which we pass to the function. So in our list we'll have two entries, for `y` and `X`.
-```{r}
+
+```r
 testObservations = sample(nrow(covertype), 10^4)
 testSet = covertype[testObservations,]
 X = covertype[-c(testObservations),2:ncol(covertype)]
@@ -38,14 +37,16 @@ data = list( "X" = X, "y" = y )
 We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.
 
 Now we want to set the starting values and shapes for our parameters. We can see from the likelihood equation we have two parameters, the bias $\beta_0$ and the coefficients $\beta$. We'll just set these to start from zero. Similar to the data, these are just a list with the relevant names.
-```{r}
+
+```r
 # Get the dimension of X, needed to set shape of params$beta
 d = ncol(data$X)
 params = list( "bias" = 0, "beta" = matrix( rep( 0, d ), nrow = d ) )
 ```
 
 Next we'll declare the log likelihood for the problem. This is a function which takes `params` as the first input and `data` as the second. The function should calculate the log likelihood using standard tensorflow functions, full details on the tensorflow library can be found [here](https://tensorflow.rstudio.com/). The library contains a lot of statistical distributions as standard. Assume that `params` is a list of tensor variables each with the same names and shape as those declared in the list you made. Similarly `data` is a placeholder with the same names as the one in the list you declared. You'll want to sum over the different observations in `data`, which can be done using the tensorflow function `tf$reduce_sum`. So the log likelihood function for our logistic regression example (just the log of the equation above) is
-```{r}
+
+```r
 logLik = function(params, data) {
     yEstimated = 1 / (1 + tf$exp( - tf$squeeze(params$bias + tf$matmul(data$X, params$beta))))
     logLik = tf$reduce_sum(data$y * tf$log(yEstimated) + (1 - data$y) * tf$log(1 - yEstimated))
@@ -55,7 +56,8 @@ logLik = function(params, data) {
  `R` does not play nicely with the tensorflow type system, so make sure you set all your constants in the `logLik` and `logPrior` functions to `tf$float32`. Otherwise you will encounter an error.
 
 Next we want to define our log prior, we assume each $\beta_i$ have independent prior Laplace distribution, so that $\log p( \beta ) = - \sum_{i=0}^d | \beta_i|$. Similar to the log likelihood definition, the log prior is defined as a function with input `params`. In our case the definition is
-```{r}
+
+```r
 logPrior = function(params) {
     logPrior = - (tf$reduce_sum(tf$abs(params$beta)) + tf$reduce_sum(tf$abs(params$bias)))
     return(logPrior)
@@ -64,7 +66,8 @@ logPrior = function(params) {
 Again make sure you set all your constants inside the function to `tf$float32`.
 
 Finally we'll set the stepsize parameters for the algorithm, along with the minibatch size. `sgldcv` relies on two stepsize parameters, one for the optimization step and one for the MCMC step. The values of the optimization and MCMC stepsizes will generally be quite similar. To allow stepsizes to be set for different parameters, the form of the stepsizes for the MCMC will be lists with names corresponding to each of the names in `params`. The optimization step will just be one value as the stepsize is automatically tuned
-```{r}
+
+```r
 stepsizesMCMC = list("beta" = 2e-5, "bias" = 2e-5)
 stepsizesOptimization = 1e-1
 # Set minibatch size
@@ -72,7 +75,8 @@ n = 500
 ```
 
 Now we can run our SGLD-CV algorithm using the function `sgldcv` from the `sgmcmc` package, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function.
-```{r}
+
+```r
 output = sgldcv(logLik, logPrior, data, params, stepsizesMCMC, stepsizesOptimization, n, nIters = 1.1e4, verbose = FALSE)
 ```
 
@@ -81,7 +85,8 @@ here $\hat \pi_i^{(j)}$ denotes the probability that the $j^{\text{th}}$ iterati
 $$A := \frac{1}{|T|} \sum_{y_i \in T} \left[ y_i \log \hat \pi_i^{(j)} + (1 - y_i) \log(1 - \hat \pi_i^{(j)}) \right]$$
 
 To check convergence, we'll plot the average log predictive every 10 iterations as follows
-```{r}
+
+```r
 yTest = testSet[,1]
 XTest = testSet[,2:ncol(testSet)]
 # Remove burn-in
@@ -109,3 +114,5 @@ ggplot(plotFrame, aes(x = iteration, y = logPredictive)) +
     geom_line() +
     xlab("Average log predictive of test set")
 ```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png)
