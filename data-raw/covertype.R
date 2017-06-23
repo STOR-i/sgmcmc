@@ -3,7 +3,7 @@ library(e1071)
 
 # Download file from LIBSVM
 temp = tempfile()
-download.file("http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/covtype.libsvm.binary.bz2", temp)
+download.file("https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/covtype.libsvm.binary.scale.bz2", temp)
 # Extract and read sparse file
 data = read.matrix.csr(bzfile(temp),fac=FALSE)
 # Convert from sparse objects to dense

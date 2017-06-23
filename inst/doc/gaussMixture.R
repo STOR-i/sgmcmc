@@ -1,4 +1,5 @@
 ## ------------------------------------------------------------------------
+library(sgmcmc)
 library(MASS)
 # Declare number of observations
 N = 10^4

@@ -1,4 +1,5 @@
 ## ------------------------------------------------------------------------
+library(sgmcmc)
 library(MASS)
 # Declare number of observations
 N = 10^4
@@ -15,7 +16,7 @@ params = list( "theta" = c( 0, 0 ) )
 
 ## ------------------------------------------------------------------------
 logLik = function( params, data ) {
-    # Declare Sigma as a tensorflow object
+    # Declare Sigma as a Tensorflow object
     Sigma = tf$constant( diag(2), dtype = tf$float32 )
     # Declare distribution of each observation
     baseDist = tf$contrib$distributions$MultivariateNormalFull( params$theta, Sigma )
@@ -25,7 +26,7 @@ logLik = function( params, data ) {
 }
 
 ## ------------------------------------------------------------------------
-logPrior = function( params ) {
+logPrior = function( params, data ) {
     baseDist = tf$contrib$distributions$Normal( 0, 10 )
     logPrior = tf$reduce_sum( baseDist$log_pdf( params$theta ) )
     return( logPrior )

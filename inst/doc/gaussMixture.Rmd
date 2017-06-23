@@ -15,6 +15,7 @@ In this example we use the package to infer the modes of a bimodal, 2d Gaussian 
 
 First let's simulate the data with the following code, we set $N$ to be $10^4$
 ```{r}
+library(sgmcmc)
 library(MASS)
 # Declare number of observations
 N = 10^4

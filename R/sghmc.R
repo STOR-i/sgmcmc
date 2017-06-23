@@ -48,7 +48,7 @@ sghmc = function( logLik, logPrior, data, params, eta, alpha, L, n,
 #'  that is calculated using control variates.
 #'
 #'  @references Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017) 
-#'      control variates for stochastic gradient Langevin dynamics. Preprint.
+#'      control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.
 #'  @references Chen, T., Fox, E. B., & Guestrin, C. (2014). 
 #'      stochastic gradient Hamiltonian Monte Carlo. In ICML (pp. 1683-1691).
 #'

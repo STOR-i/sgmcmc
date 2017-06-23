@@ -49,8 +49,8 @@ sgnht = function( logLik, logPrior, data, params, eta, a, n,
 #'  When used for parameters that are higher dimensional then vectors, the thermostat
 #'  step is approximated by a tensor contraction.
 #'
-#' @references Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017) 
-#'  control variates for stochastic gradient Langevin dynamics. Preprint.
+#'  @references Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017) 
+#'      control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.
 #' @references Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., & Neven, H. (2014). 
 #'  Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).
 #'
