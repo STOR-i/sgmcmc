@@ -34,35 +34,31 @@ for ( i in 1:N ) {
         X[i,] = mvrnorm( 1, theta2, diag(2) )
     }
 }
+dataset = list("X" = X)
+```
+In the last line we defined the dataset as it will be input to the relevant `sgmcmc` function. A lot of the inputs to functions in `sgmcmc` are defined as lists. This improves flexibility by enabling models to be specified with multiple parameters, datasets and allows separate tuning constants to be set for each parameter. We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.
+
+The parameters are declared very similarly, but this time the value associated with each entry is its starting point. We have two parameters `theta1` and `theta2`, which we'll just start at 0. 
+```{r}
+params = list( "theta1" = c( 0, 0 ), "theta2" = c( 0, 0 ) )
 ```
 
-Now we'll declare the data associated with our problem. This takes the form of a list with the name of the object and its associated value. It is used in our declaration of the log likelihood. In our problem, we have one entry `X` which has the values we just simulated.
+Now we'll define the functions `logLik` and `logPrior`. It should now become clear why the list names come in handy. The function `logLik` should take two parameters as input: `params` and `dataset`. These parameters will be lists with the same names as those you defined for `params` and `dataset` earlier. There is one difference though, the objects in the lists will have automatically been converted to `TensorFlow` objects for you. The `params` list will contain `TensorFlow` tensor variables; the `dataset` list will contain `TensorFlow` placeholders. The `logLik` function should take these lists as input and return the value of the log likelihood as a tensor at point `params` given data `dataset`. The function should do this using `TensorFlow` operations, as this allows the gradient to be automatically calculated; it also allows the wide range of distribution objects as well as matrix operations that `TensorFlow` provides to be taken advantage of. A tutorial of `TensorFlow` for \proglang{R` is beyond the scope of this article, for more details we refer the reader to \cite{Tensor4R`. With this in place we can define the `logLik` function as follows
 ```{r}
-data = list( "X" = X )
-```
-We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.
-
-The parameters are declared very similarly, but this time the value associated with each entry is its starting point. We have two parameters `theta1` and `theta2`, which we'll just start at 0.
-```{r}
-params = list( "theta1" = c( 0, 0 ), "theta2" = c( 0.25, 0.25 ) )
-```
-
-Next we'll declare the log likelihood for the problem. This is a function which takes `params` as the first input and `data` as the second. The function should calculate the log likelihood using standard tensorflow functions, full details on the tensorflow library can be found [here](https://tensorflow.rstudio.com/). The library contains a lot of statistical distributions as standard. Assume that `params` is a list of tensor variables each with the same names and shape as those declared in the list you made. Similarly `data` is a placeholder with the same names as the one in the list you declared. You'll want to sum over the different observations in `data`, which can be done using the tensorflow function `tf$reduce_sum`. So the likelihood function for our mixture example is
-```{r}
-logLik = function( params, data ) {
+logLik = function( params, dataset ) {
     # Declare Sigma as tensorflow constant (assumed known)
     Sigma = tf$constant( diag(2), dtype = tf$float32 )
     # Declare distribution of each component
     component1 = MultivariateNormalFull( params$theta1, Sigma )
     component2 = MultivariateNormalFull( params$theta2, Sigma )
     # Declare log likelihood
-    logLik = tf$reduce_sum( tf$log( 0.7 * component1$pdf(data$X) + 0.3 * component2$pdf(data$X) ) )
+    logLik = tf$reduce_sum( tf$log( 0.7 * component1$pdf(dataset$X) + 0.3 * component2$pdf(dataset$X) ) )
     return( logLik )
 }
 ```
 So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. `R` does not play nicely with the tensorflow type system, so make sure you set all your constants in the `logLik` and `logPrior` functions to `tf$float32`, as we have done. Otherwise you will encounter an error. Notice that we simply used `MultivariateNormalFull` rather than the less wieldy `tf$contrib$distributions$MultivariateNormalFull`. This is because we have built aliases for all the distributions in `tf$contrib$distributions`. For a full list, see the package documentation.
 
-Next we want to define our log prior, which we assume is $\log p( \theta ) = \mathcal N(\theta | 0,10I_2)$. Similar to the log likelihood definition, the log prior is defined as a function with input `params`. In our case the definition is
+Next we want to define our log prior, which we assume is $\log p( \theta ) = \mathcal N(\theta | 0,10I_2)$. Similar to the log likelihood definition, the log prior is defined as a function, but only with input `params`. In our case the definition is
 ```{r}
 logPrior = function( params ) {
     # Declare hyperparameters mu0 and Sigma0 as tensorflow constants
@@ -87,7 +83,7 @@ minibatchSize = 200
 
 Now we can run our SGHMC algorithm using the `sgmcmc` function `sghmc`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function.
 ```{r}
-chains = sghmc( logLik, logPrior, data, params, eta, alpha, L, minibatchSize, nIters = 10^4, verbose = FALSE )
+chains = sghmc( logLik, logPrior, dataset, params, eta, alpha, L, minibatchSize, nIters = 10^4, verbose = FALSE )
 ```
 
 Finally we'll plot the results after removing burn-in
