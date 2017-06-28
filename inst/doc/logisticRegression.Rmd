@@ -27,28 +27,28 @@ data("covertype")
 data("covertype")
 ```
 
-First we'll remove about 10000 observations from the original dataset, this will be used to check that our algorithm did okay. Then we'll separate out the response variable `y` and the explanatory variables `X`. The response variable is the first column in the dataset. Then we'll put both in our list of data for the model which we pass to the function. So in our list we'll have two entries, for `y` and `X`.
+First we'll remove about 10000 observations from the original dataset, this will be used to check that our algorithm did okay. Then we'll separate out the response variable `y` and the explanatory variables `X`. The response variable is the first column in the dataset.
 ```{r}
 testObservations = sample(nrow(covertype), 10^4)
 testSet = covertype[testObservations,]
 X = covertype[-c(testObservations),2:ncol(covertype)]
 y = covertype[-c(testObservations),1]
-data = list( "X" = X, "y" = y )
+dataset = list( "X" = X, "y" = y )
 ```
-We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.
+In the last line we defined the dataset as it will be input to the relevant `sgmcmc` function. A lot of the inputs to functions in `sgmcmc` are defined as lists. This improves flexibility by enabling models to be specified with multiple parameters, datasets and allows separate tuning constants to be set for each parameter. We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.
 
 Now we want to set the starting values and shapes for our parameters. We can see from the likelihood equation we have two parameters, the bias $\beta_0$ and the coefficients $\beta$. We'll just set these to start from zero. Similar to the data, these are just a list with the relevant names.
 ```{r}
 # Get the dimension of X, needed to set shape of params$beta
-d = ncol(data$X)
+d = ncol(dataset$X)
 params = list( "bias" = 0, "beta" = matrix( rep( 0, d ), nrow = d ) )
 ```
 
-Next we'll declare the log likelihood for the problem. This is a function which takes `params` as the first input and `data` as the second. The function should calculate the log likelihood using standard tensorflow functions, full details on the tensorflow library can be found [here](https://tensorflow.rstudio.com/). The library contains a lot of statistical distributions as standard. Assume that `params` is a list of tensor variables each with the same names and shape as those declared in the list you made. Similarly `data` is a placeholder with the same names as the one in the list you declared. You'll want to sum over the different observations in `data`, which can be done using the tensorflow function `tf$reduce_sum`. So the log likelihood function for our logistic regression example (just the log of the equation above) is
+Now we'll define the functions `logLik` and `logPrior`. It should now become clear why the list names come in handy. The function `logLik` should take two parameters as input: `params` and `dataset`. These parameters will be lists with the same names as those you defined for `params` and `dataset` earlier. There is one difference though, the objects in the lists will have automatically been converted to `TensorFlow` objects for you. The `params` list will contain `TensorFlow` tensor variables; the `dataset` list will contain `TensorFlow` placeholders. The `logLik` function should take these lists as input and return the value of the log likelihood as a tensor at point `params` given data `dataset`. The function should do this using `TensorFlow` operations, as this allows the gradient to be automatically calculated; it also allows the wide range of distribution objects as well as matrix operations that `TensorFlow` provides to be taken advantage of. A tutorial of `TensorFlow` for \proglang{R` is beyond the scope of this article, for more details we refer the reader to \cite{Tensor4R`. With this in place we can define the `logLik` function as follows
 ```{r}
-logLik = function(params, data) {
-    yEstimated = 1 / (1 + tf$exp( - tf$squeeze(params$bias + tf$matmul(data$X, params$beta))))
-    logLik = tf$reduce_sum(data$y * tf$log(yEstimated) + (1 - data$y) * tf$log(1 - yEstimated))
+logLik = function(params, dataset) {
+    yEstimated = 1 / (1 + tf$exp( - tf$squeeze(params$bias + tf$matmul(dataset$X, params$beta))))
+    logLik = tf$reduce_sum(dataset$y * tf$log(yEstimated) + (1 - dataset$y) * tf$log(1 - yEstimated))
     return(logLik)
 }
 ```
@@ -73,7 +73,7 @@ n = 500
 
 Now we can run our SGLD-CV algorithm using the function `sgldcv` from the `sgmcmc` package, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function.
 ```{r}
-output = sgldcv(logLik, logPrior, data, params, stepsizesMCMC, stepsizesOptimization, n, nIters = 1.1e4, verbose = FALSE)
+output = sgldcv(logLik, logPrior, dataset, params, stepsizesMCMC, stepsizesOptimization, n, nIters = 1.1e4, verbose = FALSE)
 ```
 
 To check the algorithm converged, we'll plot the average log predictive density of the data from our test set every 10 iterations. Let $$\hat \pi_i^{(j)} := \frac{1}{1 + \exp\left[-\beta_0^{(j)} - \mathbb x_i \beta^{(j)}\right]},$$

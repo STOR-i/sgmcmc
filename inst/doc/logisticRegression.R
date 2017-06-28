@@ -6,17 +6,17 @@ testObservations = sample(nrow(covertype), 10^4)
 testSet = covertype[testObservations,]
 X = covertype[-c(testObservations),2:ncol(covertype)]
 y = covertype[-c(testObservations),1]
-data = list( "X" = X, "y" = y )
+dataset = list( "X" = X, "y" = y )
 
 ## ------------------------------------------------------------------------
 # Get the dimension of X, needed to set shape of params$beta
-d = ncol(data$X)
+d = ncol(dataset$X)
 params = list( "bias" = 0, "beta" = matrix( rep( 0, d ), nrow = d ) )
 
 ## ------------------------------------------------------------------------
-logLik = function(params, data) {
-    yEstimated = 1 / (1 + tf$exp( - tf$squeeze(params$bias + tf$matmul(data$X, params$beta))))
-    logLik = tf$reduce_sum(data$y * tf$log(yEstimated) + (1 - data$y) * tf$log(1 - yEstimated))
+logLik = function(params, dataset) {
+    yEstimated = 1 / (1 + tf$exp( - tf$squeeze(params$bias + tf$matmul(dataset$X, params$beta))))
+    logLik = tf$reduce_sum(dataset$y * tf$log(yEstimated) + (1 - dataset$y) * tf$log(1 - yEstimated))
     return(logLik)
 }
 
@@ -33,7 +33,7 @@ stepsizesOptimization = 1e-1
 n = 500
 
 ## ------------------------------------------------------------------------
-output = sgldcv(logLik, logPrior, data, params, stepsizesMCMC, stepsizesOptimization, n, nIters = 1.1e4, verbose = FALSE)
+output = sgldcv(logLik, logPrior, dataset, params, stepsizesMCMC, stepsizesOptimization, n, nIters = 1.1e4, verbose = FALSE)
 
 ## ------------------------------------------------------------------------
 yTest = testSet[,1]

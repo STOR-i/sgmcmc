@@ -18,22 +18,20 @@ for ( i in 1:N ) {
         X[i,] = mvrnorm( 1, theta2, diag(2) )
     }
 }
+dataset = list("X" = X)
 
 ## ------------------------------------------------------------------------
-data = list( "X" = X )
+params = list( "theta1" = c( 0, 0 ), "theta2" = c( 0, 0 ) )
 
 ## ------------------------------------------------------------------------
-params = list( "theta1" = c( 0, 0 ), "theta2" = c( 0.25, 0.25 ) )
-
-## ------------------------------------------------------------------------
-logLik = function( params, data ) {
+logLik = function( params, dataset ) {
     # Declare Sigma as tensorflow constant (assumed known)
     Sigma = tf$constant( diag(2), dtype = tf$float32 )
     # Declare distribution of each component
     component1 = MultivariateNormalFull( params$theta1, Sigma )
     component2 = MultivariateNormalFull( params$theta2, Sigma )
     # Declare log likelihood
-    logLik = tf$reduce_sum( tf$log( 0.7 * component1$pdf(data$X) + 0.3 * component2$pdf(data$X) ) )
+    logLik = tf$reduce_sum( tf$log( 0.7 * component1$pdf(dataset$X) + 0.3 * component2$pdf(dataset$X) ) )
     return( logLik )
 }
 
@@ -56,7 +54,7 @@ L = 3
 minibatchSize = 200
 
 ## ------------------------------------------------------------------------
-chains = sghmc( logLik, logPrior, data, params, eta, alpha, L, minibatchSize, nIters = 10^4, verbose = FALSE )
+chains = sghmc( logLik, logPrior, dataset, params, eta, alpha, L, minibatchSize, nIters = 10^4, verbose = FALSE )
 
 ## ------------------------------------------------------------------------
 library(ggplot2)

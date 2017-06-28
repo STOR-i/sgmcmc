@@ -23,36 +23,32 @@ N = 10^4
 theta = c( 0, 0 )
 Sigma = diag(2)
 X = mvrnorm( N, theta, Sigma )
+dataset = list("X" = X)
 ```
-
-Now we'll declare the data associated with our problem. This takes the form of a list with the name of the object and its associated value. It is used in our declaration of the log likelihood. In our problem, we have one entry `X` which has the values we just simulated.
-```{r}
-data = list( "X" = X )
-```
-We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.
+In the last line we defined the dataset as it will be input to the relevant `sgmcmc` function. A lot of the inputs to functions in `sgmcmc` are defined as lists. This improves flexibility by enabling models to be specified with multiple parameters, datasets and allows separate tuning constants to be set for each parameter. We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.
 
 The parameters are declared very similarly, but this time the value associated with each entry is its starting point. We have one parameter `theta`, which we'll just start at 0.
 ```{r}
 params = list( "theta" = c( 0, 0 ) )
 ```
 
-Next we'll declare the log likelihood for the problem. This is a function which takes `params` as the first input and `data` as the second. The function should calculate the log likelihood using standard Tensorflow functions. Assume that `params` is a list of tensor variables each with the same names and shape as those declared in the list you made. Similarly `data` is a placeholder with the same names as the one in the list you declared. You'll want to sum over the different observations in `data`, which can be done using the Tensorflow function `tf$reduce_sum`. So the log likelihood function for our Gaussian example is
+Now we'll define the functions `logLik` and `logPrior`. It should now become clear why the list names come in handy. The function `logLik` should take two parameters as input: `params` and `dataset`. These parameters will be lists with the same names as those you defined for `params` and `dataset` earlier. There is one difference though, the objects in the lists will have automatically been converted to `TensorFlow` objects for you. The `params` list will contain `TensorFlow` tensor variables; the `dataset` list will contain `TensorFlow` placeholders. The `logLik` function should take these lists as input and return the value of the log likelihood as a tensor at point `params` given data `dataset`. The function should do this using `TensorFlow` operations, as this allows the gradient to be automatically calculated; it also allows the wide range of distribution objects as well as matrix operations that `TensorFlow` provides to be taken advantage of. A tutorial of `TensorFlow` for \proglang{R` is beyond the scope of this article, for more details we refer the reader to \cite{Tensor4R`. With this in place we can define the `logLik` function as follows
 ```{r}
-logLik = function( params, data ) {
+logLik = function( params, dataset ) {
     # Declare Sigma as a Tensorflow object
-    Sigma = tf$constant( diag(2), dtype = tf$float32 )
+    Sigma = tf$constant( c(1, 1), dtype = tf$float32 )
     # Declare distribution of each observation
-    baseDist = MultivariateNormalFull( params$theta, Sigma )
+    baseDist = MultivariateNormalDiag( params$theta, Sigma )
     # Declare log likelihood function and return
-    logLik = tf$reduce_sum( baseDist$log_pdf( data$X ) )
+    logLik = tf$reduce_sum( baseDist$log_pdf( dataset$X ) )
     return( logLik )
 }
 ```
 So this function basically states that our likelihood is $\sum_{i=1}^N \log \mathcal N( x_i | \theta, I_2 )$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. `R` does not play nicely with the tensorflow type system, so make sure you set all your constants in the `logLik` and `logPrior` functions to `tf$float32`, as we have done. Otherwise you will encounter an error. Notice that we simply used `MultivariateNormalFull` rather than the less wieldy `tf$contrib$distributions$MultivariateNormalFull`. This is because we have built aliases for all the distributions in `tf$contrib$distributions`. For a full list, see the package documentation.
 
-Next we want to define our log prior, which we assume is $\log p( \theta_j ) = \mathcal N(\theta_j | 0,10)$, for each dimension $j$ of $\theta$. As for the log likelihood definition, the log prior is defined as a function with input `params` and `data`. In our case the definition is
+Next we want to define our log prior, which we assume is $\log p( \theta_j ) = \mathcal N(\theta_j | 0,10)$, for each dimension $j$ of $\theta$. Similar to `logLik`, `logPrior` is defined as a function with input `params`. In our case the definition is
 ```{r}
-logPrior = function( params, data ) {
+logPrior = function( params ) {
     baseDist = Normal( 0, 10 )
     logPrior = tf$reduce_sum( baseDist$log_pdf( params$theta ) )
     return( logPrior )
@@ -60,7 +56,7 @@ logPrior = function( params, data ) {
 ```
 Again make sure you set all your constants inside the function to `tf$float32`, as we have done. Similarly we can just use `Normal` rather than `tf$contrib$distributions$Normal`.
 
-Before we begin running our SGLD algorithm, we need to specify the stepsize and minibatch size. A stepsize is required for each parameter, so this must be a list of numbers with names that are exactly the same as each of the parameters. The minibatch size is simply a number that is less than $N$. It specifies how long the SGLD algorithm takes to run, at the cost of accuracy.
+Before we begin running our SGLD algorithm, we need to specify the stepsize and minibatch size. A stepsize is required for each parameter, so this must be a list of numbers with names that are exactly the same as each of the parameters. The minibatch size is simply a number that is less than $N$. It specifies how many observations are used in each iteration of SGMCMC, it is a trade off between accuracy and speed.
 ```{r}
 stepsize = list( "theta" = 1e-5 )
 n = 100
@@ -69,7 +65,7 @@ The stepsize parameters may require a bit of tuning before you get good results.
 
 Now we can run our SGLD algorithm using the `sgmcmc` function `sgld`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function
 ```{r}
-chains = sgld( logLik, logPrior, data, params, stepsize, n, nIters = 10^4, verbose = FALSE )
+chains = sgld( logLik, logPrior, dataset, params, stepsize, n, nIters = 10^4, verbose = FALSE )
 ```
 
 Finally we'll plot the results after removing burn-in
