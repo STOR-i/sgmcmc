@@ -5,7 +5,7 @@ library(MASS)
 N = 10^4
 # Set locations of two modes, theta1 and theta2
 theta1 = c( 0, 0 )
-theta2 = c( 0.25, 0.25 )
+theta2 = c( 0.1, 0.1 )
 # Allocate observations to each component
 z = sample( 2, N, replace = TRUE, prob = c( 0.7, 0.3 ) )
 # Predeclare data matrix

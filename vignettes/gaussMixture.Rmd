@@ -21,7 +21,7 @@ library(MASS)
 N = 10^4
 # Set locations of two modes, theta1 and theta2
 theta1 = c( 0, 0 )
-theta2 = c( 0.25, 0.25 )
+theta2 = c( 0.1, 0.1 )
 # Allocate observations to each component
 z = sample( 2, N, replace = TRUE, prob = c( 0.7, 0.3 ) )
 # Predeclare data matrix
@@ -38,12 +38,12 @@ dataset = list("X" = X)
 ```
 In the last line we defined the dataset as it will be input to the relevant `sgmcmc` function. A lot of the inputs to functions in `sgmcmc` are defined as lists. This improves flexibility by enabling models to be specified with multiple parameters, datasets and allows separate tuning constants to be set for each parameter. We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.
 
-The parameters are declared very similarly, but this time the value associated with each entry is its starting point. We have two parameters `theta1` and `theta2`, which we'll just start at 0. 
+The parameters are declared very similarly, but this time the value associated with each entry is its starting point. We have two parameters `theta1` and `theta2`, which we'll just start from the true values
 ```{r}
 params = list( "theta1" = c( 0, 0 ), "theta2" = c( 0, 0 ) )
 ```
 
-Now we'll define the functions `logLik` and `logPrior`. It should now become clear why the list names come in handy. The function `logLik` should take two parameters as input: `params` and `dataset`. These parameters will be lists with the same names as those you defined for `params` and `dataset` earlier. There is one difference though, the objects in the lists will have automatically been converted to `TensorFlow` objects for you. The `params` list will contain `TensorFlow` tensor variables; the `dataset` list will contain `TensorFlow` placeholders. The `logLik` function should take these lists as input and return the value of the log likelihood as a tensor at point `params` given data `dataset`. The function should do this using `TensorFlow` operations, as this allows the gradient to be automatically calculated; it also allows the wide range of distribution objects as well as matrix operations that `TensorFlow` provides to be taken advantage of. A tutorial of `TensorFlow` for \proglang{R` is beyond the scope of this article, for more details we refer the reader to \cite{Tensor4R`. With this in place we can define the `logLik` function as follows
+Now we'll define the functions `logLik` and `logPrior`. It should now become clear why the list names come in handy. The function `logLik` should take two parameters as input: `params` and `dataset`. These parameters will be lists with the same names as those you defined for `params` and `dataset` earlier. There is one difference though, the objects in the lists will have automatically been converted to `TensorFlow` objects for you. The `params` list will contain `TensorFlow` tensor variables; the `dataset` list will contain `TensorFlow` placeholders. The `logLik` function should take these lists as input and return the value of the log likelihood as a tensor at point `params` given data `dataset`. The function should do this using `TensorFlow` operations, as this allows the gradient to be automatically calculated; it also allows the wide range of distribution objects as well as matrix operations that `TensorFlow` provides to be taken advantage of. A tutorial of `TensorFlow` for `R` is beyond the scope of this article, for more details we refer the reader to the website of [TensorFlow for R](https://tensorflow.rstudio.com/). With this in place we can define the `logLik` function as follows
 ```{r}
 logLik = function( params, dataset ) {
     # Declare Sigma as tensorflow constant (assumed known)
