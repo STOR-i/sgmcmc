@@ -1,0 +1,80 @@
+---
+title: "Multivariate Gaussian"
+author: "Jack Baker"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Multivariate Gaussian
+
+In this example we use the package to infer the mean of a 2d Gaussian using [stochastic gradient Langevin dynamics](http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $x_i | \theta \sim N( \theta, I_2 )$, and we want to infer $\theta$.
+
+First let's simulate the data with the following code, we set $N$ to be $10^4$
+```{r}
+library(sgmcmc)
+library(MASS)
+# Declare number of observations
+N = 10^4
+# Set theta to be 0 and simulate the data
+theta = c( 0, 0 )
+Sigma = diag(2)
+X = mvrnorm( N, theta, Sigma )
+dataset = list("X" = X)
+```
+In the last line we defined the dataset as it will be input to the relevant `sgmcmc` function. A lot of the inputs to functions in `sgmcmc` are defined as lists. This improves flexibility by enabling models to be specified with multiple parameters, datasets and allows separate tuning constants to be set for each parameter. We assume that observations are always accessed on the first dimension of each object, i.e. the point $x_i$ is located at `X[i,]` rather than `X[,i]`. Similarly the observation $i$ from a 3d object `Y` would be located at `Y[i,,]`.
+
+The parameters are declared very similarly, but this time the value associated with each entry is its starting point. We have one parameter `theta`, which we'll just start at 0.
+```{r}
+params = list( "theta" = c( 0, 0 ) )
+```
+
+Now we'll define the functions `logLik` and `logPrior`. It should now become clear why the list names come in handy. The function `logLik` should take two parameters as input: `params` and `dataset`. These parameters will be lists with the same names as those you defined for `params` and `dataset` earlier. There is one difference though, the objects in the lists will have automatically been converted to `TensorFlow` objects for you. The `params` list will contain `TensorFlow` tensor variables; the `dataset` list will contain `TensorFlow` placeholders. The `logLik` function should take these lists as input and return the value of the log likelihood as a tensor at point `params` given data `dataset`. The function should do this using `TensorFlow` operations, as this allows the gradient to be automatically calculated; it also allows the wide range of distribution objects as well as matrix operations that `TensorFlow` provides to be taken advantage of. A tutorial of `TensorFlow` for `R` is beyond the scope of this article, for more details we refer the reader to the website of [TensorFlow for R](https://tensorflow.rstudio.com/). With this in place we can define the `logLik` function as follows
+```{r}
+logLik = function( params, dataset ) {
+    # Declare Sigma as a Tensorflow object
+    Sigma = tf$constant( c(1, 1), dtype = tf$float32 )
+    # Declare distribution of each observation
+    baseDist = MultivariateNormalDiag( params$theta, Sigma )
+    # Declare log likelihood function and return
+    logLik = tf$reduce_sum( baseDist$log_pdf( dataset$X ) )
+    return( logLik )
+}
+```
+So this function basically states that our likelihood is $\sum_{i=1}^N \log \mathcal N( x_i | \theta, I_2 )$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. `R` does not play nicely with the tensorflow type system, so make sure you set all your constants in the `logLik` and `logPrior` functions to `tf$float32`, as we have done. Otherwise you will encounter an error. Notice that we simply used `MultivariateNormalFull` rather than the less wieldy `tf$contrib$distributions$MultivariateNormalFull`. This is because we have built aliases for all the distributions in `tf$contrib$distributions`. For a full list, see the package documentation.
+
+Next we want to define our log prior, which we assume is $\log p( \theta_j ) = \mathcal N(\theta_j | 0,10)$, for each dimension $j$ of $\theta$. Similar to `logLik`, `logPrior` is defined as a function with input `params`. In our case the definition is
+```{r}
+logPrior = function( params ) {
+    baseDist = Normal( 0, 10 )
+    logPrior = tf$reduce_sum( baseDist$log_pdf( params$theta ) )
+    return( logPrior )
+}
+```
+Again make sure you set all your constants inside the function to `tf$float32`, as we have done. Similarly we can just use `Normal` rather than `tf$contrib$distributions$Normal`.
+
+Before we begin running our SGLD algorithm, we need to specify the stepsize and minibatch size. A stepsize is required for each parameter, so this must be a list of numbers with names that are exactly the same as each of the parameters. The minibatch size is simply a number that is less than $N$. It specifies how many observations are used in each iteration of SGMCMC, it is a trade off between accuracy and speed.
+```{r}
+stepsize = list( "theta" = 1e-5 )
+n = 100
+```
+The stepsize parameters may require a bit of tuning before you get good results.
+
+Now we can run our SGLD algorithm using the `sgmcmc` function `sgld`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function
+```{r}
+chains = sgld( logLik, logPrior, dataset, params, stepsize, n, nIters = 10^4, verbose = FALSE )
+```
+
+Finally we'll plot the results after removing burn-in
+```{r}
+library(ggplot2)
+burnIn = 10^3
+thetaOut = as.data.frame( chains$theta[-c(1:burnIn),] )
+ggplot( thetaOut, aes( x = V1, y = V2 ) ) +
+    stat_density2d( size = 1.5 )
+```
+
+There are lots of other sgmcmc algorithms implemented that can be used by simply changing the tuning parameters slightly including `sghmc` and `sgnht`; as well as their [control variate counterparts](https://arxiv.org/pdf/1706.05439.pdf) for improved efficiency.

@@ -47,7 +47,7 @@ Simulates from the posterior defined by the functions logLik & logPrior using
 }
 \details{
 @references Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017) 
-     control variates for stochastic gradient Langevin dynamics. Preprint.
+     control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.
  @references Welling, M., & Teh, Y. W. (2011). 
      Bayesian learning via stochastic gradient Langevin dynamics. ICML (pp. 681-688).
 }
