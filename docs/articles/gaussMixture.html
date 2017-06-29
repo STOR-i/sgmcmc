@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gaussian Mixture • sgmcmc</title>
+<title>Worked Example: Simulate from a Gaussian Mixture • sgmcmc</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
@@ -35,6 +35,9 @@
   </a>
 </li>
 <li>
+  <a href="../articles/sgmcmc.html">Get Started</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
@@ -45,13 +48,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/gaussMixture.html">Gaussian Mixture</a>
+      <a href="../articles/gaussMixture.html">Worked Example: Simulate from a Gaussian Mixture</a>
     </li>
     <li>
-      <a href="../articles/logisticRegression.html">Logistic Regression</a>
+      <a href="../articles/logisticRegression.html">Worked Example: Logistic Regression</a>
     </li>
     <li>
-      <a href="../articles/mvGauss.html">Multivariate Gaussian</a>
+      <a href="../articles/mvGauss.html">Worked Example: Simulate from a Multivariate Gaussian</a>
     </li>
   </ul>
 </li>
@@ -68,18 +71,14 @@
       </header><div class="row">
   <div class="col-md-9">
     <div class="page-header toc-ignore">
-      <h1>Gaussian Mixture</h1>
+      <h1>Worked Example: Simulate from a Gaussian Mixture</h1>
                         <h4 class="author">Jack Baker</h4>
             
-            <h4 class="date">2017-06-28</h4>
           </div>
 
     
     
 <div class="contents">
-<div id="gaussian-mixture" class="section level1">
-<h1 class="hasAnchor">
-<a href="#gaussian-mixture" class="anchor"></a>Gaussian Mixture</h1>
 <p>In this example we use the package to infer the modes of a bimodal, 2d Gaussian using <a href="https://arxiv.org/pdf/1402.4102v2.pdf">stochastic gradient Hamiltonian Monte Carlo</a>. So we assume we have iid data <span class="math inline">\(x_1, \dots, x_N\)</span> with <span class="math inline">\(x_i | \theta \sim 0.7 N( \theta_1, I_2 ) + 0.3 N( \theta_2, I_2 )\)</span>, and we want to infer <span class="math inline">\(\theta_1\)</span> and <span class="math inline">\(\theta_2\)</span>.</p>
 <p>First let’s simulate the data with the following code, we set <span class="math inline">\(N\)</span> to be <span class="math inline">\(10^4\)</span></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sgmcmc)
@@ -110,20 +109,20 @@ dataset =<span class="st"> </span><span class="kw">list</span>(<span class="st">
     <span class="co"># Declare Sigma as tensorflow constant (assumed known)</span>
     Sigma =<span class="st"> </span>tf$<span class="kw">constant</span>( <span class="kw">diag</span>(<span class="dv">2</span>), <span class="dt">dtype =</span> tf$float32 )
     <span class="co"># Declare distribution of each component</span>
-    component1 =<span class="st"> </span>tf$contrib$distributions$<span class="kw"><a href="../reference/MultivariateNormalFull.html">MultivariateNormalFull</a></span>( params$theta1, Sigma )
-    component2 =<span class="st"> </span>tf$contrib$distributions$<span class="kw"><a href="../reference/MultivariateNormalFull.html">MultivariateNormalFull</a></span>( params$theta2, Sigma )
+    component1 =<span class="st"> </span>tf$contrib$distributions$<span class="kw">MultivariateNormalFull</span>( params$theta1, Sigma )
+    component2 =<span class="st"> </span>tf$contrib$distributions$<span class="kw">MultivariateNormalFull</span>( params$theta2, Sigma )
     <span class="co"># Declare log likelihood</span>
     logLik =<span class="st"> </span>tf$<span class="kw">reduce_sum</span>( tf$<span class="kw">log</span>( <span class="fl">0.7</span> *<span class="st"> </span>component1$<span class="kw">pdf</span>(dataset$X) +<span class="st"> </span><span class="fl">0.3</span> *<span class="st"> </span>component2$<span class="kw">pdf</span>(dataset$X) ) )
     <span class="kw">return</span>( logLik )
 }</code></pre></div>
-<p>So this function basically states that our likelihood is <span class="math inline">\(\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]\)</span>, where <span class="math inline">\(\mathcal N( x | \mu, \Sigma )\)</span> is a Gaussian density at <span class="math inline">\(x\)</span> with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\Sigma\)</span>. <code>R</code> does not play nicely with the tensorflow type system, so make sure you set all your constants in the <code>logLik</code> and <code>logPrior</code> functions to <code>tf$float32</code>, as we have done. Otherwise you will encounter an error. Notice that we simply used <code>MultivariateNormalFull</code> rather than the less wieldy <code>tf$contrib$distributions$MultivariateNormalFull</code>. This is because we have built aliases for all the distributions in <code>tf$contrib$distributions</code>. For a full list, see the package documentation.</p>
+<p>So this function basically states that our likelihood is <span class="math inline">\(\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]\)</span>, where <span class="math inline">\(\mathcal N( x | \mu, \Sigma )\)</span> is a Gaussian density at <span class="math inline">\(x\)</span> with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\Sigma\)</span>. <code>R</code> does not play nicely with the tensorflow type system, so make sure you set all your constants in the <code>logLik</code> and <code>logPrior</code> functions to <code>tf$float32</code>, as we have done. Otherwise you will encounter an error.</p>
 <p>Next we want to define our log prior, which we assume is <span class="math inline">\(\log p( \theta ) = \mathcal N(\theta | 0,10I_2)\)</span>. Similar to the log likelihood definition, the log prior is defined as a function, but only with input <code>params</code>. In our case the definition is</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">logPrior =<span class="st"> </span>function( params ) {
     <span class="co"># Declare hyperparameters mu0 and Sigma0 as tensorflow constants</span>
     mu0 =<span class="st"> </span>tf$<span class="kw">constant</span>( <span class="kw">c</span>( <span class="dv">0</span>, <span class="dv">0</span> ), <span class="dt">dtype =</span> tf$float32 )
     Sigma0 =<span class="st"> </span>tf$<span class="kw">constant</span>( <span class="dv">10</span> *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), <span class="dt">dtype =</span> tf$float32 )
     <span class="co"># Declare prior distribution</span>
-    priorDistn =<span class="st"> </span>tf$contrib$distributions$<span class="kw"><a href="../reference/MultivariateNormalFull.html">MultivariateNormalFull</a></span>( mu0, Sigma0 )
+    priorDistn =<span class="st"> </span>tf$contrib$distributions$<span class="kw">MultivariateNormalFull</span>( mu0, Sigma0 )
     <span class="co"># Declare log prior density and return</span>
     logPrior =<span class="st"> </span>priorDistn$<span class="kw">log_pdf</span>( params$theta1 ) +<span class="st"> </span>priorDistn$<span class="kw">log_pdf</span>( params$theta2 )
     <span class="kw">return</span>( logPrior )
@@ -148,24 +147,16 @@ plotData =<span class="st"> </span>chains$theta1
 <p><img src="gaussMixture_files/figure-html/unnamed-chunk-7-1.png" width="672"></p>
 <p>There are lots of other sgmcmc algorithms implemented that can be used by simply changing the tuning parameters slightly including <code>sgld</code> and <code>sgnht</code>; as well as their <a href="https://arxiv.org/pdf/1706.05439.pdf">control variate counterparts</a> for improved efficiency.</p>
 </div>
-</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-        <div id="tocnav">
-      <h2 class="hasAnchor">
-<a href="#tocnav" class="anchor"></a>Contents</h2>
-      <ul class="nav nav-pills nav-stacked">
-<li><a href="#gaussian-mixture">Gaussian Mixture</a></li>
-      </ul>
-</div>
       </div>
 
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by <a href="http://lancs.ac.uk/~bakerj1/">Jack Baker</a>, <a href="http://www.lancs.ac.uk/~nemeth/">Christopher Nemeth</a>, <a href="http://www.maths.lancs.ac.uk/~fearnhea/">Paul Fearnhead</a>, <a href="https://homes.cs.washington.edu/~ebfox/">Emily B. Fox</a>, <a href="http://www.stor-i.lancs.ac.uk/"><img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18"></a>.</p>
+  <p>Developed by <a href="http://lancs.ac.uk/~bakerj1/">Jack Baker</a>, <a href="http://www.lancs.ac.uk/~nemeth/">Christopher Nemeth</a>, <a href="http://www.maths.lancs.ac.uk/~fearnhea/">Paul Fearnhead</a>, <a href="http://www.stor-i.lancs.ac.uk/"><img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18"></a>.</p>
 </div>
 
 <div class="pkgdown">

@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Logistic Regression • sgmcmc</title>
+<title>Worked Example: Logistic Regression • sgmcmc</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
@@ -35,6 +35,9 @@
   </a>
 </li>
 <li>
+  <a href="../articles/sgmcmc.html">Get Started</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
@@ -45,13 +48,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/gaussMixture.html">Gaussian Mixture</a>
+      <a href="../articles/gaussMixture.html">Worked Example: Simulate from a Gaussian Mixture</a>
     </li>
     <li>
-      <a href="../articles/logisticRegression.html">Logistic Regression</a>
+      <a href="../articles/logisticRegression.html">Worked Example: Logistic Regression</a>
     </li>
     <li>
-      <a href="../articles/mvGauss.html">Multivariate Gaussian</a>
+      <a href="../articles/mvGauss.html">Worked Example: Simulate from a Multivariate Gaussian</a>
     </li>
   </ul>
 </li>
@@ -68,18 +71,14 @@
       </header><div class="row">
   <div class="col-md-9">
     <div class="page-header toc-ignore">
-      <h1>Logistic Regression</h1>
+      <h1>Worked Example: Logistic Regression</h1>
                         <h4 class="author">Jack Baker</h4>
             
-            <h4 class="date">2017-06-28</h4>
           </div>
 
     
     
 <div class="contents">
-<div id="logistic-regression" class="section level1">
-<h1 class="hasAnchor">
-<a href="#logistic-regression" class="anchor"></a>Logistic Regression</h1>
 <p>In this example we use the package to infer the bias and coefficients in a logistic regression model using <a href="https://arxiv.org/pdf/1706.05439.pdf">stochastic gradient Langevin Dynamics with control variates</a>. So we assume we have data <span class="math inline">\(\mathbf x_1, \dots, \mathbf x_N\)</span> and response variables <span class="math inline">\(y_1, \dots, y_N\)</span> with likelihood <span class="math display">\[
     p(\mathbf X, \mathbf y | \beta, \beta_0 ) = \prod_{i=1}^N \left[ \frac{1}{1+e^{-\beta_0 + \mathbf x_i \beta}} \right]^{y_i} \left[ 1 - \frac{1}{1+e^{-\beta_0 + \mathbf x_i \beta}} \right]^{1-y_i}
 \]</span></p>
@@ -148,24 +147,16 @@ plotFrame =<span class="st"> </span><span class="kw">data.frame</span>(<span cla
 <span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Average log predictive of test set"</span>)</code></pre></div>
 <p><img src="logisticRegression_files/figure-html/unnamed-chunk-8-1.png" width="672"></p>
 </div>
-</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-        <div id="tocnav">
-      <h2 class="hasAnchor">
-<a href="#tocnav" class="anchor"></a>Contents</h2>
-      <ul class="nav nav-pills nav-stacked">
-<li><a href="#logistic-regression">Logistic Regression</a></li>
-      </ul>
-</div>
       </div>
 
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by <a href="http://lancs.ac.uk/~bakerj1/">Jack Baker</a>, <a href="http://www.lancs.ac.uk/~nemeth/">Christopher Nemeth</a>, <a href="http://www.maths.lancs.ac.uk/~fearnhea/">Paul Fearnhead</a>, <a href="https://homes.cs.washington.edu/~ebfox/">Emily B. Fox</a>, <a href="http://www.stor-i.lancs.ac.uk/"><img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18"></a>.</p>
+  <p>Developed by <a href="http://lancs.ac.uk/~bakerj1/">Jack Baker</a>, <a href="http://www.lancs.ac.uk/~nemeth/">Christopher Nemeth</a>, <a href="http://www.maths.lancs.ac.uk/~fearnhea/">Paul Fearnhead</a>, <a href="http://www.stor-i.lancs.ac.uk/"><img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18"></a>.</p>
 </div>
 
 <div class="pkgdown">

@@ -1,15 +1,12 @@
 ---
-title: "Multivariate Gaussian"
+title: "Worked Example: Simulate from a Multivariate Gaussian"
 author: "Jack Baker"
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-# Multivariate Gaussian
 
 In this example we use the package to infer the mean of a 2d Gaussian using [stochastic gradient Langevin dynamics](http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $x_i | \theta \sim N( \theta, I_2 )$, and we want to infer $\theta$.
 

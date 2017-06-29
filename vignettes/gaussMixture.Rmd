@@ -1,15 +1,12 @@
 ---
-title: "Gaussian Mixture"
+title: "Worked Example: Simulate from a Gaussian Mixture"
 author: "Jack Baker"
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-# Gaussian Mixture
 
 In this example we use the package to infer the modes of a bimodal, 2d Gaussian using [stochastic gradient Hamiltonian Monte Carlo](https://arxiv.org/pdf/1402.4102v2.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $x_i | \theta \sim 0.7 N( \theta_1, I_2 ) + 0.3 N( \theta_2, I_2 )$, and we want to infer $\theta_1$ and $\theta_2$.
 

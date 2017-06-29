@@ -1,15 +1,12 @@
 ---
-title: "Logistic Regression"
+title: "Worked Example: Logistic Regression"
 author: "Jack Baker"
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-# Logistic Regression
 
 In this example we use the package to infer the bias and coefficients in a logistic regression model using [stochastic gradient Langevin Dynamics with control variates](https://arxiv.org/pdf/1706.05439.pdf). So we assume we have data $\mathbf x_1, \dots, \mathbf x_N$ and response variables $y_1, \dots, y_N$ with likelihood
 \[

@@ -6,7 +6,6 @@ Authors@R: c(
     person("Jack", "Baker", email = "j.baker1@lancaster.ac.uk", role = c("aut", "cre", "cph")),
     person( "Christopher", "Nemeth", role = c("aut", "cph") ), 
     person( "Paul", "Fearnhead", role = c( "aut", "cph" ) ),
-    person( "Emily B.", "Fox", role = c( "aut", "cph" ) ),
     person( "STOR-i", role = c( "cph", "fnd" ) ))
 Maintainer: Jack Baker <j.baker1@lancaster.ac.uk>
 Description: R library for performing stochastic gradient MCMC

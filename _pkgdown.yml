@@ -5,8 +5,6 @@ authors:
     href: http://www.lancs.ac.uk/~nemeth/
   Paul Fearnhead:
     href: http://www.maths.lancs.ac.uk/~fearnhea/
-  Emily B. Fox:
-    href: https://homes.cs.washington.edu/~ebfox/
   STOR-i:
     href: http://www.stor-i.lancs.ac.uk/
     html: <img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18" />
@@ -25,10 +23,6 @@ reference:
         - sgldcv
         - sghmccv
         - sgnhtcv
-  - title: "Aliases for TensorFlow distributions"
-    desc: "Aliases for TensorFlow distribution functions"
-    contents:
-        - matches("^[A-Z].*")
   - title: "Datasets"
     desc: "Datasets used in examples"
     contents:

@@ -1,7 +1,6 @@
 ---
-title: "sgmcmc"
+title: "sgmcmc: Getting Started"
 author: "Jack Baker"
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -9,13 +8,11 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-# Introduction to sgmcmc: A package for stochastic gradient MCMC
-
 The goal of `sgmcmc` is to make it as easy as possible for users to run stochastic gradient MCMC (SGMCMC) algorithms. SGMCMC are algorithms which enable MCMC to scale more easily to large datasets, as traditional MCMC can run very slowly as dataset sizes grow.
 
 `sgmcmc` implements a lot of the popular stochastic gradient MCMC methods including [SGLD](http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf), [SGHMC](https://arxiv.org/pdf/1402.4102v2.pdf) and [SGNHT](http://papers.nips.cc/paper/5592-bayesian-sampling-using-stochastic-gradient-thermostats.pdf). The package uses automatic differentiation, so all the differentiation needed for the methods is calculated automatically. Control variate methods can be used in order to improve the efficiency of the methods as proposed in the [recent publication](https://github.com/jbaker92/stochasticGradientMCMC). All users need to specify to run these algorithms is the data; the log likelihood and log prior; the parameter starting values; and a few tuning parameters. 
 
-To enable as much flexibility as possible, the data and parameter starting points fed to the functions in `sgmcmc` are specified as lists. This allows users to specify multiple parameters and datasets. It also allows the user to easily reference these quantities in the log likelihood and log prior, and to set stepsizes for different paramters (which is essential when parameters are on different scales).
+To enable as much flexibility as possible, the data and parameter starting points fed to the functions in `sgmcmc` are specified as lists. This allows users to specify multiple parameters and datasets. It also allows the user to easily reference these quantities in the log likelihood and log prior, and to set different stepsizes for different paramters (essential when parameters are on different scales).
 
 ### Specifying the Data
 
@@ -23,9 +20,9 @@ As we mentioned earlier, the datasets you wish to use are specified as a list. S
 ```{r eval=FALSE}
 dataset = list("X" = X, "Y" = Y)
 ```
-You can specify as many datasets as you like, the most important thing is that your naming is consistent, so you use the same names in your log likelihood and log prior functions as how you specified them here.
+You can specify as many datasets as you like, the most important thing is that your naming is consistent, so you use the same names in your log likelihood and log prior functions.
 
-The functions assume that each observation is located on the first axis of the object. Suppose `Y` is a 2d matrix, so observation $Y_i$ should be located at `dataset$Y[i,]`. Similarly if `X` is a 3d array, observation $X_i$ should be located at `dataset$X[i,,]`.
+The functions assume that each observation is located on the first axis of the object. Suppose `Y` is a 2d matrix, then the observation $Y_i$ should be located at `dataset$Y[i,]`. Similarly if `X` is a 3d array, observation $X_i$ should be located at `dataset$X[i,,]`.
 
 ### Specifying the Parameters
 
@@ -40,7 +37,7 @@ The log likelihood is specified as a function of the `dataset` and `params`, whi
 
 The log prior is specified in exactly the same way except that the function should only take `params` as input, as a prior should be independent of the dataset.
 
-Suppose we want to simulate from the mean of a multivariate Normal density with the each component of the mean having a Student T prior, we would specify this as follows
+Suppose we want to simulate from the mean of a multivariate Normal density with each component of the mean having a Student T prior, we would specify this as follows
 ```{r eval=FALSE}
 library(MASS)
 # Simulate and declare dataset
@@ -59,8 +56,29 @@ logLik = function(params, dataset) {
 # Declare log prior
 logPrior = function(params) {
     # Declare prior distribution
-    distn = tf$contrib$distributions$StudentT(df = 3)
+    distn = tf$contrib$distributions$StudentT(3, 0, 1)
     # Apply log prior componentwise and return sum
     return(tf$reduce_sum(distn$log_pdf(params$theta)))
 }
 ```
+
+### Specifying the Tuning Parameters
+
+Apart from the minibatch size ($n$) and the number of iterations, the tuning parameters will be a list with the same names as `params`. This allows you to specify different stepsizes for different parameters -- vital if they are on different scales. Note that if you are using the control variate algorithms, the tuning parameter `optStepsize` will also not be a list, this is because we use the standard TensorFlow ADAM optimizer in order to find the MAP estimates. So for example if you wanted to simulate from the previous example using `sgldcv`, so [stochastic gradient Langevin dynamics with control variates](https://arxiv.org/pdf/1706.05439.pdf), then you might set the tuning parameters as follows
+```{r eval=FALSE}
+stepsize = list( "theta" = 1e-5 )
+optStepsize = 1e-1
+n = 100
+```
+The `stepsize` here are the stepsize parameters that SGLD will use, the `optStepsize` is the stepsize used for the initial optimization procedure that SGLDCV uses to find the MAP estimates.
+
+Once the parameters are declared you can set `sgldcv` running using
+```{r eval=FALSE}
+sgldcv(logLik, logPrior, dataset, params, stepsize, optStepsize, n, nIters = 10^4, nItersOpt = 10^4)
+```
+The optional parameters here are simply `nIters` which is the number of iterations to run SGLD for and `nItersOpt`, the number of iterations in the optimization step.
+
+Most of the time, parameters need tuning, we suggest doing this using cross validation. You can roughly check the algorithm is converging by inspection by checking that the `Log posterior estimate` output by the algorithm settles down eventually (it should decrease at first unless the chain converges very quickly).
+
+### Next Steps
+We suggest for more details you read the worked examples in the Articles section, or you read the documentation in Reference.
