@@ -81,4 +81,9 @@ The optional parameters here are simply `nIters` which is the number of iteratio
 Most of the time, parameters need tuning, we suggest doing this using cross validation. You can roughly check the algorithm is converging by inspection by checking that the `Log posterior estimate` output by the algorithm settles down eventually (it should decrease at first unless the chain converges very quickly).
 
 ### Next Steps
-We suggest for more details you read the worked examples in the Articles section, or you read the documentation in Reference.
+We suggest for more details you read the worked examples in the Articles section, these cover a variety of models (which will be expanded as the package matures):
+ - [Multivariate Gaussian](https://stor-i.github.io/sgmcmc///articles/mvGauss.html)
+ - [Gaussian Mixture](https://stor-i.github.io/sgmcmc///articles/gaussMixture.html)
+ - [Logistic Regression](https://stor-i.github.io/sgmcmc///articles/logisticRegression.html)
+
+Full details of the API can be found [here](https://stor-i.github.io/sgmcmc///reference/index.html)

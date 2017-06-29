@@ -8,8 +8,15 @@ The package is built on top of the [tensorflow library for R](https://tensorflow
 
 To start with, tensorflow for R needs to be properly installed, this requires dependencies that can't be handled by the standard `install.packages` framework, so follow the tensorflow for R library [installation instructions](https://tensorflow.rstudio.com/installation.html).
 
-To install the `sgmcmc` library, ensure `devtools` are installed and run `devtools::install_github("jbaker92/sgmcmc")`.
+To install the `sgmcmc` library, ensure `devtools` are installed and run `devtools::install_github("STOR-i/sgmcmc")`.
 
 ## Documentation
 
-TO BE ADDED, for now see the vignettes and man documentation for the API and example usage. `inst/doc` contains vignettes that have already been built.
+It's recommended you start [here](https://stor-i.github.io/sgmcmc///articles/sgmcmc.html). This getting started page outlines the general structure of the package and its usage.
+
+There's also worked examples for the following models (these will be extended as the package matures)
+ - [Multivariate Gaussian](https://stor-i.github.io/sgmcmc///articles/mvGauss.html)
+ - [Gaussian Mixture](https://stor-i.github.io/sgmcmc///articles/gaussMixture.html)
+ - [Logistic Regression](https://stor-i.github.io/sgmcmc///articles/logisticRegression.html)
+
+Finally full details of the API can be found [here](https://stor-i.github.io/sgmcmc///reference/index.html)
