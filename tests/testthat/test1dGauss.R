@@ -18,7 +18,7 @@ declareConsts = function() {
 
 logLik = function( params, data ) {
     sigma = tf$constant(1, dtype = tf$float32)
-    baseDist = Normal(params$theta, sigma)
+    baseDist = tf$contrib$distributions$Normal(params$theta, sigma)
     return(tf$reduce_sum(baseDist$log_pdf(data$x)))
 }
 

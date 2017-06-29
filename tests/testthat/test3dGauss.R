@@ -23,7 +23,7 @@ declareConsts = function() {
 logLik = function( params, data ) {
     Sigma = matrix( c( 1, 0.3, 0.5, 0.3, 1, 0.2, 0.5, 0.2, 1 ), ncol = 3 )
     Sigma = tf$constant( Sigma, dtype = tf$float32 )
-    baseDist = MultivariateNormalFull( params$theta, Sigma )
+    baseDist = tf$contrib$distributions$MultivariateNormalFull( params$theta, Sigma )
     return( tf$reduce_sum( baseDist$log_pdf( data$X ) ) )
 }
 
