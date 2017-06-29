@@ -4,19 +4,19 @@
 \alias{sgnht}
 \title{Stochastic Gradient Nose Hoover Thermostat}
 \usage{
-sgnht(logLik, logPrior, data, params, eta, a, n, nIters = 10^4,
+sgnht(logLik, logPrior, dataset, params, eta, a, n, nIters = 10^4,
   verbose = TRUE)
 }
 \arguments{
-\item{logLik}{function which takes parameters and data 
+\item{logLik}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.}
 
-\item{logPrior}{function which takes parameters and data 
+\item{logPrior}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 The function should return a tensorflow tensor which defines the log prior of the model.}
 
-\item{data}{list of R arrays which defines the datasets for the problem.
+\item{dataset}{list of R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
 \item{params}{list of R arrays which define the starting point of each parameter.
@@ -44,9 +44,12 @@ List of arrays for each parameter containing the MCMC chain.
 Simulates from the posterior defined by the functions logLik & logPrior using
  stochastic gradient Nose Hoover Thermostat.
  When used for parameters that are higher dimensional then vectors, the thermostat
- step is approximated by a tensor contraction.
+ step is approximated by a tensor contraction. Currently the implementation will only
+ handle vector or scalar parameters, this will be updated in future implementations.
 }
-\details{
-@references Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., & Neven, H. (2014). 
-     Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).
+\references{
+\itemize{\item \href{
+ http://papers.nips.cc/paper/5592-bayesian-sampling-using-stochastic-gradient-thermostats.pdf}{
+ Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., & Neven, H. (2014). 
+ Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).}}
 }

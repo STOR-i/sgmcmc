@@ -14,7 +14,7 @@ vignette: >
 In this example we use the package to infer the modes of a bimodal, 2d Gaussian using [stochastic gradient Hamiltonian Monte Carlo](https://arxiv.org/pdf/1402.4102v2.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $x_i | \theta \sim 0.7 N( \theta_1, I_2 ) + 0.3 N( \theta_2, I_2 )$, and we want to infer $\theta_1$ and $\theta_2$.
 
 First let's simulate the data with the following code, we set $N$ to be $10^4$
-```{r}
+```{r message=FALSE}
 library(sgmcmc)
 library(MASS)
 # Declare number of observations
@@ -49,14 +49,14 @@ logLik = function( params, dataset ) {
     # Declare Sigma as tensorflow constant (assumed known)
     Sigma = tf$constant( diag(2), dtype = tf$float32 )
     # Declare distribution of each component
-    component1 = MultivariateNormalFull( params$theta1, Sigma )
-    component2 = MultivariateNormalFull( params$theta2, Sigma )
+    component1 = tf$contrib$distributions$MultivariateNormalFull( params$theta1, Sigma )
+    component2 = tf$contrib$distributions$MultivariateNormalFull( params$theta2, Sigma )
     # Declare log likelihood
     logLik = tf$reduce_sum( tf$log( 0.7 * component1$pdf(dataset$X) + 0.3 * component2$pdf(dataset$X) ) )
     return( logLik )
 }
 ```
-So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. `R` does not play nicely with the tensorflow type system, so make sure you set all your constants in the `logLik` and `logPrior` functions to `tf$float32`, as we have done. Otherwise you will encounter an error. Notice that we simply used `MultivariateNormalFull` rather than the less wieldy `tf$contrib$distributions$MultivariateNormalFull`. This is because we have built aliases for all the distributions in `tf$contrib$distributions`. For a full list, see the package documentation.
+So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. `R` does not play nicely with the tensorflow type system, so make sure you set all your constants in the `logLik` and `logPrior` functions to `tf$float32`, as we have done. Otherwise you will encounter an error.
 
 Next we want to define our log prior, which we assume is $\log p( \theta ) = \mathcal N(\theta | 0,10I_2)$. Similar to the log likelihood definition, the log prior is defined as a function, but only with input `params`. In our case the definition is
 ```{r}
@@ -65,7 +65,7 @@ logPrior = function( params ) {
     mu0 = tf$constant( c( 0, 0 ), dtype = tf$float32 )
     Sigma0 = tf$constant( 10 * diag(2), dtype = tf$float32 )
     # Declare prior distribution
-    priorDistn = MultivariateNormalFull( mu0, Sigma0 )
+    priorDistn = tf$contrib$distributions$MultivariateNormalFull( mu0, Sigma0 )
     # Declare log prior density and return
     logPrior = priorDistn$log_pdf( params$theta1 ) + priorDistn$log_pdf( params$theta2 )
     return( logPrior )

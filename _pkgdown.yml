@@ -1,0 +1,35 @@
+authors:
+  Jack Baker:
+    href: http://lancs.ac.uk/~bakerj1/
+  Christopher Nemeth:
+    href: http://www.lancs.ac.uk/~nemeth/
+  Paul Fearnhead:
+    href: http://www.maths.lancs.ac.uk/~fearnhea/
+  Emily B. Fox:
+    href: https://homes.cs.washington.edu/~ebfox/
+  STOR-i:
+    href: http://www.stor-i.lancs.ac.uk/
+    html: <img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18" />
+
+
+reference:
+  - title: SGMCMC
+    desc: "Functions for running standard SGMCMC algorithms"
+    contents: 
+        - sgld
+        - sghmc
+        - sgnht
+  - title: "SGMCMC with Control Variates"
+    desc: "Functions for running SGMCMC algorithms with improved efficiency using control variates"
+    contents: 
+        - sgldcv
+        - sghmccv
+        - sgnhtcv
+  - title: "Aliases for TensorFlow distributions"
+    desc: "Aliases for TensorFlow distribution functions"
+    contents:
+        - matches("^[A-Z].*")
+  - title: "Datasets"
+    desc: "Datasets used in examples"
+    contents:
+        - covertype

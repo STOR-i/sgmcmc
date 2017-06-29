@@ -99,10 +99,13 @@
     
     <p>Simulates from the posterior defined by the functions logLik &amp; logPrior using 
  stochastic gradient Hamiltonian Monte Carlo with an improved gradient estimate 
- that is calculated using control variates.</p>
+ that is calculated using control variates. 
+ Currently we use the approximation \(\hat \beta = 0\), 
+ as used in the simulations by the original reference. 
+ This will be changed in future implementations.</p>
     
 
-    <pre class="usage"><span class='fu'>sghmccv</span>(<span class='no'>logLik</span>, <span class='no'>logPrior</span>, <span class='no'>data</span>, <span class='no'>params</span>, <span class='no'>eta</span>, <span class='no'>alpha</span>, <span class='no'>L</span>, <span class='no'>optStepsize</span>, <span class='no'>n</span>,
+    <pre class="usage"><span class='fu'>sghmccv</span>(<span class='no'>logLik</span>, <span class='no'>logPrior</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>eta</span>, <span class='no'>alpha</span>, <span class='no'>L</span>, <span class='no'>optStepsize</span>, <span class='no'>n</span>,
   <span class='kw'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>, <span class='kw'>nItersOpt</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
@@ -110,18 +113,18 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>logLik</th>
-      <td><p>function which takes parameters and data 
+      <td><p>function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.</p></td>
     </tr>
     <tr>
       <th>logPrior</th>
-      <td><p>function which takes parameters and data 
+      <td><p>function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 The function should return a tensorflow tensor which defines the log prior of the model.</p></td>
     </tr>
     <tr>
-      <th>data</th>
+      <th>dataset</th>
       <td><p>list of R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions</p></td>
     </tr>
@@ -174,12 +177,16 @@ optional, default 10^4.</p></td>
     <p>List of arrays for each parameter containing the MCMC chain.
  Dimension of the form (nIters,paramDim1,paramDim2,...)</p>
     
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>@references Baker, J., Fearnhead, P., Fox, E. B., &amp; Nemeth, C. (2017) 
-     control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.
- @references Chen, T., Fox, E. B., &amp; Guestrin, C. (2014). 
-     stochastic gradient Hamiltonian Monte Carlo. In ICML (pp. 1683-1691).</p>
+    <ul>
+<li><p><a href='https://arxiv.org/pdf/1706.05439.pdf'>
+ Baker, J., Fearnhead, P., Fox, E. B., &amp; Nemeth, C. (2017).
+ Control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.</a></p></li>
+<li><p><a href='https://arxiv.org/pdf/1402.4102v2.pdf'>
+ Chen, T., Fox, E. B., &amp; Guestrin, C. (2014). Stochastic gradient Hamiltonian Monte Carlo. 
+ In ICML (pp. 1683-1691).</a></p></li>
+</ul>
     
 
   </div>
@@ -190,7 +197,7 @@ optional, default 10^4.</p></td>
       
       <li><a href="#value">Value</a></li>
 
-      <li><a href="#details">Details</a></li>
+      <li><a href="#references">References</a></li>
           </ul>
 
   </div>
@@ -198,7 +205,7 @@ optional, default 10^4.</p></td>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jack Baker, Christopher Nemeth, Paul Fearnhead, Emily B. Fox.</p>
+  <p>Developed by <a href='http://lancs.ac.uk/~bakerj1/'>Jack Baker</a>, <a href='http://www.lancs.ac.uk/~nemeth/'>Christopher Nemeth</a>, <a href='http://www.maths.lancs.ac.uk/~fearnhea/'>Paul Fearnhead</a>, <a href='https://homes.cs.washington.edu/~ebfox/'>Emily B. Fox</a>, <a href='http://www.stor-i.lancs.ac.uk/'><img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18" /></a>.</p>
 </div>
 
 <div class="pkgdown">

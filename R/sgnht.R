@@ -3,18 +3,21 @@
 #' Simulates from the posterior defined by the functions logLik & logPrior using
 #'  stochastic gradient Nose Hoover Thermostat.
 #'  When used for parameters that are higher dimensional then vectors, the thermostat
-#'  step is approximated by a tensor contraction.
+#'  step is approximated by a tensor contraction. Currently the implementation will only
+#'  handle vector or scalar parameters, this will be updated in future implementations.
 #'
-#'  @references Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., & Neven, H. (2014). 
-#'      Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).
+#' @references \itemize{\item \href{
+#'  http://papers.nips.cc/paper/5592-bayesian-sampling-using-stochastic-gradient-thermostats.pdf}{
+#'  Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., & Neven, H. (2014). 
+#'  Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).}}
 #'
-#' @param logLik function which takes parameters and data 
+#' @param logLik function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  It should return a tensorflow expression which defines the log likelihood of the model.
-#' @param logPrior function which takes parameters and data 
+#' @param logPrior function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  The function should return a tensorflow tensor which defines the log prior of the model.
-#' @param data list of R arrays which defines the datasets for the problem.
+#' @param dataset list of R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param params list of R arrays which define the starting point of each parameter.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
@@ -33,10 +36,9 @@
 #'
 #' @export
 #'
-sgnht = function( logLik, logPrior, data, params, eta, a, n, 
-        nIters = 10^4, verbose = TRUE ) {
+sgnht = function( logLik, logPrior, dataset, params, eta, a, n, nIters = 10^4, verbose = TRUE ) {
     # Declare SGNHT object
-    sgmcmc = genSGNHT( logLik, logPrior, data, params, eta, a, n, NULL )
+    sgmcmc = genSGNHT( logLik, logPrior, dataset, params, eta, a, n, NULL )
     options = list( "nIters" = nIters, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sgmcmc, params, options )
@@ -49,20 +51,25 @@ sgnht = function( logLik, logPrior, data, params, eta, a, n,
 #'  stochastic gradient Nose Hoover Thermostat with an improved gradient estimate 
 #'  that is calculated using control variates.
 #'  When used for parameters that are higher dimensional then vectors, the thermostat
-#'  step is approximated by a tensor contraction.
+#'  step is approximated by a tensor contraction. Currently the implementation will only
+#'  handle vector or scalar parameters, this will be updated in future implementations.
 #'
-#'  @references Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017) 
-#'      control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.
-#' @references Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., & Neven, H. (2014). 
-#'  Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).
+#' @references \itemize{
+#'  \item \href{https://arxiv.org/pdf/1706.05439.pdf}{
+#'  Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017).
+#'  Control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.}
+#'  \item \href{
+#'  http://papers.nips.cc/paper/5592-bayesian-sampling-using-stochastic-gradient-thermostats.pdf}{
+#'  Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., & Neven, H. (2014). 
+#'  Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).}}
 #'
-#' @param logLik function which takes parameters and data 
+#' @param logLik function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  It should return a tensorflow expression which defines the log likelihood of the model.
-#' @param logPrior function which takes parameters and data 
+#' @param logPrior function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  The function should return a tensorflow tensor which defines the log prior of the model.
-#' @param data list of R arrays which defines the datasets for the problem.
+#' @param dataset list of R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param params list of R arrays which define the starting point of each parameter.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
@@ -84,10 +91,10 @@ sgnht = function( logLik, logPrior, data, params, eta, a, n,
 #'
 #' @export
 #'
-sgnhtcv = function( logLik, logPrior, data, params, eta, a, optStepsize, n, 
-            nIters = 10^4, nItersOpt = 10^4, verbose = TRUE ) {
+sgnhtcv = function( logLik, logPrior, dataset, params, eta, a, optStepsize, n, nIters = 10^4, 
+        nItersOpt = 10^4, verbose = TRUE ) {
     # Declare SGNHTCV object
-    sgmcmcCV = genSGNHTCV( logLik, logPrior, data, params, eta, a, optStepsize, n, NULL )
+    sgmcmcCV = genSGNHTCV( logLik, logPrior, dataset, params, eta, a, optStepsize, n, NULL )
     options = list( "nIters" = nIters, "nItersOpt" = nItersOpt, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sgmcmcCV, params, options )
@@ -98,19 +105,19 @@ sgnhtcv = function( logLik, logPrior, data, params, eta, a, optStepsize, n,
 # 
 # Creates a stochastic gradient Nose Hoover Thermostat (SGNHT) object which can be passed 
 #  to mcmcStep to simulate from 1 step of SGHMC for the posterior defined by logLik and logPrior.
-genSGNHT = function( logLik, logPrior, data, params, eta, a, n, gibbsParams ) {
+genSGNHT = function( logLik, logPrior, dataset, params, eta, a, n, gibbsParams ) {
     # 
     # Get dataset size
-    N = getDatasetSize( data )
-    # Convert params and data to tensorflow variables and placeholders
+    N = getDatasetSize( dataset )
+    # Convert params and dataset to tensorflow variables and placeholders
     paramstf = setupParams( params )
-    placeholders = setupPlaceholders( data, n )
+    placeholders = setupPlaceholders( dataset, n )
     # Declare estimated log posterior tensor using declared variables and placeholders
     estLogPost = setupEstLogPost( logLik, logPrior, paramstf, placeholders, N, n, gibbsParams )
     # Get ranks for each parameter tensor, required for dynamics
     ranks = getRanks( params )
     # Create SGNHT object
-    sgnht = list( "data" = data, "n" = n, "eta" = eta, "a" = a, "ranks" = ranks, 
+    sgnht = list( "data" = dataset, "n" = n, "eta" = eta, "a" = a, "ranks" = ranks, 
             "placeholders" = placeholders, "params" = paramstf, "estLogPost" = estLogPost )
     class(sgnht) = c( "sgnht", "sgmcmc" )
     # Declare SGNHT dynamics
@@ -123,17 +130,17 @@ genSGNHT = function( logLik, logPrior, data, params, eta, a, n, gibbsParams ) {
 # Creates a stochastic gradient Nose Hoover Thermostat with Control Variates (SGHMCCV) object 
 #  which can be passed to optUpdate and mcmcStep functions to simulate from SGNHTCV
 #  for the posterior defined by logLik and logPrior.
-genSGNHTCV = function( logLik, logPrior, data, params, eta, a, 
+genSGNHTCV = function( logLik, logPrior, dataset, params, eta, a, 
             optStepsize, n, gibbsParams, n_iters = 10^4 ) {
     # Get key sizes and declare correction term for log posterior estimate
-    N = getDatasetSize( data )
+    N = getDatasetSize( dataset )
     correction = tf$constant( N / n, dtype = tf$float32 )
-    # Convert params and data to tensorflow variables and placeholders
+    # Convert params and dataset to tensorflow variables and placeholders
     paramstf = setupParams( params )
-    placeholders = setupPlaceholders( data, n )
+    placeholders = setupPlaceholders( dataset, n )
     # Declare tensorflow variables for initial optimizer
     paramsOpt = setupParams( params )
-    placeholdersFull = setupFullPlaceholders( data )
+    placeholdersFull = setupFullPlaceholders( dataset )
     # Get ranks for each parameter tensor, required for dynamics
     ranks = getRanks( params )
     # Declare container for full gradient
@@ -148,7 +155,7 @@ genSGNHTCV = function( logLik, logPrior, data, params, eta, a,
     optimizer = declareOptimizer( estLogPostOpt, fullLogPostOpt, paramsOpt, 
             paramstf, logPostOptGrad, optStepsize )
     # Declare SGNHTCV object
-    sgnhtCV = list( "optimizer" = optimizer, "data" = data, "n" = n, 
+    sgnhtCV = list( "optimizer" = optimizer, "data" = dataset, "n" = n, 
             "eta" = eta, "a" = a, "ranks" = ranks, "placeholders" = placeholders, 
             "placeholdersFull" = placeholdersFull, "params" = paramstf, "paramsOpt" = paramsOpt, 
             "estLogPost" = estLogPost, "estLogPostOpt" = estLogPostOpt, 

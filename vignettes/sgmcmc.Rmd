@@ -1,0 +1,66 @@
+---
+title: "sgmcmc"
+author: "Jack Baker"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction to sgmcmc: A package for stochastic gradient MCMC
+
+The goal of `sgmcmc` is to make it as easy as possible for users to run stochastic gradient MCMC (SGMCMC) algorithms. SGMCMC are algorithms which enable MCMC to scale more easily to large datasets, as traditional MCMC can run very slowly as dataset sizes grow.
+
+`sgmcmc` implements a lot of the popular stochastic gradient MCMC methods including [SGLD](http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf), [SGHMC](https://arxiv.org/pdf/1402.4102v2.pdf) and [SGNHT](http://papers.nips.cc/paper/5592-bayesian-sampling-using-stochastic-gradient-thermostats.pdf). The package uses automatic differentiation, so all the differentiation needed for the methods is calculated automatically. Control variate methods can be used in order to improve the efficiency of the methods as proposed in the [recent publication](https://github.com/jbaker92/stochasticGradientMCMC). All users need to specify to run these algorithms is the data; the log likelihood and log prior; the parameter starting values; and a few tuning parameters. 
+
+To enable as much flexibility as possible, the data and parameter starting points fed to the functions in `sgmcmc` are specified as lists. This allows users to specify multiple parameters and datasets. It also allows the user to easily reference these quantities in the log likelihood and log prior, and to set stepsizes for different paramters (which is essential when parameters are on different scales).
+
+### Specifying the Data
+
+As we mentioned earlier, the datasets you wish to use are specified as a list. Suppose we have datasets we have already obtained or created `X` and `y`, we would specify the whole dataset for our session as
+```{r eval=FALSE}
+dataset = list("X" = X, "Y" = Y)
+```
+You can specify as many datasets as you like, the most important thing is that your naming is consistent, so you use the same names in your log likelihood and log prior functions as how you specified them here.
+
+The functions assume that each observation is located on the first axis of the object. Suppose `Y` is a 2d matrix, so observation $Y_i$ should be located at `dataset$Y[i,]`. Similarly if `X` is a 3d array, observation $X_i$ should be located at `dataset$X[i,,]`.
+
+### Specifying the Parameters
+
+Again to specify parameters, we simply set what we want their starting points to be. Suppose my model depends on two parameter vectors `theta1` and `theta2`, and we want to start both from 0. If we assume both are length 3, this could be specified like this
+```{r eval=FALSE}
+params = list("theta1" = rep(0, 3), "theta2" = rep(0, 3))
+```
+
+### Specifying the Log Likelihood and Log Prior
+
+The log likelihood is specified as a function of the `dataset` and `params`, which have the same names as the lists you just specified. The only difference is that the objects inside the lists will have automatically been converted to TensorFlow objects for you. The `dataset` list will contain TensorFlow placeholders. The `params` list will contain TensorFlow variables. The `logLik` function should be a function that takes these lists as input and returns what the log likelihood value should be given the current parameter and data values. It should do this using TensorFlow operations. More details about how TensorFlow works can be found [here](https://tensorflow.rstudio.com/). Note if you define constants inside the `logLik` function, please specify them as 32-bit (so `tf$float32` or `tf$int32`), as the `R` type system does not play nicely with the TensorFlow type system.
+
+The log prior is specified in exactly the same way except that the function should only take `params` as input, as a prior should be independent of the dataset.
+
+Suppose we want to simulate from the mean of a multivariate Normal density with the each component of the mean having a Student T prior, we would specify this as follows
+```{r eval=FALSE}
+library(MASS)
+# Simulate and declare dataset
+dataset = list("X" = mvrnorm(10^4, c(0, 0), diag(2)))
+# Simulate random starting point
+params = list("theta" = rnorm(2))
+
+# Declare log likelihood
+logLik = function(params, dataset) {
+    # Declare distribution, assuming Sigma known and constant
+    distn = tf$contrib$distributions$MultivariateNormalDiag(params$theta, tf$constant(c(1, 1), dtype = tf$float32))
+    # Return sum of log pdf
+    return(tf$reduce_sum(distn$log_pdf(dataset$X)))
+}
+
+# Declare log prior
+logPrior = function(params) {
+    # Declare prior distribution
+    distn = tf$contrib$distributions$StudentT(df = 3)
+    # Apply log prior componentwise and return sum
+    return(tf$reduce_sum(distn$log_pdf(params$theta)))
+}
+```

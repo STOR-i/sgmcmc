@@ -102,7 +102,7 @@
  The function uses TensorFlow, so needs Tensorflow for python installed.</p>
     
 
-    <pre class="usage"><span class='fu'>sgldcv</span>(<span class='no'>logLik</span>, <span class='no'>logPrior</span>, <span class='no'>data</span>, <span class='no'>paramsRaw</span>, <span class='no'>stepsize</span>, <span class='no'>optStepsize</span>, <span class='no'>n</span>,
+    <pre class="usage"><span class='fu'>sgldcv</span>(<span class='no'>logLik</span>, <span class='no'>logPrior</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>, <span class='no'>optStepsize</span>, <span class='no'>n</span>,
   <span class='kw'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>, <span class='kw'>nItersOpt</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
@@ -110,19 +110,24 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>logLik</th>
-      <td><p>function which takes parameters and data 
+      <td><p>function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.</p></td>
     </tr>
     <tr>
       <th>logPrior</th>
-      <td><p>function which takes parameters and data 
+      <td><p>function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 The function should return a tensorflow tensor which defines the log prior of the model.</p></td>
     </tr>
     <tr>
-      <th>data</th>
+      <th>dataset</th>
       <td><p>list of numeric R arrays which defines the datasets for the problem.
+The names in the list should correspond to those referred to in the logLik and logPrior functions</p></td>
+    </tr>
+    <tr>
+      <th>params</th>
+      <td><p>list of numeric R arrays which define the starting point of each parameter.
 The names in the list should correspond to those referred to in the logLik and logPrior functions</p></td>
     </tr>
     <tr>
@@ -151,11 +156,6 @@ optional, default 10^4.</p></td>
       <th>verbose</th>
       <td><p>Boolean, whether to print algorithm progress or not, default TRUE.</p></td>
     </tr>
-    <tr>
-      <th>params</th>
-      <td><p>list of numeric R arrays which define the starting point of each parameter.
-The names in the list should correspond to those referred to in the logLik and logPrior functions</p></td>
-    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -163,12 +163,16 @@ The names in the list should correspond to those referred to in the logLik and l
     <p>List of arrays for each parameter containing the MCMC chain.
  Dimension of the form (nIters,paramDim1,paramDim2,...)</p>
     
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>@references Baker, J., Fearnhead, P., Fox, E. B., &amp; Nemeth, C. (2017) 
-     control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.
- @references Welling, M., &amp; Teh, Y. W. (2011). 
-     Bayesian learning via stochastic gradient Langevin dynamics. ICML (pp. 681-688).</p>
+    <ul>
+<li><p><a href='https://arxiv.org/pdf/1706.05439.pdf'>
+ Baker, J., Fearnhead, P., Fox, E. B., &amp; Nemeth, C. (2017).
+ Control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.</a></p></li>
+<li><p><a href='http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf'>
+ Welling, M., &amp; Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
+ ICML (pp. 681-688).</a></p></li>
+</ul>
     
 
   </div>
@@ -179,7 +183,7 @@ The names in the list should correspond to those referred to in the logLik and l
       
       <li><a href="#value">Value</a></li>
 
-      <li><a href="#details">Details</a></li>
+      <li><a href="#references">References</a></li>
           </ul>
 
   </div>
@@ -187,7 +191,7 @@ The names in the list should correspond to those referred to in the logLik and l
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jack Baker, Christopher Nemeth, Paul Fearnhead, Emily B. Fox.</p>
+  <p>Developed by <a href='http://lancs.ac.uk/~bakerj1/'>Jack Baker</a>, <a href='http://www.lancs.ac.uk/~nemeth/'>Christopher Nemeth</a>, <a href='http://www.maths.lancs.ac.uk/~fearnhea/'>Paul Fearnhead</a>, <a href='https://homes.cs.washington.edu/~ebfox/'>Emily B. Fox</a>, <a href='http://www.stor-i.lancs.ac.uk/'><img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18" /></a>.</p>
 </div>
 
 <div class="pkgdown">

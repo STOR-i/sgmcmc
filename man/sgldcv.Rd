@@ -4,19 +4,22 @@
 \alias{sgldcv}
 \title{Stochastic Gradient Langevin Dynamics with Control Variates}
 \usage{
-sgldcv(logLik, logPrior, data, paramsRaw, stepsize, optStepsize, n,
+sgldcv(logLik, logPrior, dataset, params, stepsize, optStepsize, n,
   nIters = 10^4, nItersOpt = 10^4, verbose = TRUE)
 }
 \arguments{
-\item{logLik}{function which takes parameters and data 
+\item{logLik}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.}
 
-\item{logPrior}{function which takes parameters and data 
+\item{logPrior}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 The function should return a tensorflow tensor which defines the log prior of the model.}
 
-\item{data}{list of numeric R arrays which defines the datasets for the problem.
+\item{dataset}{list of numeric R arrays which defines the datasets for the problem.
+The names in the list should correspond to those referred to in the logLik and logPrior functions}
+
+\item{params}{list of numeric R arrays which define the starting point of each parameter.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
 \item{stepsize}{list of stepsizes corresponding to the SGLD stepsizes for each parameter
@@ -32,9 +35,6 @@ The names in the list should correspond to those in params.}
 optional, default 10^4.}
 
 \item{verbose}{Boolean, whether to print algorithm progress or not, default TRUE.}
-
-\item{params}{list of numeric R arrays which define the starting point of each parameter.
-The names in the list should correspond to those referred to in the logLik and logPrior functions}
 }
 \value{
 List of arrays for each parameter containing the MCMC chain.
@@ -45,9 +45,12 @@ Simulates from the posterior defined by the functions logLik & logPrior using
  stochastic gradient Langevin Dynamics with an improved gradient estimate using Control Variates.
  The function uses TensorFlow, so needs Tensorflow for python installed.
 }
-\details{
-@references Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017) 
-     control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.
- @references Welling, M., & Teh, Y. W. (2011). 
-     Bayesian learning via stochastic gradient Langevin dynamics. ICML (pp. 681-688).
+\references{
+\itemize{
+ \item \href{https://arxiv.org/pdf/1706.05439.pdf}{
+ Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017).
+ Control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.}
+ \item \href{http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf}{
+ Welling, M., & Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
+ ICML (pp. 681-688).} }
 }

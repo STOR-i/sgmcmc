@@ -4,19 +4,19 @@
 \alias{sgld}
 \title{Stochastic Gradient Langevin Dynamics}
 \usage{
-sgld(logLik, logPrior, data, params, stepsize, n, nIters = 10^4,
+sgld(logLik, logPrior, dataset, params, stepsize, n, nIters = 10^4,
   verbose = TRUE)
 }
 \arguments{
-\item{logLik}{function which takes parameters and data 
+\item{logLik}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.}
 
-\item{logPrior}{function which takes parameters and data 
+\item{logPrior}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 The function should return a tensorflow tensor which defines the log prior of the model.}
 
-\item{data}{list of R arrays which defines the datasets for the problem.
+\item{dataset}{list of R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
 \item{params}{list of R arrays which define the starting point of each parameter.
@@ -40,7 +40,8 @@ Simulates from the posterior defined by the functions logLik & logPrior using
  stochastic gradient Langevin Dynamics. The function uses TensorFlow, so needs
  Tensorflow for python installed.
 }
-\details{
-@references Welling, M., & Teh, Y. W. (2011). 
-     Bayesian learning via stochastic gradient Langevin dynamics. ICML (pp. 681-688).
+\references{
+\itemize{\item \href{http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf}{
+ Welling, M., & Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
+ ICML (pp. 681-688).}}
 }

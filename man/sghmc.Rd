@@ -4,19 +4,19 @@
 \alias{sghmc}
 \title{Stochastic Gradient Hamiltonian Monte Carlo}
 \usage{
-sghmc(logLik, logPrior, data, params, eta, alpha, L, n, nIters = 10^4,
+sghmc(logLik, logPrior, dataset, params, eta, alpha, L, n, nIters = 10^4,
   verbose = TRUE)
 }
 \arguments{
-\item{logLik}{function which takes parameters and data 
+\item{logLik}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.}
 
-\item{logPrior}{function which takes parameters and data 
+\item{logPrior}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 The function should return a tensorflow tensor which defines the log prior of the model.}
 
-\item{data}{list of R arrays which defines the datasets for the problem.
+\item{dataset}{list of R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
 \item{params}{list of R arrays which define the starting point of each parameter.
@@ -45,9 +45,12 @@ List of arrays for each parameter containing the MCMC chain.
 \description{
 Simulates from the posterior defined by the functions logLik & logPrior using
  stochastic gradient Hamiltonian Monte Carlo. The function uses TensorFlow, so needs
- Tensorflow for python installed.
+ Tensorflow for python installed. Currently we use the approximation \eqn{\hat \beta = 0},
+ as used in the simulations by the original reference. 
+ This will be changed in future implementations.
 }
-\details{
-@references Chen, T., Fox, E. B., & Guestrin, C. (2014). 
-     stochastic gradient Hamiltonian Monte Carlo. In ICML (pp. 1683-1691).
+\references{
+\itemize{\item \href{https://arxiv.org/pdf/1402.4102v2.pdf}{
+ Chen, T., Fox, E. B., & Guestrin, C. (2014). Stochastic gradient Hamiltonian Monte Carlo. 
+ In ICML (pp. 1683-1691).}}
 }

@@ -110,8 +110,60 @@
       <tbody>
         <tr>
           <th colspan="2">
-            <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-            <p class="section-desc"></p>
+            <h2 id="section-sgmcmc" class="hasAnchor"><a href="#section-sgmcmc" class="anchor"></a>SGMCMC</h2>
+            <p class="section-desc"><p>Functions for running standard SGMCMC algorithms</p></p>
+          </th>
+        </tr>
+        <tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sgld.html">sgld</a></code> </p>
+          </td>
+          <td><p>Stochastic Gradient Langevin Dynamics</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sghmc.html">sghmc</a></code> </p>
+          </td>
+          <td><p>Stochastic Gradient Hamiltonian Monte Carlo</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sgnht.html">sgnht</a></code> </p>
+          </td>
+          <td><p>Stochastic Gradient Nose Hoover Thermostat</p></td>
+        </tr>
+      </tbody><tbody>
+        <tr>
+          <th colspan="2">
+            <h2 id="section-sgmcmc-with-control-variates" class="hasAnchor"><a href="#section-sgmcmc-with-control-variates" class="anchor"></a>SGMCMC with Control Variates</h2>
+            <p class="section-desc"><p>Functions for running SGMCMC algorithms with improved efficiency using control variates</p></p>
+          </th>
+        </tr>
+        <tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sgldcv.html">sgldcv</a></code> </p>
+          </td>
+          <td><p>Stochastic Gradient Langevin Dynamics with Control Variates</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sghmccv.html">sghmccv</a></code> </p>
+          </td>
+          <td><p>Stochastic Gradient Hamiltonian Monte Carlo with Control Variates</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sgnhtcv.html">sgnhtcv</a></code> </p>
+          </td>
+          <td><p>Stochastic Gradient Nose Hoover Thermostat with Control Variates</p></td>
+        </tr>
+      </tbody><tbody>
+        <tr>
+          <th colspan="2">
+            <h2 id="section-aliases-for-tensorflow-distributions" class="hasAnchor"><a href="#section-aliases-for-tensorflow-distributions" class="anchor"></a>Aliases for TensorFlow distributions</h2>
+            <p class="section-desc"><p>Aliases for TensorFlow distribution functions</p></p>
           </th>
         </tr>
         <tr>
@@ -162,12 +214,6 @@
             <p><code><a href="Chi2WithAbsDf.html">Chi2WithAbsDf</a></code> </p>
           </td>
           <td><p>Tensorflow distribution Chi2WithAbsDf</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="covertype.html">covertype</a></code> </p>
-          </td>
-          <td><p>Forest Covertype data</p></td>
         </tr><tr>
           <!--  -->
           <td>
@@ -309,48 +355,6 @@
         </tr><tr>
           <!--  -->
           <td>
-            <p><code><a href="sghmccv.html">sghmccv</a></code> </p>
-          </td>
-          <td><p>Stochastic Gradient Hamiltonian Monte Carlo with Control Variates</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sghmc.html">sghmc</a></code> </p>
-          </td>
-          <td><p>Stochastic Gradient Hamiltonian Monte Carlo</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sgldcv.html">sgldcv</a></code> </p>
-          </td>
-          <td><p>Stochastic Gradient Langevin Dynamics with Control Variates</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sgld.html">sgld</a></code> </p>
-          </td>
-          <td><p>Stochastic Gradient Langevin Dynamics</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p></p>
-          </td>
-          <td><p>sgmcmc: A package for stochastic gradient MCMC</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sgnhtcv.html">sgnhtcv</a></code> </p>
-          </td>
-          <td><p>Stochastic Gradient Nose Hoover Thermostat with Control Variates</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sgnht.html">sgnht</a></code> </p>
-          </td>
-          <td><p>Stochastic Gradient Nose Hoover Thermostat</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
             <p><code><a href="StudentT.html">StudentT</a></code> </p>
           </td>
           <td><p>Tensorflow distribution StudentT</p></td>
@@ -385,6 +389,20 @@
           </td>
           <td><p>Tensorflow distribution WishartFull</p></td>
         </tr>
+      </tbody><tbody>
+        <tr>
+          <th colspan="2">
+            <h2 id="section-datasets" class="hasAnchor"><a href="#section-datasets" class="anchor"></a>Datasets</h2>
+            <p class="section-desc"><p>Datasets used in examples</p></p>
+          </th>
+        </tr>
+        <tr>
+          <!--  -->
+          <td>
+            <p><code><a href="covertype.html">covertype</a></code> </p>
+          </td>
+          <td><p>Forest Covertype data</p></td>
+        </tr>
       </tbody>
       </table>
     </div>
@@ -393,14 +411,17 @@
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#section-all-functions">All functions</a></li>
+      <li><a href="#section-sgmcmc">SGMCMC</a></li>
+      <li><a href="#section-sgmcmc-with-control-variates">SGMCMC with Control Variates</a></li>
+      <li><a href="#section-aliases-for-tensorflow-distributions">Aliases for TensorFlow distributions</a></li>
+      <li><a href="#section-datasets">Datasets</a></li>
     </ul>
   </div>
 </div>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jack Baker, Christopher Nemeth, Paul Fearnhead, Emily B. Fox.</p>
+  <p>Developed by <a href='http://lancs.ac.uk/~bakerj1/'>Jack Baker</a>, <a href='http://www.lancs.ac.uk/~nemeth/'>Christopher Nemeth</a>, <a href='http://www.maths.lancs.ac.uk/~fearnhea/'>Paul Fearnhead</a>, <a href='https://homes.cs.washington.edu/~ebfox/'>Emily B. Fox</a>, <a href='http://www.stor-i.lancs.ac.uk/'><img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18" /></a>.</p>
 </div>
 
 <div class="pkgdown">

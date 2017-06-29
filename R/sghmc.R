@@ -2,18 +2,21 @@
 #' 
 #' Simulates from the posterior defined by the functions logLik & logPrior using
 #'  stochastic gradient Hamiltonian Monte Carlo. The function uses TensorFlow, so needs
-#'  Tensorflow for python installed.
+#'  Tensorflow for python installed. Currently we use the approximation \eqn{\hat \beta = 0},
+#'  as used in the simulations by the original reference. 
+#'  This will be changed in future implementations.
 #'
-#'  @references Chen, T., Fox, E. B., & Guestrin, C. (2014). 
-#'      stochastic gradient Hamiltonian Monte Carlo. In ICML (pp. 1683-1691).
+#' @references \itemize{\item \href{https://arxiv.org/pdf/1402.4102v2.pdf}{
+#'  Chen, T., Fox, E. B., & Guestrin, C. (2014). Stochastic gradient Hamiltonian Monte Carlo. 
+#'  In ICML (pp. 1683-1691).}}
 #'
-#' @param logLik function which takes parameters and data 
+#' @param logLik function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  It should return a tensorflow expression which defines the log likelihood of the model.
-#' @param logPrior function which takes parameters and data 
+#' @param logPrior function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  The function should return a tensorflow tensor which defines the log prior of the model.
-#' @param data list of R arrays which defines the datasets for the problem.
+#' @param dataset list of R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param params list of R arrays which define the starting point of each parameter.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
@@ -33,10 +36,10 @@
 #'
 #' @export
 #'
-sghmc = function( logLik, logPrior, data, params, eta, alpha, L, n, 
-        nIters = 10^4, verbose = TRUE ) {
+sghmc = function( logLik, logPrior, dataset, params, eta, alpha, L, n, nIters = 10^4, 
+        verbose = TRUE ) {
     # Setup SGHMC object
-    sgmcmc = genSGHMC( logLik, logPrior, data, params, eta, alpha, L, n, NULL )
+    sgmcmc = genSGHMC( logLik, logPrior, dataset, params, eta, alpha, L, n, NULL )
     options = list( "nIters" = nIters, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sgmcmc, params, options )
@@ -47,20 +50,26 @@ sghmc = function( logLik, logPrior, data, params, eta, alpha, L, n,
 #' 
 #' Simulates from the posterior defined by the functions logLik & logPrior using 
 #'  stochastic gradient Hamiltonian Monte Carlo with an improved gradient estimate 
-#'  that is calculated using control variates.
+#'  that is calculated using control variates. 
+#'  Currently we use the approximation \eqn{\hat \beta = 0}, 
+#'  as used in the simulations by the original reference. 
+#'  This will be changed in future implementations.
 #'
-#'  @references Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017) 
-#'      control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.
-#'  @references Chen, T., Fox, E. B., & Guestrin, C. (2014). 
-#'      stochastic gradient Hamiltonian Monte Carlo. In ICML (pp. 1683-1691).
+#' @references \itemize{
+#'  \item \href{https://arxiv.org/pdf/1706.05439.pdf}{
+#'  Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017).
+#'  Control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.}
+#'  \item \href{https://arxiv.org/pdf/1402.4102v2.pdf}{
+#'  Chen, T., Fox, E. B., & Guestrin, C. (2014). Stochastic gradient Hamiltonian Monte Carlo. 
+#'  In ICML (pp. 1683-1691).}}
 #'
-#' @param logLik function which takes parameters and data 
+#' @param logLik function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  It should return a tensorflow expression which defines the log likelihood of the model.
-#' @param logPrior function which takes parameters and data 
+#' @param logPrior function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  The function should return a tensorflow tensor which defines the log prior of the model.
-#' @param data list of R arrays which defines the datasets for the problem.
+#' @param dataset list of R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param params list of R arrays which define the starting point of each parameter.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
@@ -83,10 +92,9 @@ sghmc = function( logLik, logPrior, data, params, eta, alpha, L, n,
 #'
 #' @export
 #'
-sghmccv = function( logLik, logPrior, data, params, eta, alpha, L, optStepsize, 
-            n, nIters = 10^4, nItersOpt = 10^4, verbose = TRUE ) {
+sghmccv = function( logLik, logPrior, dataset, params, eta, alpha, L, optStepsize, n, nIters = 10^4, nItersOpt = 10^4, verbose = TRUE ) {
     # Setup SGHMCCV object
-    sgmcmcCV = genSGHMCCV( logLik, logPrior, data, params, eta, alpha, L, optStepsize, n, NULL )
+    sgmcmcCV = genSGHMCCV( logLik, logPrior, dataset, params, eta, alpha, L, optStepsize, n, NULL )
     options = list( "nIters" = nIters, "nItersOpt" = nItersOpt, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sgmcmcCV, params, options )
@@ -97,16 +105,16 @@ sghmccv = function( logLik, logPrior, data, params, eta, alpha, L, optStepsize,
 # 
 # Creates a stochastic gradient Langevin Dynamics (SGHMC) object which can be passed to mcmcStep
 #  to simulate from 1 step of SGHMC for the posterior defined by logLik and logPrior.
-genSGHMC = function( logLik, logPrior, data, params, eta, alpha, L, n, gibbsParams ) {
+genSGHMC = function( logLik, logPrior, dataset, params, eta, alpha, L, n, gibbsParams ) {
     # Get dataset size
-    N = getDatasetSize( data )
-    # Convert params and data to tensorflow variables and placeholders
+    N = getDatasetSize( dataset )
+    # Convert params and dataset to tensorflow variables and placeholders
     paramstf = setupParams( params )
-    placeholders = setupPlaceholders( data, n )
+    placeholders = setupPlaceholders( dataset, n )
     # Declare estimated log posterior tensor using declared variables and placeholders
     estLogPost = setupEstLogPost( logLik, logPrior, paramstf, placeholders, N, n, gibbsParams )
     # Declare SGLD dynamics
-    sghmc = list( "data" = data, "n" = n, "placeholders" = placeholders, 
+    sghmc = list( "data" = dataset, "n" = n, "placeholders" = placeholders, 
             "eta" = eta, "alpha" = alpha, "L" = L, "params" = paramstf, "estLogPost" = estLogPost )
     class( sghmc ) = c( "sghmc", "sgmcmc" )
     sghmc$dynamics = declareDynamics( sghmc )
@@ -118,15 +126,15 @@ genSGHMC = function( logLik, logPrior, data, params, eta, alpha, L, n, gibbsPara
 # Creates a stochastic gradient Hamiltonian Monte Carlo with Control Variates (SGHMCCV) object 
 #  which can be passed to optUpdate and mcmcStep functions to simulate from SGHMCCV
 #  for the posterior defined by logLik and logPrior.
-genSGHMCCV = function( logLik, logPrior, data, params, eta, alpha, L, optStepsize, n, gibbsParams ) {
+genSGHMCCV = function( logLik, logPrior, dataset, params, eta, alpha, L, optStepsize, n, gibbsParams ) {
     # Get dataset size
-    N = getDatasetSize( data )
+    N = getDatasetSize( dataset )
     # Convert params and data to tensorflow variables and placeholders
     paramstf = setupParams( params )
-    placeholders = setupPlaceholders( data, n )
+    placeholders = setupPlaceholders( dataset, n )
     # Declare tensorflow variables for initial optimizer
     paramsOpt = setupParams( params )
-    placeholdersFull = setupFullPlaceholders( data )
+    placeholdersFull = setupFullPlaceholders( dataset )
     # Declare container for full gradients at mode
     logPostOptGrad = setupFullGradients( params )
     # Declare estimated log posterior tensor using declared variables and placeholders
@@ -139,7 +147,7 @@ genSGHMCCV = function( logLik, logPrior, data, params, eta, alpha, L, optStepsiz
     optimizer = declareOptimizer( estLogPostOpt, fullLogPostOpt, paramsOpt, 
             paramstf, logPostOptGrad, optStepsize )
     # Create SGHMCCV object
-    sghmcCV = list( "optimizer" = optimizer, "data" = data, "n" = n, "eta" = eta, "alpha" = alpha, 
+    sghmcCV = list( "optimizer" = optimizer, "data" = dataset, "n" = n, "eta" = eta, "alpha" = alpha, 
             "L" = L, "placeholders" = placeholders, "placeholdersFull" = placeholdersFull, 
             "params" = paramstf, "paramsOpt" = paramsOpt, "estLogPost" = estLogPost, 
             "estLogPostOpt" = estLogPostOpt, "logPostOptGrad" = logPostOptGrad, 

@@ -14,7 +14,7 @@ vignette: >
 In this example we use the package to infer the mean of a 2d Gaussian using [stochastic gradient Langevin dynamics](http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $x_i | \theta \sim N( \theta, I_2 )$, and we want to infer $\theta$.
 
 First let's simulate the data with the following code, we set $N$ to be $10^4$
-```{r}
+```{r message=FALSE}
 library(sgmcmc)
 library(MASS)
 # Declare number of observations
@@ -38,18 +38,18 @@ logLik = function( params, dataset ) {
     # Declare Sigma as a Tensorflow object
     Sigma = tf$constant( c(1, 1), dtype = tf$float32 )
     # Declare distribution of each observation
-    baseDist = MultivariateNormalDiag( params$theta, Sigma )
+    baseDist = tf$contrib$distributions$MultivariateNormalDiag( params$theta, Sigma )
     # Declare log likelihood function and return
     logLik = tf$reduce_sum( baseDist$log_pdf( dataset$X ) )
     return( logLik )
 }
 ```
-So this function basically states that our likelihood is $\sum_{i=1}^N \log \mathcal N( x_i | \theta, I_2 )$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. `R` does not play nicely with the tensorflow type system, so make sure you set all your constants in the `logLik` and `logPrior` functions to `tf$float32`, as we have done. Otherwise you will encounter an error. Notice that we simply used `MultivariateNormalFull` rather than the less wieldy `tf$contrib$distributions$MultivariateNormalFull`. This is because we have built aliases for all the distributions in `tf$contrib$distributions`. For a full list, see the package documentation.
+So this function basically states that our likelihood is $\sum_{i=1}^N \log \mathcal N( x_i | \theta, I_2 )$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. `R` does not play nicely with the tensorflow type system, so make sure you set all your constants in the `logLik` and `logPrior` functions to `tf$float32`, as we have done. Otherwise you will encounter an error.
 
 Next we want to define our log prior, which we assume is $\log p( \theta_j ) = \mathcal N(\theta_j | 0,10)$, for each dimension $j$ of $\theta$. Similar to `logLik`, `logPrior` is defined as a function with input `params`. In our case the definition is
 ```{r}
 logPrior = function( params ) {
-    baseDist = Normal( 0, 10 )
+    baseDist = tf$contrib$distributions$Normal( 0, 10 )
     logPrior = tf$reduce_sum( baseDist$log_pdf( params$theta ) )
     return( logPrior )
 }
@@ -77,4 +77,4 @@ ggplot( thetaOut, aes( x = V1, y = V2 ) ) +
     stat_density2d( size = 1.5 )
 ```
 
-There are lots of other sgmcmc algorithms implemented that can be used by simply changing the tuning parameters slightly including `sghmc` and `sgnht`; as well as their [control variate counterparts](https://arxiv.org/pdf/1706.05439.pdf) for improved efficiency.
+There are lots of other sgmcmc algorithms implemented that can be used by simply changing the tuning parameters slightly including `sghmc` and `sgnht`; as well as their [control variate counterparts](https://arxiv.org/pdf/1705.05439.pdf) for improved efficiency.

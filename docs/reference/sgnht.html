@@ -100,10 +100,11 @@
     <p>Simulates from the posterior defined by the functions logLik &amp; logPrior using
  stochastic gradient Nose Hoover Thermostat.
  When used for parameters that are higher dimensional then vectors, the thermostat
- step is approximated by a tensor contraction.</p>
+ step is approximated by a tensor contraction. Currently the implementation will only
+ handle vector or scalar parameters, this will be updated in future implementations.</p>
     
 
-    <pre class="usage"><span class='fu'>sgnht</span>(<span class='no'>logLik</span>, <span class='no'>logPrior</span>, <span class='no'>data</span>, <span class='no'>params</span>, <span class='no'>eta</span>, <span class='no'>a</span>, <span class='no'>n</span>, <span class='kw'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>,
+    <pre class="usage"><span class='fu'>sgnht</span>(<span class='no'>logLik</span>, <span class='no'>logPrior</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>eta</span>, <span class='no'>a</span>, <span class='no'>n</span>, <span class='kw'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>,
   <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
@@ -111,18 +112,18 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>logLik</th>
-      <td><p>function which takes parameters and data 
+      <td><p>function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.</p></td>
     </tr>
     <tr>
       <th>logPrior</th>
-      <td><p>function which takes parameters and data 
+      <td><p>function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 The function should return a tensorflow tensor which defines the log prior of the model.</p></td>
     </tr>
     <tr>
-      <th>data</th>
+      <th>dataset</th>
       <td><p>list of R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions</p></td>
     </tr>
@@ -162,10 +163,14 @@ for each parameter in params, the names should correspond to those in params.</p
     <p>List of arrays for each parameter containing the MCMC chain.
  Dimension of the form (nIters,paramDim1,paramDim2,...)</p>
     
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>@references Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., &amp; Neven, H. (2014). 
-     Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).</p>
+    <ul>
+<li><p><a href='
+ http://papers.nips.cc/paper/5592-bayesian-sampling-using-stochastic-gradient-thermostats.pdf'>
+ Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., &amp; Neven, H. (2014). 
+ Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).</a></p></li>
+</ul>
     
 
   </div>
@@ -176,7 +181,7 @@ for each parameter in params, the names should correspond to those in params.</p
       
       <li><a href="#value">Value</a></li>
 
-      <li><a href="#details">Details</a></li>
+      <li><a href="#references">References</a></li>
           </ul>
 
   </div>
@@ -184,7 +189,7 @@ for each parameter in params, the names should correspond to those in params.</p
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jack Baker, Christopher Nemeth, Paul Fearnhead, Emily B. Fox.</p>
+  <p>Developed by <a href='http://lancs.ac.uk/~bakerj1/'>Jack Baker</a>, <a href='http://www.lancs.ac.uk/~nemeth/'>Christopher Nemeth</a>, <a href='http://www.maths.lancs.ac.uk/~fearnhea/'>Paul Fearnhead</a>, <a href='https://homes.cs.washington.edu/~ebfox/'>Emily B. Fox</a>, <a href='http://www.stor-i.lancs.ac.uk/'><img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18" /></a>.</p>
 </div>
 
 <div class="pkgdown">
