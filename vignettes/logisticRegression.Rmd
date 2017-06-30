@@ -65,8 +65,8 @@ n = 500
 ```
 
 Now we can run our SGLD-CV algorithm using the function `sgldcv` from the `sgmcmc` package, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function.
-```{r}
-output = sgldcv(logLik, logPrior, dataset, params, stepsizesMCMC, stepsizesOptimization, n, nIters = 1.1e4, verbose = FALSE)
+```{r message=FALSE}
+output = sgldcv(logLik, logPrior, dataset, params, stepsizesMCMC, stepsizesOptimization, n, nIters = 1.1e4 )
 ```
 
 To check the algorithm converged, we'll plot the average log predictive density of the data from our test set every 10 iterations. Let $$\hat \pi_i^{(j)} := \frac{1}{1 + \exp\left[-\beta_0^{(j)} - \mathbb x_i \beta^{(j)}\right]},$$

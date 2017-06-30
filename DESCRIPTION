@@ -23,5 +23,5 @@ Suggests:
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
-URL: https://stor-i.github.io/sgmcmc/, https://github.com/STOR-i/sgmcmc
+URL: https://github.com/STOR-i/sgmcmc
 BugReports: https://github.com/STOR-i/sgmcmc/issues

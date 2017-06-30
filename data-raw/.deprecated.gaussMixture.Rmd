@@ -44,12 +44,12 @@ Now we'll define the functions `logLik` and `logPrior`. It should now become cle
 ```{r}
 logLik = function( params, dataset ) {
     # Declare Sigma as tensorflow constant (assumed known)
-    Sigma = tf$constant( diag(2), dtype = tf$float32 )
+    Sigma = tf$constant( c(1, 1), dtype = tf$float32 )
     # Declare distribution of each component
-    component1 = tf$contrib$distributions$MultivariateNormalFull( params$theta1, Sigma )
-    component2 = tf$contrib$distributions$MultivariateNormalFull( params$theta2, Sigma )
+    component1 = tf$contrib$distributions$MultivariateNormalDiag( params$theta1, Sigma )
+    component2 = tf$contrib$distributions$MultivariateNormalDiag( params$theta2, Sigma )
     # Declare log likelihood
-    logLik = tf$reduce_sum( tf$log( 0.7 * component1$pdf(dataset$X) + 0.3 * component2$pdf(dataset$X) ) )
+    logLik = tf$reduce_sum( tf$log( 0.7 * component1$prob(dataset$X) + 0.3 * component2$prob(dataset$X) ) )
     return( logLik )
 }
 ```
@@ -62,9 +62,9 @@ logPrior = function( params ) {
     mu0 = tf$constant( c( 0, 0 ), dtype = tf$float32 )
     Sigma0 = tf$constant( 10 * diag(2), dtype = tf$float32 )
     # Declare prior distribution
-    priorDistn = tf$contrib$distributions$MultivariateNormalFull( mu0, Sigma0 )
+    priorDistn = tf$contrib$distributions$MultivariateNormalFullCovariance( mu0, Sigma0 )
     # Declare log prior density and return
-    logPrior = priorDistn$log_pdf( params$theta1 ) + priorDistn$log_pdf( params$theta2 )
+    logPrior = priorDistn$log_prob( params$theta1 ) + priorDistn$log_prob( params$theta2 )
     return( logPrior )
 }
 ```
@@ -79,8 +79,8 @@ minibatchSize = 200
 ```
 
 Now we can run our SGHMC algorithm using the `sgmcmc` function `sghmc`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function.
-```{r}
-chains = sghmc( logLik, logPrior, dataset, params, eta, alpha, L, minibatchSize, nIters = 10^4, verbose = FALSE )
+```{r message=FALSE}
+chains = sghmc( logLik, logPrior, dataset, params, eta, alpha, L, minibatchSize, nIters = 10^4 )
 ```
 
 Finally we'll plot the results after removing burn-in

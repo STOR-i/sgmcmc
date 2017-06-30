@@ -48,9 +48,6 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/gaussMixture.html">Worked Example: Simulate from a Gaussian Mixture</a>
-    </li>
-    <li>
       <a href="../articles/logisticRegression.html">Worked Example: Logistic Regression</a>
     </li>
     <li>
@@ -120,7 +117,7 @@ logLik =<span class="st"> </span>function(params, dataset) {
     <span class="co"># Declare distribution, assuming Sigma known and constant</span>
     distn =<span class="st"> </span>tf$contrib$distributions$<span class="kw">MultivariateNormalDiag</span>(params$theta, tf$<span class="kw">constant</span>(<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="dt">dtype =</span> tf$float32))
     <span class="co"># Return sum of log pdf</span>
-    <span class="kw">return</span>(tf$<span class="kw">reduce_sum</span>(distn$<span class="kw">log_pdf</span>(dataset$X)))
+    <span class="kw">return</span>(tf$<span class="kw">reduce_sum</span>(distn$<span class="kw">log_prob</span>(dataset$X)))
 }
 
 <span class="co"># Declare log prior</span>
@@ -128,7 +125,7 @@ logPrior =<span class="st"> </span>function(params) {
     <span class="co"># Declare prior distribution</span>
     distn =<span class="st"> </span>tf$contrib$distributions$<span class="kw">StudentT</span>(<span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">1</span>)
     <span class="co"># Apply log prior componentwise and return sum</span>
-    <span class="kw">return</span>(tf$<span class="kw">reduce_sum</span>(distn$<span class="kw">log_pdf</span>(params$theta)))
+    <span class="kw">return</span>(tf$<span class="kw">reduce_sum</span>(distn$<span class="kw">log_prob</span>(params$theta)))
 }</code></pre></div>
 </div>
 <div id="specifying-the-tuning-parameters" class="section level3">

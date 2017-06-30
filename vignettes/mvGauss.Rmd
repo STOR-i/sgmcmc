@@ -37,7 +37,7 @@ logLik = function( params, dataset ) {
     # Declare distribution of each observation
     baseDist = tf$contrib$distributions$MultivariateNormalDiag( params$theta, Sigma )
     # Declare log likelihood function and return
-    logLik = tf$reduce_sum( baseDist$log_pdf( dataset$X ) )
+    logLik = tf$reduce_sum( baseDist$log_prob( dataset$X ) )
     return( logLik )
 }
 ```
@@ -47,7 +47,7 @@ Next we want to define our log prior, which we assume is $\log p( \theta_j ) = \
 ```{r}
 logPrior = function( params ) {
     baseDist = tf$contrib$distributions$Normal( 0, 10 )
-    logPrior = tf$reduce_sum( baseDist$log_pdf( params$theta ) )
+    logPrior = tf$reduce_sum( baseDist$log_prob( params$theta ) )
     return( logPrior )
 }
 ```
@@ -61,8 +61,8 @@ n = 100
 The stepsize parameters may require a bit of tuning before you get good results.
 
 Now we can run our SGLD algorithm using the `sgmcmc` function `sgld`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function
-```{r}
-chains = sgld( logLik, logPrior, dataset, params, stepsize, n, nIters = 10^4, verbose = FALSE )
+```{r message=FALSE}
+chains = sgld( logLik, logPrior, dataset, params, stepsize, n, nIters = 10^4 )
 ```
 
 Finally we'll plot the results after removing burn-in
