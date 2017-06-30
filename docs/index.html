@@ -85,8 +85,15 @@
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
-<p>To start with, tensorflow for R needs to be properly installed, this requires dependencies that can’t be handled by the standard <code>install.packages</code> framework, so follow the tensorflow for R library <a href="https://tensorflow.rstudio.com/installation.html">installation instructions</a>.</p>
-<p>To install the <code>sgmcmc</code> library, ensure <code>devtools</code> are installed and run <code><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">devtools::install_github("STOR-i/sgmcmc")</a></code>.</p>
+<p><code>sgmcmc</code> requires <a href="https://cran.r-project.org/web/packages/devtools/index.html">TensorFlow for R</a> to be installed so has a few steps:</p>
+<ul>
+<li>Install tensorflow for python, instructions for this can be found <a href="https://www.tensorflow.org/install/">here</a>
+</li>
+<li>Make sure <a href="https://cran.r-project.org/web/packages/devtools/index.html">devtools</a> are installed, this can be installed simply by running <code>install.packages("devtools")</code>
+</li>
+<li>Now run <code><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">devtools::install_github("STOR-i/sgmcmc")</a></code>.</li>
+</ul>
+<p>The TensorFlow API changes a lot, so it’s best to make sure your TensorFlow for python installation is up to date.</p>
 </div>
 <div id="documentation" class="section level2">
 <h2 class="hasAnchor">
@@ -99,6 +106,12 @@
 <li><a href="https://stor-i.github.io/sgmcmc///articles/logisticRegression.html">Logistic Regression</a></li>
 </ul>
 <p>Finally full details of the API can be found <a href="https://stor-i.github.io/sgmcmc///reference/index.html">here</a></p>
+<p>For the source code, and bug reporting, see the <a href="https://github.com/STOR-i/sgmcmc">Github page</a></p>
+</div>
+<div id="issues-running-examples" class="section level2">
+<h2 class="hasAnchor">
+<a href="#issues-running-examples" class="anchor"></a>Issues Running Examples</h2>
+<p>If you are having issues running the examples, as a first port of call please make sure your TensorFlow installation is the most up to date version. A lot of issues are simply because the TensorFlow API has changed. If you’re still having issues, please file a <a href="https://github.com/STOR-i/sgmcmc/issues">bug report</a>.</p>
 </div>
 </div>
   </div>

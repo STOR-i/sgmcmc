@@ -6,9 +6,12 @@ The package is built on top of the [tensorflow library for R](https://tensorflow
 
 ## Installation
 
-To start with, tensorflow for R needs to be properly installed, this requires dependencies that can't be handled by the standard `install.packages` framework, so follow the tensorflow for R library [installation instructions](https://tensorflow.rstudio.com/installation.html).
+`sgmcmc` requires [TensorFlow for R](https://cran.r-project.org/web/packages/devtools/index.html) to be installed so has a few steps:
+- Install tensorflow for python, instructions for this can be found [here](https://www.tensorflow.org/install/)
+- Make sure [devtools](https://cran.r-project.org/web/packages/devtools/index.html) are installed, this can be installed simply by running `install.packages("devtools")` 
+- Now run `devtools::install_github("STOR-i/sgmcmc")`.
 
-To install the `sgmcmc` library, ensure `devtools` are installed and run `devtools::install_github("STOR-i/sgmcmc")`.
+The TensorFlow API changes a lot, so it's best to make sure your TensorFlow for python installation is up to date.
 
 ## Documentation
 
@@ -20,3 +23,9 @@ There's also worked examples for the following models (these will be extended as
  - [Logistic Regression](https://stor-i.github.io/sgmcmc///articles/logisticRegression.html)
 
 Finally full details of the API can be found [here](https://stor-i.github.io/sgmcmc///reference/index.html)
+
+For the source code, and bug reporting, see the [Github page](https://github.com/STOR-i/sgmcmc)
+
+## Issues Running Examples
+
+If you are having issues running the examples, as a first port of call please make sure your TensorFlow installation is the most up to date version. A lot of issues are simply because the TensorFlow API has changed. If you're still having issues, please file a [bug report](https://github.com/STOR-i/sgmcmc/issues).
