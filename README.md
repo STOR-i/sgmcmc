@@ -16,6 +16,7 @@ It's recommended you start [here](https://stor-i.github.io/sgmcmc///articles/sgm
 
 There's also worked examples for the following models (these will be extended as the package matures)
  - [Multivariate Gaussian](https://stor-i.github.io/sgmcmc///articles/mvGauss.html)
+ - [Gaussian Mixture](https://stor-i.github.io/sgmcmc///articles/gaussMixture.html)
  - [Logistic Regression](https://stor-i.github.io/sgmcmc///articles/logisticRegression.html)
 
 Finally full details of the API can be found [here](https://stor-i.github.io/sgmcmc///reference/index.html)

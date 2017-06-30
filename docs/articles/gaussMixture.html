@@ -86,7 +86,7 @@
     
     
 <div class="contents">
-<p>In this example we use the package to infer the modes of a bimodal, 2d Gaussian using <a href="https://arxiv.org/pdf/1402.4102v2.pdf">stochastic gradient Hamiltonian Monte Carlo</a>. So we assume we have iid data <span class="math inline">\(x_1, \dots, x_N\)</span> with <span class="math inline">\(x_i | \theta \sim 0.7 N( \theta_1, I_2 ) + 0.3 N( \theta_2, I_2 )\)</span>, and we want to infer <span class="math inline">\(\theta_1\)</span> and <span class="math inline">\(\theta_2\)</span>.</p>
+<p>In this example we use the package to infer the modes of a bimodal, 2d Gaussian using <a href="https://arxiv.org/pdf/1402.4102v2.pdf">stochastic gradient Hamiltonian Monte Carlo</a>. So we assume we have iid data <span class="math inline">\(x_1, \dots, x_N\)</span> with <span class="math inline">\(x_i | \theta \sim 0.5 N( \theta_1, I_2 ) + 0.5 N( \theta_2, I_2 )\)</span>, and we want to infer <span class="math inline">\(\theta_1\)</span> and <span class="math inline">\(\theta_2\)</span>.</p>
 <p>First let’s simulate the data with the following code, we set <span class="math inline">\(N\)</span> to be <span class="math inline">\(10^4\)</span></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sgmcmc)
 <span class="kw">library</span>(MASS)
@@ -96,7 +96,7 @@ N =<span class="st"> </span><span class="dv">10</span>^<span class="dv">4</span>
 theta1 =<span class="st"> </span><span class="kw">c</span>( <span class="dv">0</span>, <span class="dv">0</span> )
 theta2 =<span class="st"> </span><span class="kw">c</span>( <span class="fl">0.1</span>, <span class="fl">0.1</span> )
 <span class="co"># Allocate observations to each component</span>
-z =<span class="st"> </span><span class="kw">sample</span>( <span class="dv">2</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>, <span class="dt">prob =</span> <span class="kw">c</span>( <span class="fl">0.7</span>, <span class="fl">0.3</span> ) )
+z =<span class="st"> </span><span class="kw">sample</span>( <span class="dv">2</span>, N, <span class="dt">replace =</span> <span class="ot">TRUE</span>, <span class="dt">prob =</span> <span class="kw">c</span>( <span class="fl">0.5</span>, <span class="fl">0.5</span> ) )
 <span class="co"># Predeclare data matrix</span>
 X =<span class="st"> </span><span class="kw">matrix</span>( <span class="kw">rep</span>( <span class="ot">NA</span>, <span class="dv">2</span>*N ), <span class="dt">ncol =</span> <span class="dv">2</span> )
 <span class="co"># Simulate each observation depending on the component its been allocated</span>
@@ -109,46 +109,151 @@ for ( i in <span class="dv">1</span>:N ) {
 }
 dataset =<span class="st"> </span><span class="kw">list</span>(<span class="st">"X"</span> =<span class="st"> </span>X)</code></pre></div>
 <p>In the last line we defined the dataset as it will be input to the relevant <code>sgmcmc</code> function. A lot of the inputs to functions in <code>sgmcmc</code> are defined as lists. This improves flexibility by enabling models to be specified with multiple parameters, datasets and allows separate tuning constants to be set for each parameter. We assume that observations are always accessed on the first dimension of each object, i.e. the point <span class="math inline">\(x_i\)</span> is located at <code>X[i,]</code> rather than <code>X[,i]</code>. Similarly the observation <span class="math inline">\(i\)</span> from a 3d object <code>Y</code> would be located at <code>Y[i,,]</code>.</p>
-<p>The parameters are declared very similarly, but this time the value associated with each entry is its starting point. We have two parameters <code>theta1</code> and <code>theta2</code>, which we’ll just start from the true values</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">params =<span class="st"> </span><span class="kw">list</span>( <span class="st">"theta1"</span> =<span class="st"> </span><span class="kw">c</span>( <span class="dv">0</span>, <span class="dv">0</span> ), <span class="st">"theta2"</span> =<span class="st"> </span><span class="kw">c</span>( <span class="dv">0</span>, <span class="dv">0</span> ) )</code></pre></div>
+<p>The parameters are declared very similarly, but this time the value associated with each entry is its starting point. We have two parameters <code>theta1</code> and <code>theta2</code>, which we’ll just start from the true values for the sake of demonstration purposes</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">params =<span class="st"> </span><span class="kw">list</span>( <span class="st">"theta1"</span> =<span class="st"> </span><span class="kw">c</span>( <span class="dv">0</span>, <span class="dv">0</span> ), <span class="st">"theta2"</span> =<span class="st"> </span><span class="kw">c</span>( <span class="fl">0.1</span>, <span class="fl">0.1</span> ) )</code></pre></div>
 <p>Now we’ll define the functions <code>logLik</code> and <code>logPrior</code>. It should now become clear why the list names come in handy. The function <code>logLik</code> should take two parameters as input: <code>params</code> and <code>dataset</code>. These parameters will be lists with the same names as those you defined for <code>params</code> and <code>dataset</code> earlier. There is one difference though, the objects in the lists will have automatically been converted to <code>TensorFlow</code> objects for you. The <code>params</code> list will contain <code>TensorFlow</code> tensor variables; the <code>dataset</code> list will contain <code>TensorFlow</code> placeholders. The <code>logLik</code> function should take these lists as input and return the value of the log likelihood as a tensor at point <code>params</code> given data <code>dataset</code>. The function should do this using <code>TensorFlow</code> operations, as this allows the gradient to be automatically calculated; it also allows the wide range of distribution objects as well as matrix operations that <code>TensorFlow</code> provides to be taken advantage of. A tutorial of <code>TensorFlow</code> for <code>R</code> is beyond the scope of this article, for more details we refer the reader to the website of <a href="https://tensorflow.rstudio.com/">TensorFlow for R</a>. With this in place we can define the <code>logLik</code> function as follows</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">logLik =<span class="st"> </span>function( params, dataset ) {
     <span class="co"># Declare Sigma as tensorflow constant (assumed known)</span>
-    Sigma =<span class="st"> </span>tf$<span class="kw">constant</span>( <span class="kw">diag</span>(<span class="dv">2</span>), <span class="dt">dtype =</span> tf$float32 )
+    Sigma =<span class="st"> </span>tf$<span class="kw">constant</span>( <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="dt">dtype =</span> tf$float32 )
     <span class="co"># Declare distribution of each component</span>
-    component1 =<span class="st"> </span>tf$contrib$distributions$<span class="kw">MultivariateNormalFull</span>( params$theta1, Sigma )
-    component2 =<span class="st"> </span>tf$contrib$distributions$<span class="kw">MultivariateNormalFull</span>( params$theta2, Sigma )
+    component1 =<span class="st"> </span>tf$contrib$distributions$<span class="kw">MultivariateNormalDiag</span>( params$theta1, Sigma )
+    component2 =<span class="st"> </span>tf$contrib$distributions$<span class="kw">MultivariateNormalDiag</span>( params$theta2, Sigma )
+    <span class="co"># Declare allocation probabilities of each component</span>
+    probs =<span class="st"> </span>tf$contrib$distributions$<span class="kw">Categorical</span>(<span class="kw">c</span>(<span class="fl">0.5</span>,<span class="fl">0.5</span>))
+    <span class="co"># Declare full mixture distribution given components and allocation probabilities</span>
+    distn =<span class="st"> </span>tf$contrib$distributions$<span class="kw">Mixture</span>(probs, <span class="kw">list</span>(component1, component2))
     <span class="co"># Declare log likelihood</span>
-    logLik =<span class="st"> </span>tf$<span class="kw">reduce_sum</span>( tf$<span class="kw">log</span>( <span class="fl">0.7</span> *<span class="st"> </span>component1$<span class="kw">pdf</span>(dataset$X) +<span class="st"> </span><span class="fl">0.3</span> *<span class="st"> </span>component2$<span class="kw">pdf</span>(dataset$X) ) )
+    logLik =<span class="st"> </span>tf$<span class="kw">reduce_sum</span>( distn$<span class="kw">log_prob</span>(dataset$X) )
     <span class="kw">return</span>( logLik )
 }</code></pre></div>
 <p>So this function basically states that our likelihood is <span class="math inline">\(\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]\)</span>, where <span class="math inline">\(\mathcal N( x | \mu, \Sigma )\)</span> is a Gaussian density at <span class="math inline">\(x\)</span> with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\Sigma\)</span>. <code>R</code> does not play nicely with the tensorflow type system, so make sure you set all your constants in the <code>logLik</code> and <code>logPrior</code> functions to <code>tf$float32</code>, as we have done. Otherwise you will encounter an error.</p>
-<p>Next we want to define our log prior, which we assume is <span class="math inline">\(\log p( \theta ) = \mathcal N(\theta | 0,10I_2)\)</span>. Similar to the log likelihood definition, the log prior is defined as a function, but only with input <code>params</code>. In our case the definition is</p>
+<p>Next we want to define our log prior, which we assume is uninformative <span class="math inline">\(\log p( \theta ) = \mathcal N(\theta | 0,10I_2)\)</span>. Similar to the log likelihood definition, the log prior is defined as a function, but only with input <code>params</code>. In our case the definition is</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">logPrior =<span class="st"> </span>function( params ) {
     <span class="co"># Declare hyperparameters mu0 and Sigma0 as tensorflow constants</span>
     mu0 =<span class="st"> </span>tf$<span class="kw">constant</span>( <span class="kw">c</span>( <span class="dv">0</span>, <span class="dv">0</span> ), <span class="dt">dtype =</span> tf$float32 )
-    Sigma0 =<span class="st"> </span>tf$<span class="kw">constant</span>( <span class="dv">10</span> *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), <span class="dt">dtype =</span> tf$float32 )
+    Sigma0 =<span class="st"> </span>tf$<span class="kw">constant</span>( <span class="kw">c</span>(<span class="dv">10</span>, <span class="dv">10</span>), <span class="dt">dtype =</span> tf$float32 )
     <span class="co"># Declare prior distribution</span>
-    priorDistn =<span class="st"> </span>tf$contrib$distributions$<span class="kw">MultivariateNormalFull</span>( mu0, Sigma0 )
+    priorDistn =<span class="st"> </span>tf$contrib$distributions$<span class="kw">MultivariateNormalDiag</span>( mu0, Sigma0 )
     <span class="co"># Declare log prior density and return</span>
-    logPrior =<span class="st"> </span>priorDistn$<span class="kw">log_pdf</span>( params$theta1 ) +<span class="st"> </span>priorDistn$<span class="kw">log_pdf</span>( params$theta2 )
+    logPrior =<span class="st"> </span>priorDistn$<span class="kw">log_prob</span>( params$theta1 ) +<span class="st"> </span>priorDistn$<span class="kw">log_prob</span>( params$theta2 )
     <span class="kw">return</span>( logPrior )
 }</code></pre></div>
 <p>Again make sure you set all your constants inside the function to <code>tf$float32</code>, as we have done.</p>
 <p>Finally we set the tuning parameters for SGHMC and the minibatch size. Both the tuning parameters for SGHMC, momentum term <code>alpha</code> and stepsize term <code>eta</code>, are set for each parameter, and so are each lists with the same names as <code>params</code>. Following the advice in the <a href="https://arxiv.org/pdf/1402.4102v2.pdf">original paper</a> we fix <code>alpha</code> at a small value like <span class="math inline">\(0.1\)</span> and then find a good value for <code>eta</code>. We set the trajectory <code>L</code> to be 3.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">eta =<span class="st"> </span><span class="kw">list</span>( <span class="st">"theta1"</span> =<span class="st"> </span><span class="fl">1e-5</span>, <span class="st">"theta2"</span> =<span class="st"> </span><span class="fl">1e-5</span> )
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">eta =<span class="st"> </span><span class="kw">list</span>( <span class="st">"theta1"</span> =<span class="st"> </span><span class="fl">5e-6</span>, <span class="st">"theta2"</span> =<span class="st"> </span><span class="fl">5e-6</span> )
 alpha =<span class="st"> </span><span class="kw">list</span>( <span class="st">"theta1"</span> =<span class="st"> </span><span class="fl">0.01</span>, <span class="st">"theta2"</span> =<span class="st"> </span><span class="fl">0.01</span> )
 L =<span class="st"> </span><span class="dv">3</span>
 minibatchSize =<span class="st"> </span><span class="dv">200</span></code></pre></div>
 <p>Now we can run our SGHMC algorithm using the <code>sgmcmc</code> function <code>sghmc</code>, which returns a list of Markov chains for each parameter as output. Use the argument <code>verbose = FALSE</code> to hide the output of the function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chains =<span class="st"> </span><span class="kw"><a href="../reference/sghmc.html">sghmc</a></span>( logLik, logPrior, dataset, params, eta, alpha, L, minibatchSize, <span class="dt">nIters =</span> <span class="dv">10</span>^<span class="dv">4</span>, <span class="dt">verbose =</span> <span class="ot">FALSE</span> )</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chains =<span class="st"> </span><span class="kw"><a href="../reference/sghmc.html">sghmc</a></span>( logLik, logPrior, dataset, params, eta, alpha, L, minibatchSize, <span class="dt">nIters =</span> <span class="dv">10</span>^<span class="dv">4</span> )</code></pre></div>
+<pre><code>## Iteration: 100       Log posterior estimate: -29196.404296875
+## Iteration: 200       Log posterior estimate: -28085.587890625
+## Iteration: 300       Log posterior estimate: -27806.69140625
+## Iteration: 400       Log posterior estimate: -30448.470703125
+## Iteration: 500       Log posterior estimate: -28044.478515625
+## Iteration: 600       Log posterior estimate: -29083.19921875
+## Iteration: 700       Log posterior estimate: -28813.33203125
+## Iteration: 800       Log posterior estimate: -28607.57421875
+## Iteration: 900       Log posterior estimate: -28806.03515625
+## Iteration: 1000      Log posterior estimate: -27990.880859375
+## Iteration: 1100      Log posterior estimate: -28188.126953125
+## Iteration: 1200      Log posterior estimate: -28017.37890625
+## Iteration: 1300      Log posterior estimate: -28757.232421875
+## Iteration: 1400      Log posterior estimate: -29601.326171875
+## Iteration: 1500      Log posterior estimate: -27902.837890625
+## Iteration: 1600      Log posterior estimate: -28419.826171875
+## Iteration: 1700      Log posterior estimate: -28470.150390625
+## Iteration: 1800      Log posterior estimate: -28124.015625
+## Iteration: 1900      Log posterior estimate: -27943.978515625
+## Iteration: 2000      Log posterior estimate: -27620.466796875
+## Iteration: 2100      Log posterior estimate: -27823.916015625
+## Iteration: 2200      Log posterior estimate: -28946.9375
+## Iteration: 2300      Log posterior estimate: -28546.30078125
+## Iteration: 2400      Log posterior estimate: -27502.89453125
+## Iteration: 2500      Log posterior estimate: -29014.205078125
+## Iteration: 2600      Log posterior estimate: -27958.412109375
+## Iteration: 2700      Log posterior estimate: -29101.015625
+## Iteration: 2800      Log posterior estimate: -28535.994140625
+## Iteration: 2900      Log posterior estimate: -28627.189453125
+## Iteration: 3000      Log posterior estimate: -30090.779296875
+## Iteration: 3100      Log posterior estimate: -28699.220703125
+## Iteration: 3200      Log posterior estimate: -27388.162109375
+## Iteration: 3300      Log posterior estimate: -28524.806640625
+## Iteration: 3400      Log posterior estimate: -27712.35546875
+## Iteration: 3500      Log posterior estimate: -27931.48046875
+## Iteration: 3600      Log posterior estimate: -28412.806640625
+## Iteration: 3700      Log posterior estimate: -27266.47265625
+## Iteration: 3800      Log posterior estimate: -28497.640625
+## Iteration: 3900      Log posterior estimate: -29628.3984375
+## Iteration: 4000      Log posterior estimate: -28375.15234375
+## Iteration: 4100      Log posterior estimate: -28714.537109375
+## Iteration: 4200      Log posterior estimate: -27098.4375
+## Iteration: 4300      Log posterior estimate: -28820.509765625
+## Iteration: 4400      Log posterior estimate: -27267.1015625
+## Iteration: 4500      Log posterior estimate: -28828.765625
+## Iteration: 4600      Log posterior estimate: -28791.244140625
+## Iteration: 4700      Log posterior estimate: -28895.40625
+## Iteration: 4800      Log posterior estimate: -28273.98828125
+## Iteration: 4900      Log posterior estimate: -28911.439453125
+## Iteration: 5000      Log posterior estimate: -28566.2734375
+## Iteration: 5100      Log posterior estimate: -28945.400390625
+## Iteration: 5200      Log posterior estimate: -28462.458984375
+## Iteration: 5300      Log posterior estimate: -28277.578125
+## Iteration: 5400      Log posterior estimate: -28004.640625
+## Iteration: 5500      Log posterior estimate: -29786.2578125
+## Iteration: 5600      Log posterior estimate: -28624.64453125
+## Iteration: 5700      Log posterior estimate: -30371.037109375
+## Iteration: 5800      Log posterior estimate: -28738.15625
+## Iteration: 5900      Log posterior estimate: -28770.228515625
+## Iteration: 6000      Log posterior estimate: -27928.41015625
+## Iteration: 6100      Log posterior estimate: -27356.837890625
+## Iteration: 6200      Log posterior estimate: -28424.134765625
+## Iteration: 6300      Log posterior estimate: -27601.814453125
+## Iteration: 6400      Log posterior estimate: -28878.359375
+## Iteration: 6500      Log posterior estimate: -28511.96484375
+## Iteration: 6600      Log posterior estimate: -28169.322265625
+## Iteration: 6700      Log posterior estimate: -28578.58203125
+## Iteration: 6800      Log posterior estimate: -28679.0703125
+## Iteration: 6900      Log posterior estimate: -28916.3984375
+## Iteration: 7000      Log posterior estimate: -27879.7265625
+## Iteration: 7100      Log posterior estimate: -27360.83203125
+## Iteration: 7200      Log posterior estimate: -28326.638671875
+## Iteration: 7300      Log posterior estimate: -29370.58984375
+## Iteration: 7400      Log posterior estimate: -27603.3984375
+## Iteration: 7500      Log posterior estimate: -28787.154296875
+## Iteration: 7600      Log posterior estimate: -28279.796875
+## Iteration: 7700      Log posterior estimate: -29102.947265625
+## Iteration: 7800      Log posterior estimate: -27880.953125
+## Iteration: 7900      Log posterior estimate: -27645.736328125
+## Iteration: 8000      Log posterior estimate: -30013.97265625
+## Iteration: 8100      Log posterior estimate: -29469.712890625
+## Iteration: 8200      Log posterior estimate: -28382.384765625
+## Iteration: 8300      Log posterior estimate: -28929.08203125
+## Iteration: 8400      Log posterior estimate: -28466.755859375
+## Iteration: 8500      Log posterior estimate: -28088.2890625
+## Iteration: 8600      Log posterior estimate: -29132.0390625
+## Iteration: 8700      Log posterior estimate: -28156.962890625
+## Iteration: 8800      Log posterior estimate: -30314.091796875
+## Iteration: 8900      Log posterior estimate: -28844.3984375
+## Iteration: 9000      Log posterior estimate: -28272.640625
+## Iteration: 9100      Log posterior estimate: -28382.52734375
+## Iteration: 9200      Log posterior estimate: -28420.025390625
+## Iteration: 9300      Log posterior estimate: -28840.984375
+## Iteration: 9400      Log posterior estimate: -27949.068359375
+## Iteration: 9500      Log posterior estimate: -28523.193359375
+## Iteration: 9600      Log posterior estimate: -28305.837890625
+## Iteration: 9700      Log posterior estimate: -28271.681640625
+## Iteration: 9800      Log posterior estimate: -28314.1953125
+## Iteration: 9900      Log posterior estimate: -27719.615234375
+## Iteration: 10000     Log posterior estimate: -28738.2890625</code></pre>
 <p>Finally we’ll plot the results after removing burn-in</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
 <span class="co"># Remove burn in</span>
 burnIn =<span class="st"> </span><span class="dv">10</span>^<span class="dv">3</span>
 chains =<span class="st"> </span><span class="kw">list</span>( <span class="st">"theta1"</span> =<span class="st"> </span><span class="kw">as.data.frame</span>( chains$theta1[-<span class="kw">c</span>(<span class="dv">1</span>:burnIn),] ),
                <span class="st">"theta2"</span> =<span class="st"> </span><span class="kw">as.data.frame</span>( chains$theta2[-<span class="kw">c</span>(<span class="dv">1</span>:burnIn),] ) )
-plotData =<span class="st"> </span>chains$theta1
+<span class="co"># Concatenate the two chains for the plot to get a picture of the whole distribution</span>
+plotData =<span class="st"> </span><span class="kw">rbind</span>(chains$theta1, chains$theta2)
 <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggplot">ggplot</a></span>( plotData, <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>( <span class="dt">x =</span> V1, <span class="dt">y =</span> V2 ) ) +
 <span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/geom_density_2d">stat_density2d</a></span>( <span class="dt">size =</span> <span class="fl">1.5</span>, <span class="dt">alpha =</span> <span class="fl">0.7</span> )</code></pre></div>
 <p><img src="gaussMixture_files/figure-html/unnamed-chunk-7-1.png" width="672"></p>
@@ -163,7 +268,7 @@ plotData =<span class="st"> </span>chains$theta1
 
 
       <footer><div class="copyright">
-  <p>Developed by <a href="http://lancs.ac.uk/~bakerj1/">Jack Baker</a>, <a href="http://www.lancs.ac.uk/~nemeth/">Christopher Nemeth</a>, <a href="http://www.maths.lancs.ac.uk/~fearnhea/">Paul Fearnhead</a>, <a href="http://www.stor-i.lancs.ac.uk/"><img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18"></a>.</p>
+  <p>Developed by <a href="http://lancs.ac.uk/~bakerj1/">Jack Baker</a>, <a href="http://www.lancs.ac.uk/~nemeth/">Christopher Nemeth</a>, <a href="http://www.maths.lancs.ac.uk/~fearnhea/">Paul Fearnhead</a>, <a href="https://homes.cs.washington.edu/~ebfox/">Emily B. Fox</a>, <a href="http://www.stor-i.lancs.ac.uk/"><img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18"></a>.</p>
 </div>
 
 <div class="pkgdown">
