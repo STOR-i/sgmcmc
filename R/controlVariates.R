@@ -1,3 +1,27 @@
+# Create generic sgmcmccv object from sgmcmc object
+createSGMCMCCV = function( logLik, logPrior, dataset, params, stepsize, optStepsize, 
+        minibatchSize ) {
+    # First create generic sgmcmc object then add specifics
+    sgmcmccv = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize )
+    # If minibatchSize is a proportion, convert to an integer
+    minibatchSize = convertProp( minibatchSize, sgmcmccv$N )
+    # Declare tensorflow variables for initial optimizer
+    sgmcmccv$paramsOpt = setupParams( params )
+    sgmcmccv$placeholdersFull = setupFullPlaceholders( dataset )
+    # Declare container for full gradients at mode
+    sgmcmccv$logPostOptGrad = setupFullGradients( params )
+    # Declare estimated log posterior tensor for optimization
+    sgmcmccv$estLogPostOpt = setupEstLogPost( 
+        logLik, logPrior, sgmcmccv$paramsOpt, sgmcmccv$placeholders, sgmcmccv$N, minibatchSize )
+    # Declare full log posterior for calculation at MAP estimate
+    sgmcmccv$fullLogPostOpt = setupFullLogPost( 
+        logLik, logPrior, sgmcmccv$paramsOpt, sgmcmccv$placeholdersFull )
+    # Declare optimizer
+    sgmcmccv$optimizer = declareOptimizer( sgmcmccv$estLogPostOpt, sgmcmccv$fullLogPostOpt, 
+        sgmcmccv$paramsOpt, sgmcmccv$params, sgmcmccv$logPostOptGrad, optStepsize )
+    return( sgmcmccv )
+}
+
 # This function performs a single optimization step on the control variate parameters.
 # This initial optimization procedure is needed before SGMCMCCV is applied in order to
 # ensure the control variate parameters estimate the mode well.
@@ -26,13 +50,12 @@ getMode = function( sess, sgmcmc, nIters = 10^4, verbose = TRUE ) {
 }
 
 # Declare full log posterior density from logLik and logPrior functions
-setupFullLogPost = function( logLik, logPrior, params, placeholders, gibbsParams ) {
+setupFullLogPost = function( logLik, logPrior, params, placeholders ) {
     # Separate function from setupEstLogPost avoids float precision errors from correction term
-    if ( is.null( gibbsParams ) ) {
-        logPost = logPrior( params ) + logLik( params, placeholders )
+    if ( is.null( logPrior ) ) {
+        logPost = logLik( params, placeholders )
     } else {
-        logPost = logPrior( params, gibbsParams ) + 
-                logLik( params, placeholders, gibbsParams )
+        logPost = logPrior( params ) + logLik( params, placeholders )
     }
     return( logPost )
 }

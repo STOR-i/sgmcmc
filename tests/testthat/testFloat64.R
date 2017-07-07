@@ -11,13 +11,14 @@ declareConsts = function() {
     testData$nIters = 1100
     testData$nItersOpt = 1000
     testData$burnIn = 100
-    testData$alpha = 0.001
+    testData$alpha = 0.01
     testData$width = 1
     return( testData )
 }
 
 logLik = function( params, data ) {
-    baseDist = tf$contrib$distributions$Normal(params$theta, 1)
+    sigma = tf$constant( 1, dtype = tf$float64 )
+    baseDist = tf$contrib$distributions$Normal(params$theta, sigma)
     return(tf$reduce_sum(baseDist$log_prob(data$x)))
 }
 
@@ -72,77 +73,32 @@ sgnhtcvTest = function( testData ) {
     return( storage )
 }
 
-test_that( "Check SGLD chain reasonable for 1d gauss", {
+test_that( "sgld: Check Error thrown for float64 input", {
     testData = declareConsts()
-    thetaOut = sgldTest( testData )
-    # Check 0 contained within confidence interval
-    confInt = quantile( thetaOut, c( testData$alpha, (1 - testData$alpha) ) )
-    expect_lte(confInt[1], 0)
-    expect_gte(confInt[2], 0)
-    # Check width of the confidence interval is small
-    expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+    expect_error( sgldTest( testData ) )
 } )
 
-test_that( "Check SGLDCV chain reasonable for 1d gauss", {
+test_that( "sgldcv: Check Error thrown for float64 input", {
     testData = declareConsts()
-    storage = sgldcvTest( testData )
-    # Check optimization found reasonable mode
-    expect_lt( storage$theta[1], 1 )
-    thetaOut = storage$theta[-c(1:testData$burnIn)]
-    # Check 0 contained within confidence interval
-    confInt = quantile( thetaOut, c( testData$alpha, (1 - testData$alpha) ) )
-    expect_lte(confInt[1], 0)
-    expect_gte(confInt[2], 0)
-    # Check width of the confidence interval is small
-    expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+    expect_error( sgldcvTest( testData ) )
 } )
 
-test_that( "Check SGHMC chain reasonable for 1d gauss", {
+test_that( "sghmc: Check Error thrown for float64 input", {
     testData = declareConsts()
-    thetaOut = sghmcTest( testData )
-    # Check 0 contained within confidence interval
-    confInt = quantile( thetaOut, c( testData$alpha, (1 - testData$alpha) ) )
-    expect_lte(confInt[1], 0)
-    expect_gte(confInt[2], 0)
-    # Check width of the confidence interval is small
-    expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+    expect_error( sghmcTest( testData ) )
 } )
 
-test_that( "Check SGHMCCV chain reasonable for 1d gauss", {
+test_that( "sghmccv: Check Error thrown for float64 input", {
     testData = declareConsts()
-    storage = sghmccvTest( testData )
-    # Check optimization found reasonable mode
-    expect_lt( storage$theta[1], 1 )
-    thetaOut = storage$theta[-c(1:testData$burnIn)]
-    # Check 0 contained within confidence interval
-    confInt = quantile( thetaOut, c( testData$alpha, (1 - testData$alpha) ) )
-    expect_lte(confInt[1], 0)
-    expect_gte(confInt[2], 0)
-    # Check width of the confidence interval is small
-    expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+    expect_error( sghmccvTest( testData ) )
 } )
 
-test_that( "Check SGNHT chain reasonable for 1d gauss", {
+test_that( "sgnht: Check Error thrown for float64 input", {
     testData = declareConsts()
-    thetaOut = sgnhtTest( testData )
-    # Check 0 contained within confidence interval
-    confInt = quantile( thetaOut, c( testData$alpha, (1 - testData$alpha) ) )
-    expect_lte(confInt[1], 0)
-    expect_gte(confInt[2], 0)
-    # Check width of the confidence interval is small
-    expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+    expect_error( sgnhtTest( testData ) )
 } )
 
-test_that( "Check SGNHTCV chain reasonable for 1d gauss", {
+test_that( "sgnhtcv: Check Error thrown for float64 input", {
     testData = declareConsts()
-    storage = sgnhtcvTest( testData )
-    # Check optimization found reasonable mode
-    expect_lt( storage$theta[1], 1 )
-    thetaOut = storage$theta[-c(1:testData$burnIn)]
-    # Check 0 contained within confidence interval
-    confInt = quantile( thetaOut, c( testData$alpha, (1 - testData$alpha) ) )
-    expect_lte(confInt[1], 0)
-    expect_gte(confInt[2], 0)
-    # Check width of the confidence interval is small
-    expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+    expect_error( sgnhtcvTest( testData ) )
 } )

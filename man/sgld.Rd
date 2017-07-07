@@ -4,17 +4,13 @@
 \alias{sgld}
 \title{Stochastic Gradient Langevin Dynamics}
 \usage{
-sgld(logLik, logPrior, dataset, params, stepsize, n, nIters = 10^4,
-  verbose = TRUE)
+sgld(logLik, dataset, params, stepsize, logPrior = NULL,
+  minibatchSize = 0.01, nIters = 10^4, verbose = TRUE)
 }
 \arguments{
 \item{logLik}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.}
-
-\item{logPrior}{function which takes parameters and dataset 
-(list of tensorflow variables and placeholders respectively) as input. 
-The function should return a tensorflow tensor which defines the log prior of the model.}
 
 \item{dataset}{list of R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
@@ -23,11 +19,17 @@ The names in the list should correspond to those referred to in the logLik and l
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
 \item{stepsize}{list of stepsizes corresponding to the SGLD stepsizes for each parameter
-The names in the list should correspond to those in params.}
+The names in the list should correspond to those in params.
+Alternatively specify a single float to use that stepsize for all parameters.}
 
-\item{n}{minibatch size, assumed integer.}
+\item{logPrior}{function which takes parameters (list of tensorflow variables) as input.
+The function should return a tensorflow tensor which defines the log prior of the model.
+Optional. Default uninformative improper prior.}
 
-\item{nIters}{number of iterations of SGLD to perform, optional, assumed integer, default 10^4.}
+\item{minibatchSize}{either as proportion of dataset size or actual size, assumed float or int.
+Optional. Default 0.01.}
+
+\item{nIters}{number of iterations of SGLD to perform, assumed integer. Optional. Default 10^4.}
 
 \item{verbose}{whether to print algorithm progress or not, assumed BOOLEAN, default TRUE.}
 }
@@ -36,12 +38,12 @@ List of arrays for each parameter containing the MCMC chain.
  Dimension of the form (nIters,paramDim1,paramDim2,...)
 }
 \description{
-Simulates from the posterior defined by the functions logLik & logPrior using
+Simulates from the posterior defined by the functions logLik and logPrior using
  stochastic gradient Langevin Dynamics. The function uses TensorFlow, so needs
  Tensorflow for python installed.
 }
 \references{
 \itemize{\item \href{http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf}{
- Welling, M., & Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
+ Welling, M., and Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
  ICML (pp. 681-688).}}
 }

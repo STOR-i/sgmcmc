@@ -4,7 +4,8 @@
 \alias{sghmc}
 \title{Stochastic Gradient Hamiltonian Monte Carlo}
 \usage{
-sghmc(logLik, logPrior, dataset, params, eta, alpha, L, n, nIters = 10^4,
+sghmc(logLik, dataset, params, stepsize, logPrior = NULL,
+  minibatchSize = 500, alpha = 0.01, L = 3, nIters = 10^4,
   verbose = TRUE)
 }
 \arguments{
@@ -12,27 +13,32 @@ sghmc(logLik, logPrior, dataset, params, eta, alpha, L, n, nIters = 10^4,
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.}
 
-\item{logPrior}{function which takes parameters and dataset 
-(list of tensorflow variables and placeholders respectively) as input. 
-The function should return a tensorflow tensor which defines the log prior of the model.}
-
 \item{dataset}{list of R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
 \item{params}{list of R arrays which define the starting point of each parameter.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
-\item{eta}{list of numeric values corresponding to the SGHMC eta stepsize terms,
+\item{stepsize}{list of numeric values corresponding to the SGHMC eta stepsize terms,
 as defined in the paper given in the references. One value should be given 
-for each parameter in params, the names should correspond to those in params.}
+for each parameter in params, the names should correspond to those in params.
+Alternatively specify a single float to specify that value for all parameters.}
+
+\item{logPrior}{function which takes parameters (list of tensorflow variables) as input.
+The function should return a tensorflow tensor which defines the log prior of the model.
+Optional. Default uninformative improper prior.}
+
+\item{minibatchSize}{either as proportion of dataset size or actual size, assumed float or int.
+Optional. Default 0.01.}
 
 \item{alpha}{list of numeric values corresponding to the SGHMC alpha momentum terms,
 as defined in the paper given in the references. One value should be given 
-for each parameter in params, the names should correspond to those in params.}
+for each parameter in params, the names should correspond to those in params.
+Alternatively specify a single float to specify that value for all parameters.
+Optional. Default 0.01 for all parameters.}
 
-\item{L}{integer specifying the trajectory of the simulation, as defined in the main reference.}
-
-\item{n}{minibatch size, assumed integer.}
+\item{L}{integer specifying the trajectory of the simulation, as defined in the main reference.
+Optional. Default 3.}
 
 \item{nIters}{number of iterations of SGLD to perform, optional, assumed integer, default 10^4.}
 
@@ -43,7 +49,7 @@ List of arrays for each parameter containing the MCMC chain.
  Dimension of the form (nIters,paramDim1,paramDim2,...)
 }
 \description{
-Simulates from the posterior defined by the functions logLik & logPrior using
+Simulates from the posterior defined by the functions logLik and logPrior using
  stochastic gradient Hamiltonian Monte Carlo. The function uses TensorFlow, so needs
  Tensorflow for python installed. Currently we use the approximation \eqn{\hat \beta = 0},
  as used in the simulations by the original reference. 
@@ -51,6 +57,6 @@ Simulates from the posterior defined by the functions logLik & logPrior using
 }
 \references{
 \itemize{\item \href{https://arxiv.org/pdf/1402.4102v2.pdf}{
- Chen, T., Fox, E. B., & Guestrin, C. (2014). Stochastic gradient Hamiltonian Monte Carlo. 
+ Chen, T., Fox, E. B., and Guestrin, C. (2014). Stochastic gradient Hamiltonian Monte Carlo. 
  In ICML (pp. 1683-1691).}}
 }

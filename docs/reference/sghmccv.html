@@ -105,7 +105,7 @@
     </div>
 
     
-    <p>Simulates from the posterior defined by the functions logLik &amp; logPrior using 
+    <p>Simulates from the posterior defined by the functions logLik and logPrior using 
  stochastic gradient Hamiltonian Monte Carlo with an improved gradient estimate 
  that is calculated using control variates. 
  Currently we use the approximation \(\hat \beta = 0\), 
@@ -113,8 +113,9 @@
  This will be changed in future implementations.</p>
     
 
-    <pre class="usage"><span class='fu'>sghmccv</span>(<span class='no'>logLik</span>, <span class='no'>logPrior</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>eta</span>, <span class='no'>alpha</span>, <span class='no'>L</span>, <span class='no'>optStepsize</span>, <span class='no'>n</span>,
-  <span class='kw'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>, <span class='kw'>nItersOpt</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>sghmccv</span>(<span class='no'>logLik</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>, <span class='no'>optStepsize</span>, <span class='kw'>logPrior</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>minibatchSize</span> <span class='kw'>=</span> <span class='fl'>500</span>, <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>,
+  <span class='kw'>nItersOpt</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -124,12 +125,6 @@
       <td><p>function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.</p></td>
-    </tr>
-    <tr>
-      <th>logPrior</th>
-      <td><p>function which takes parameters and dataset 
-(list of tensorflow variables and placeholders respectively) as input. 
-The function should return a tensorflow tensor which defines the log prior of the model.</p></td>
     </tr>
     <tr>
       <th>dataset</th>
@@ -142,28 +137,39 @@ The names in the list should correspond to those referred to in the logLik and l
 The names in the list should correspond to those referred to in the logLik and logPrior functions</p></td>
     </tr>
     <tr>
-      <th>eta</th>
+      <th>stepsize</th>
       <td><p>list of numeric values corresponding to the SGHMC eta stepsize terms,
 as defined in the paper given in the references. One value should be given 
-for each parameter in params, the names should correspond to those in params.</p></td>
-    </tr>
-    <tr>
-      <th>alpha</th>
-      <td><p>list of numeric values corresponding to the SGHMC alpha momentum terms,
-as defined in the paper given in the references. One value should be given 
-for each parameter in params, the names should correspond to those in params.</p></td>
-    </tr>
-    <tr>
-      <th>L</th>
-      <td><p>integer specifying the trajectory of the simulation, as defined in the main reference.</p></td>
+for each parameter in params, the names should correspond to those in params.
+Alternatively specify a single float to specify that value for all parameters.</p></td>
     </tr>
     <tr>
       <th>optStepsize</th>
       <td><p>numeric, stepsize for optimization step to find MAP estimates of parameters.</p></td>
     </tr>
     <tr>
-      <th>n</th>
-      <td><p>minibatch size, assumed integer.</p></td>
+      <th>logPrior</th>
+      <td><p>function which takes parameters (list of tensorflow variables) as input.
+The function should return a tensorflow tensor which defines the log prior of the model.
+Optional. Default uninformative improper prior.</p></td>
+    </tr>
+    <tr>
+      <th>minibatchSize</th>
+      <td><p>either as proportion of dataset size or actual size, assumed float or int.
+Optional. Default 0.01.</p></td>
+    </tr>
+    <tr>
+      <th>alpha</th>
+      <td><p>list of numeric values corresponding to the SGHMC alpha momentum terms,
+as defined in the paper given in the references. One value should be given 
+for each parameter in params, the names should correspond to those in params.
+Alternatively specify a single float to specify that value for all parameters.
+Optional. Default 0.01 for all parameters.</p></td>
+    </tr>
+    <tr>
+      <th>L</th>
+      <td><p>integer specifying the trajectory of the simulation, as defined in the main reference.
+Optional. Default 3.</p></td>
     </tr>
     <tr>
       <th>nIters</th>
@@ -189,10 +195,10 @@ optional, default 10^4.</p></td>
 
     <ul>
 <li><p><a href='https://arxiv.org/pdf/1706.05439.pdf'>
- Baker, J., Fearnhead, P., Fox, E. B., &amp; Nemeth, C. (2017).
+ Baker, J., Fearnhead, P., Fox, E. B., and Nemeth, C. (2017).
  Control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.</a></p></li>
 <li><p><a href='https://arxiv.org/pdf/1402.4102v2.pdf'>
- Chen, T., Fox, E. B., &amp; Guestrin, C. (2014). Stochastic gradient Hamiltonian Monte Carlo. 
+ Chen, T., Fox, E. B., and Guestrin, C. (2014). Stochastic gradient Hamiltonian Monte Carlo. 
  In ICML (pp. 1683-1691).</a></p></li>
 </ul>
     

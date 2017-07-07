@@ -4,17 +4,13 @@
 \alias{sgldcv}
 \title{Stochastic Gradient Langevin Dynamics with Control Variates}
 \usage{
-sgldcv(logLik, logPrior, dataset, params, stepsize, optStepsize, n,
-  nIters = 10^4, nItersOpt = 10^4, verbose = TRUE)
+sgldcv(logLik, dataset, params, stepsize, optStepsize, logPrior = NULL,
+  minibatchSize = 0.01, nIters = 10^4, nItersOpt = 10^4, verbose = TRUE)
 }
 \arguments{
 \item{logLik}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.}
-
-\item{logPrior}{function which takes parameters and dataset 
-(list of tensorflow variables and placeholders respectively) as input. 
-The function should return a tensorflow tensor which defines the log prior of the model.}
 
 \item{dataset}{list of numeric R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
@@ -23,11 +19,17 @@ The names in the list should correspond to those referred to in the logLik and l
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
 \item{stepsize}{list of stepsizes corresponding to the SGLD stepsizes for each parameter
-The names in the list should correspond to those in params.}
+The names in the list should correspond to those in params.
+Alternatively specify a single float to use that stepsize for all parameters.}
 
-\item{optStepsize}{numeric, stepsize for optimization step to find MAP estimates of parameters.}
+\item{optStepsize}{stepsize for optimization to find MAP estimates of parameters. Assumed float.}
 
-\item{n}{minibatch size, assumed integer.}
+\item{logPrior}{function which takes parameters (list of tensorflow variables) as input.
+The function should return a tensorflow tensor which defines the log prior of the model.
+Optional. Default uninformative improper prior.}
+
+\item{minibatchSize}{either as proportion of dataset size or actual size, assumed float or int.
+Optional. Default 0.01.}
 
 \item{nIters}{integer, number of iterations of SGLD to perform, optional, default 10^4.}
 
@@ -41,16 +43,16 @@ List of arrays for each parameter containing the MCMC chain.
  Dimension of the form (nIters,paramDim1,paramDim2,...)
 }
 \description{
-Simulates from the posterior defined by the functions logLik & logPrior using
+Simulates from the posterior defined by the functions logLik and logPrior using
  stochastic gradient Langevin Dynamics with an improved gradient estimate using Control Variates.
  The function uses TensorFlow, so needs Tensorflow for python installed.
 }
 \references{
 \itemize{
  \item \href{https://arxiv.org/pdf/1706.05439.pdf}{
- Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017).
+ Baker, J., Fearnhead, P., Fox, E. B., and Nemeth, C. (2017).
  Control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.}
  \item \href{http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf}{
- Welling, M., & Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
+ Welling, M., and Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
  ICML (pp. 681-688).} }
 }

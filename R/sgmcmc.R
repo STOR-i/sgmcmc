@@ -14,6 +14,7 @@
 #'  These are the functions sgldcv, sghmccv and sgnhtcv.
 #'
 #' @docType package
+#' @import tensorflow
 #' @name sgmcmc
 #'
 #' @references Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017) 

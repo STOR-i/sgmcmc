@@ -1,27 +1,29 @@
 #' Stochastic Gradient Langevin Dynamics
 #' 
-#' Simulates from the posterior defined by the functions logLik & logPrior using
+#' Simulates from the posterior defined by the functions logLik and logPrior using
 #'  stochastic gradient Langevin Dynamics. The function uses TensorFlow, so needs
 #'  Tensorflow for python installed.
 #'
 #' @references \itemize{\item \href{http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf}{
-#'  Welling, M., & Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
+#'  Welling, M., and Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
 #'  ICML (pp. 681-688).}}
 #'
 #' @param logLik function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  It should return a tensorflow expression which defines the log likelihood of the model.
-#' @param logPrior function which takes parameters and dataset 
-#'  (list of tensorflow variables and placeholders respectively) as input. 
-#'  The function should return a tensorflow tensor which defines the log prior of the model.
 #' @param dataset list of R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param params list of R arrays which define the starting point of each parameter.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param stepsize list of stepsizes corresponding to the SGLD stepsizes for each parameter
 #'  The names in the list should correspond to those in params.
-#' @param n minibatch size, assumed integer.
-#' @param nIters number of iterations of SGLD to perform, optional, assumed integer, default 10^4.
+#'  Alternatively specify a single float to use that stepsize for all parameters.
+#' @param logPrior function which takes parameters (list of tensorflow variables) as input.
+#'  The function should return a tensorflow tensor which defines the log prior of the model.
+#'  Optional. Default uninformative improper prior.
+#' @param minibatchSize either as proportion of dataset size or actual size, assumed float or int.
+#'  Optional. Default 0.01.
+#' @param nIters number of iterations of SGLD to perform, assumed integer. Optional. Default 10^4.
 #' @param verbose whether to print algorithm progress or not, assumed BOOLEAN, default TRUE.
 #'
 #' @return List of arrays for each parameter containing the MCMC chain.
@@ -29,9 +31,10 @@
 #'
 #' @export
 #'
-sgld = function( logLik, logPrior, dataset, params, stepsize, n, nIters = 10^4, verbose = TRUE ) {
+sgld = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
+        nIters = 10^4, verbose = TRUE ) {
     # Create SGLD object
-    sgmcmc = genSGLD( logLik, logPrior, dataset, params, stepsize, n, NULL )
+    sgmcmc = genSGLD( logLik, logPrior, dataset, params, stepsize, minibatchSize )
     options = list( "nIters" = nIters, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sgmcmc, params, options )
@@ -41,32 +44,34 @@ sgld = function( logLik, logPrior, dataset, params, stepsize, n, nIters = 10^4, 
 
 #' Stochastic Gradient Langevin Dynamics with Control Variates
 #' 
-#' Simulates from the posterior defined by the functions logLik & logPrior using
+#' Simulates from the posterior defined by the functions logLik and logPrior using
 #'  stochastic gradient Langevin Dynamics with an improved gradient estimate using Control Variates.
 #'  The function uses TensorFlow, so needs Tensorflow for python installed.
 #'
 #' @references \itemize{
 #'  \item \href{https://arxiv.org/pdf/1706.05439.pdf}{
-#'  Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017).
+#'  Baker, J., Fearnhead, P., Fox, E. B., and Nemeth, C. (2017).
 #'  Control variates for stochastic gradient MCMC. ArXiv preprint arXiv:1706.05439.}
 #'  \item \href{http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf}{
-#'  Welling, M., & Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
+#'  Welling, M., and Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
 #'  ICML (pp. 681-688).} }
 #'
 #' @param logLik function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  It should return a tensorflow expression which defines the log likelihood of the model.
-#' @param logPrior function which takes parameters and dataset 
-#'  (list of tensorflow variables and placeholders respectively) as input. 
-#'  The function should return a tensorflow tensor which defines the log prior of the model.
 #' @param dataset list of numeric R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param params list of numeric R arrays which define the starting point of each parameter.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param stepsize list of stepsizes corresponding to the SGLD stepsizes for each parameter
 #'  The names in the list should correspond to those in params.
-#' @param optStepsize numeric, stepsize for optimization step to find MAP estimates of parameters.
-#' @param n minibatch size, assumed integer.
+#'  Alternatively specify a single float to use that stepsize for all parameters.
+#' @param optStepsize stepsize for optimization to find MAP estimates of parameters. Assumed float.
+#' @param logPrior function which takes parameters (list of tensorflow variables) as input.
+#'  The function should return a tensorflow tensor which defines the log prior of the model.
+#'  Optional. Default uninformative improper prior.
+#' @param minibatchSize either as proportion of dataset size or actual size, assumed float or int.
+#'  Optional. Default 0.01.
 #' @param nIters integer, number of iterations of SGLD to perform, optional, default 10^4.
 #' @param nItersOpt integer, number of iterations of initial optimization to perform, 
 #'  optional, default 10^4.
@@ -77,10 +82,10 @@ sgld = function( logLik, logPrior, dataset, params, stepsize, n, nIters = 10^4, 
 #'
 #' @export
 #'
-sgldcv = function( logLik, logPrior, dataset, params, stepsize, optStepsize, n, nIters = 10^4, 
-        nItersOpt = 10^4, verbose = TRUE ) {
+sgldcv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL,
+        minibatchSize = 0.01, nIters = 10^4, nItersOpt = 10^4, verbose = TRUE ) {
     # Setup SGLDCV object
-    sgmcmcCV = genSGLDCV( logLik, logPrior, dataset, params, stepsize, optStepsize, n, NULL )
+    sgmcmcCV = genSGLDCV( logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize )
     options = list( "nIters" = nIters, "nItersOpt" = nItersOpt, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sgmcmcCV, params, options )
@@ -91,17 +96,10 @@ sgldcv = function( logLik, logPrior, dataset, params, stepsize, optStepsize, n, 
 # 
 # Creates a stochastic gradient Langevin Dynamics (SGLD) object which can be passed to mcmcStep
 #  to simulate from 1 step of SGLD for the posterior defined by logLik and logPrior.
-genSGLD = function( logLik, logPrior, dataset, params, stepsize, n, gibbsParams ) {
-    # Get dataset size
-    N = getDatasetSize( dataset )
-    # Convert params and dataset to tensorflow variables and placeholders
-    paramstf = setupParams( params )
-    placeholders = setupPlaceholders( dataset, n )
-    # Declare estimated log posterior tensor using declared variables and placeholders
-    estLogPost = setupEstLogPost( logLik, logPrior, paramstf, placeholders, N, n, gibbsParams )
-    # Declare SGLD object
-    sgld = list( "data" = dataset, "n" = n, "placeholders" = placeholders, "stepsize" = stepsize,
-            "params" = paramstf, "estLogPost" = estLogPost )
+genSGLD = function( logLik, logPrior, dataset, params, stepsize, minibatchSize ) {
+    # Create generic sgmcmc object
+    sgld = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize )
+    # Declare object type
     class( sgld ) = c( "sgld", "sgmcmc" )
     # Declare SGLD dynamics
     sgld$dynamics = declareDynamics( sgld )
@@ -113,31 +111,10 @@ genSGLD = function( logLik, logPrior, dataset, params, stepsize, n, gibbsParams 
 # Creates a stochastic gradient Langevin Dynamics with Control Variates (SGLDCV) object 
 #  which can be passed to optUpdate and mcmcStep to simulate from 1 step of SGLD 
 #  for the posterior defined by logLik and logPrior.
-genSGLDCV = function( logLik, logPrior, dataset, params, stepsize, optStepsize, n, gibbsParams ) {
-    # Get dataset size
-    N = getDatasetSize( dataset )
-    # Convert params and data to tensorflow variables and placeholders
-    paramstf = setupParams( params )
-    placeholders = setupPlaceholders( dataset, n )
-    # Declare tensorflow variables for initial optimizer
-    paramsOpt = setupParams( params )
-    placeholdersFull = setupFullPlaceholders( dataset )
-    # Declare container for full gradients at mode
-    logPostOptGrad = setupFullGradients( params )
-    # Declare estimated log posterior tensor using declared variables and placeholders
-    estLogPost = setupEstLogPost( logLik, logPrior, paramstf, placeholders, N, n, gibbsParams )
-    # Declare estimated log posterior tensor for optimization
-    estLogPostOpt = setupEstLogPost( logLik, logPrior, paramsOpt, placeholders, N, n, gibbsParams )
-    # Declare full log posterior for calculation at MAP estimate
-    fullLogPostOpt = setupFullLogPost( logLik, logPrior, paramsOpt, placeholdersFull, gibbsParams )
-    # Declare optimizer
-    optimizer = declareOptimizer( estLogPostOpt, fullLogPostOpt, paramsOpt, 
-            paramstf, logPostOptGrad, optStepsize )
-    # Declare SGLDCV object
-    sgldCV = list( "optimizer" = optimizer, "data" = dataset, "n" = n, "stepsize" = stepsize,
-            "placeholders" = placeholders, "placeholdersFull" = placeholdersFull, 
-            "params" = paramstf, "paramsOpt" = paramsOpt, "estLogPost" = estLogPost, 
-            "estLogPostOpt" = estLogPostOpt, "logPostOptGrad" = logPostOptGrad )
+genSGLDCV = function( logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize ) {
+    # Create generic sgmcmcCV object
+    sgldCV = createSGMCMCCV( 
+        logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize )
     class(sgldCV) = c( "sgld", "sgmcmcCV" )
     # Declare SGLD dynamics
     sgldCV$dynamics = declareDynamics( sgldCV )

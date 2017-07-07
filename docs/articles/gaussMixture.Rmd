@@ -79,9 +79,9 @@ stepsize = list( "theta1" = 5e-6, "theta2" = 5e-6 )
 ```
 Optionally we can set the tuning parameter for the momentum `alpha` in the same way as the `stepsize`. But we'll leave this along with the trajectory integer `L`, and the `minibatchSize` as their defaullts, 3 and `0.01 * N = 100` respectively.
 
-Now we can run our SGHMC algorithm using the `sgmcmc` function `sghmc`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function. We'll set the number of iterations as `11000` to allow for `1000` iterations of burn-in.
+Now we can run our SGHMC algorithm using the `sgmcmc` function `sghmc`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function.
 ```{r message=FALSE}
-chains = sghmc( logLik, dataset, params, stepsize, logPrior = logPrior, nIters = 11000 )
+chains = sghmc( logLik, dataset, params, stepsize, logPrior = logPrior )
 ```
 If you don't specify the `logPrior` an uninformative uniform prior will be used.
 

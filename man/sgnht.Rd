@@ -4,17 +4,13 @@
 \alias{sgnht}
 \title{Stochastic Gradient Nose Hoover Thermostat}
 \usage{
-sgnht(logLik, logPrior, dataset, params, eta, a, n, nIters = 10^4,
-  verbose = TRUE)
+sgnht(logLik, dataset, params, stepsize, logPrior = NULL,
+  minibatchSize = 500, a = 0.01, nIters = 10^4, verbose = TRUE)
 }
 \arguments{
 \item{logLik}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.}
-
-\item{logPrior}{function which takes parameters and dataset 
-(list of tensorflow variables and placeholders respectively) as input. 
-The function should return a tensorflow tensor which defines the log prior of the model.}
 
 \item{dataset}{list of R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
@@ -22,15 +18,23 @@ The names in the list should correspond to those referred to in the logLik and l
 \item{params}{list of R arrays which define the starting point of each parameter.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
-\item{eta}{list of numeric values corresponding to the SGNHT eta stepsize terms,
+\item{stepsize}{list of numeric values corresponding to the SGNHT eta stepsize terms,
 as defined in the paper given in the references, Appendix F. One value should be given 
-for each parameter in params, the names should correspond to those in params.}
+for each parameter in params, the names should correspond to those in params.
+Alternatively specify a single float to use that stepsize for all parameters.}
+
+\item{logPrior}{function which takes parameters (list of tensorflow variables) as input.
+The function should return a tensorflow tensor which defines the log prior of the model.
+Optional. Default uninformative improper prior.}
+
+\item{minibatchSize}{either as proportion of dataset size or actual size, assumed float or int.
+Optional. Default 0.01.}
 
 \item{a}{list of numeric values corresponding to the SGNHT a diffusion factors,
 as defined in the paper given in the references, Appendix F. One value should be given 
-for each parameter in params, the names should correspond to those in params.}
-
-\item{n}{minibatch size, assumed integer.}
+for each parameter in params, the names should correspond to those in params.
+Alternatively specify a single float to specify that value for all parameters.
+Optional. Default 0.01 for all parameters.}
 
 \item{nIters}{number of iterations of SGLD to perform, optional, assumed integer, default 10^4.}
 
@@ -41,15 +45,14 @@ List of arrays for each parameter containing the MCMC chain.
  Dimension of the form (nIters,paramDim1,paramDim2,...)
 }
 \description{
-Simulates from the posterior defined by the functions logLik & logPrior using
+Simulates from the posterior defined by the functions logLik and logPrior using
  stochastic gradient Nose Hoover Thermostat.
  When used for parameters that are higher dimensional then vectors, the thermostat
  step is approximated by a tensor contraction. Currently the implementation will only
  handle vector or scalar parameters, this will be updated in future implementations.
 }
 \references{
-\itemize{\item \href{
- http://papers.nips.cc/paper/5592-bayesian-sampling-using-stochastic-gradient-thermostats.pdf}{
- Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., & Neven, H. (2014). 
+\itemize{\item \href{http://people.ee.duke.edu/~lcarin/sgnht-4.pdf}{
+ Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., and Neven, H. (2014). 
  Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).}}
 }

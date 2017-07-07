@@ -105,13 +105,13 @@
     </div>
 
     
-    <p>Simulates from the posterior defined by the functions logLik &amp; logPrior using
+    <p>Simulates from the posterior defined by the functions logLik and logPrior using
  stochastic gradient Langevin Dynamics. The function uses TensorFlow, so needs
  Tensorflow for python installed.</p>
     
 
-    <pre class="usage"><span class='fu'>sgld</span>(<span class='no'>logLik</span>, <span class='no'>logPrior</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>, <span class='no'>n</span>, <span class='kw'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>,
-  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>sgld</span>(<span class='no'>logLik</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>, <span class='kw'>logPrior</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>minibatchSize</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -121,12 +121,6 @@
       <td><p>function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.</p></td>
-    </tr>
-    <tr>
-      <th>logPrior</th>
-      <td><p>function which takes parameters and dataset 
-(list of tensorflow variables and placeholders respectively) as input. 
-The function should return a tensorflow tensor which defines the log prior of the model.</p></td>
     </tr>
     <tr>
       <th>dataset</th>
@@ -141,15 +135,23 @@ The names in the list should correspond to those referred to in the logLik and l
     <tr>
       <th>stepsize</th>
       <td><p>list of stepsizes corresponding to the SGLD stepsizes for each parameter
-The names in the list should correspond to those in params.</p></td>
+The names in the list should correspond to those in params.
+Alternatively specify a single float to use that stepsize for all parameters.</p></td>
     </tr>
     <tr>
-      <th>n</th>
-      <td><p>minibatch size, assumed integer.</p></td>
+      <th>logPrior</th>
+      <td><p>function which takes parameters (list of tensorflow variables) as input.
+The function should return a tensorflow tensor which defines the log prior of the model.
+Optional. Default uninformative improper prior.</p></td>
+    </tr>
+    <tr>
+      <th>minibatchSize</th>
+      <td><p>either as proportion of dataset size or actual size, assumed float or int.
+Optional. Default 0.01.</p></td>
     </tr>
     <tr>
       <th>nIters</th>
-      <td><p>number of iterations of SGLD to perform, optional, assumed integer, default 10^4.</p></td>
+      <td><p>number of iterations of SGLD to perform, assumed integer. Optional. Default 10^4.</p></td>
     </tr>
     <tr>
       <th>verbose</th>
@@ -166,7 +168,7 @@ The names in the list should correspond to those in params.</p></td>
 
     <ul>
 <li><p><a href='http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf'>
- Welling, M., &amp; Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
+ Welling, M., and Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
  ICML (pp. 681-688).</a></p></li>
 </ul>
     

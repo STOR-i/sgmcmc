@@ -1,3 +1,24 @@
+# Create generic sgmcmc object
+createSGMCMC = function( logLik, logPrior, dataset, params, stepsize, minibatchSize ) { 
+    # Get dataset size
+    N = getDatasetSize( dataset )
+    # If minibatchSize is a proportion, convert to an integer
+    minibatchSize = convertProp( minibatchSize, N )
+    # Convert params and dataset to tensorflow variables and placeholders
+    paramstf = setupParams( params )
+    placeholders = setupPlaceholders( dataset, minibatchSize )
+    # Declare estimated log posterior tensor using declared variables and placeholders
+    # Check for tf$float64 errors (we only use tf$float32), if so throw a more explanatory error
+    estLogPost = tryCatch({ 
+        setupEstLogPost( logLik, logPrior, paramstf, placeholders, N, minibatchSize )
+    }, error = function ( e ) throwFloat64Error( e ) )
+    # Check stepsize tuning constants are in list format
+    stepsize = convertList( stepsize, params )
+    # Declare sgmcmc object as list
+    sgmcmc = list( "N" = N, "data" = dataset, "n" = minibatchSize, "placeholders" = placeholders, "stepsize" = stepsize, "params" = paramstf, "estLogPost" = estLogPost )
+    return( sgmcmc )
+}
+
 # Define declareDynamics generic, defined for each SGMCMC method in their respective modules
 # @param sgmcmc a stochastic gradient mcmc object, as defined in the respective modules sgld.r etc.
 declareDynamics = function( sgmcmc ) UseMethod("declareDynamics")
@@ -69,18 +90,30 @@ setupPlaceholders = function( data, n ) {
 }
 
 # Use defined logLik & logPrior functions to declare unbiased estimate of log posterior
-setupEstLogPost = function( logLik, logPrior, params, placeholders, N, n, gibbsParams ) {
+setupEstLogPost = function( logLik, logPrior, params, placeholders, N, n ) {
     correction = tf$constant( N / n, dtype = tf$float32 )
-    # If parameters are declared that will updated using Gibbs then the passed logPrior & logLik 
-    # functions will also take gibbsParams as arguments
-    if ( is.null( gibbsParams ) ) {
-        estLogPost = logPrior( params ) + 
-                correction * logLik( params, placeholders )
+    # If logPrior is NULL then use uninformative prior
+    if ( is.null( logPrior ) ) {
+        estLogPost = correction * logLik( params, placeholders )
     } else {
-        estLogPost = logPrior( params, gibbsParams ) + 
-                correction * logLik( params, placeholders, gibbsParams )
+        estLogPost = logPrior( params ) + correction * logLik( params, placeholders )
     }
     return( estLogPost )
+}
+
+# If minibatch size is a proportion convert to an integer
+convertProp = function( minibatchSize, N ) {
+    if ( minibatchSize < 1 ) {
+        out = round( minibatchSize * N )
+        if ( out == 0 ) {
+            stop( paste0( "minibatchSize proportion (", minibatchSize, 
+                    ") too small for dataset size (", N, ")." ) )
+        } else {
+            return( round( minibatchSize * N ) )
+        }
+    } else {
+        return( minibatchSize )
+    }
 }
 
 # Get the rank of each of the parameter objects, needed for sghmc
@@ -89,7 +122,31 @@ getRanks = function( paramsRaw ) {
     ranks = list()
     for ( pname in names( paramsRaw ) ) {
         param = paramsRaw[[pname]]
-        ranks[[pname]] = length( dim( param ) )
+        # Catch case that param is a vector
+        if ( is.null( dim( param ) ) ) {
+            ranks[[pname]] = as.numeric( length( param ) > 1 )
+        } else {
+            ranks[[pname]] = length( dim( param ) )
+        }
     }
     return( ranks )
+}
+
+# If stepsizes or a or alpha tuning constants are not in a list
+# format then convert to a list format
+convertList = function( tuningConst, params ) {
+    # Do nothing if already a list
+    if( typeof( tuningConst ) == "list" ) {
+        return( tuningConst )
+    }
+    convertedConsts = list()
+    for ( pname in names( params ) ) {
+        convertedConsts[[pname]] = tuningConst
+    }
+    return( convertedConsts )
+}
+
+# If tf$float64 error encountered, provide a more useful message
+throwFloat64Error = function( e ) {
+    stop(paste0("Problem building log posterior estimate from supplied logLik and logPrior functions. This can sometimes be due to constants declared in these functions resulting in objects of type tf$float64. Full output below should make it clear if this is the issue.\n\n", e))
 }
