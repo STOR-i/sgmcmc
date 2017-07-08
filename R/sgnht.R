@@ -13,34 +13,34 @@
 #' @param logLik function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  It should return a tensorflow expression which defines the log likelihood of the model.
-#' @param dataset list of R arrays which defines the datasets for the problem.
+#' @param dataset list of numeric R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
-#' @param params list of R arrays which define the starting point of each parameter.
+#' @param params list of numeric R arrays which define the starting point of each parameter.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
-#' @param stepsize list of numeric values corresponding to the SGNHT eta stepsize terms,
-#'  as defined in the paper given in the references, Appendix F. One value should be given 
-#'  for each parameter in params, the names should correspond to those in params.
-#'  Alternatively specify a single float to use that stepsize for all parameters.
-#' @param logPrior function which takes parameters (list of tensorflow variables) as input.
+#' @param stepsize list of numeric values corresponding to the SGNHT stepsizes for each parameter
+#'  (\eqn{\eta} in the original paper, Algorithm 2). 
+#'  The names in the list should correspond to those in params.
+#'  Alternatively specify a single numeric value to use that stepsize for all parameters.
+#' @param logPrior optional. Default uninformative improper prior.
+#'  Function which takes parameters (list of tensorflow variables) as input.
 #'  The function should return a tensorflow tensor which defines the log prior of the model.
-#'  Optional. Default uninformative improper prior.
-#' @param minibatchSize either as proportion of dataset size or actual size, assumed float or int.
-#'  Optional. Default 0.01.
-#' @param a list of numeric values corresponding to the SGNHT a diffusion factors,
-#'  as defined in the paper given in the references, Appendix F. One value should be given 
+#' @param minibatchSize optional. Default 0.01.
+#'  Numeric or integer value that specifies amount of dataset to use at each iteration 
+#'  either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).
+#' @param a optional. Default 0.01. List of numeric values corresponding to SGNHT diffusion factors
+#'  (see Algorithm 2 of the original paper). One value should be given 
 #'  for each parameter in params, the names should correspond to those in params.
 #'  Alternatively specify a single float to specify that value for all parameters.
-#'  Optional. Default 0.01 for all parameters.
-#' @param nIters number of iterations of SGLD to perform, optional, assumed integer, default 10^4.
-#' @param verbose whether to print algorithm progress or not, assumed BOOLEAN, default TRUE.
+#' @param nIters optional. Default 10^4L. Integer specifying number of iterations to perform.
+#' @param verbose optional. Default TRUE. Boolean specifying whether to print algorithm progress
 #'
-#' @return List of arrays for each parameter containing the MCMC chain.
+#' @return Returns list of arrays for each parameter containing the MCMC chain.
 #'  Dimension of the form (nIters,paramDim1,paramDim2,...)
 #'
 #' @export
 #'
-sgnht = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 500, 
-        a = 0.01, nIters = 10^4, verbose = TRUE ) {
+sgnht = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
+        a = 0.01, nIters = 10^4L, verbose = TRUE ) {
     # Declare SGNHT object
     sgmcmc = genSGNHT( logLik, logPrior, dataset, params, stepsize, a, minibatchSize )
     options = list( "nIters" = nIters, "verbose" = verbose )
@@ -69,32 +69,33 @@ sgnht = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchS
 #' @param logLik function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  It should return a tensorflow expression which defines the log likelihood of the model.
-#' @param dataset list of R arrays which defines the datasets for the problem.
+#' @param dataset list of numeric R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
-#' @param params list of R arrays which define the starting point of each parameter.
+#' @param params list of numeric R arrays which define the starting point of each parameter.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
-#' @param stepsize list of numeric values corresponding to the SGNHT eta stepsize terms,
-#'  as defined in the paper given in the references, Appendix F. One value should be given 
-#'  for each parameter in params, the names should correspond to those in params.
-#'  Alternatively specify a single float to use that stepsize for all parameters.
-#' @param optStepsize numeric, stepsize for optimization step to find MAP estimates of parameters.
-#' @param logPrior function which takes parameters (list of tensorflow variables) as input.
+#' @param stepsize list of numeric values corresponding to the SGNHT stepsizes for each parameter
+#'  (\eqn{\eta} in the original paper, Algorithm 2). 
+#'  The names in the list should correspond to those in params.
+#'  Alternatively specify a single numeric value to use that stepsize for all parameters.
+#' @param optStepsize numeric value specifying the stepsize for the optimization 
+#'  to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.
+#' @param logPrior optional. Default uninformative improper prior.
+#'  Function which takes parameters (list of tensorflow variables) as input.
 #'  The function should return a tensorflow tensor which defines the log prior of the model.
-#'  Optional. Default uninformative improper prior.
-#' @param minibatchSize either as proportion of dataset size or actual size, assumed float or int.
-#'  Optional. Default 0.01.
-#' @param a list of numeric values corresponding to the SGNHT a diffusion factors,
-#'  as defined in the paper given in the references, Appendix F. One value should be given 
+#' @param minibatchSize optional. Default 0.01.
+#'  Numeric or integer value that specifies amount of dataset to use at each iteration 
+#'  either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).
+#' @param a optional. Default 0.01. List of numeric values corresponding to SGNHT diffusion factors
+#'  (see Algorithm 2 of the original paper). One value should be given 
 #'  for each parameter in params, the names should correspond to those in params.
 #'  Alternatively specify a single float to specify that value for all parameters.
-#'  Optional. Default 0.01 for all parameters.
-#' @param nIters integer, number of iterations of SGLD to perform, optional, default 10^4.
-#' @param nItersOpt integer, number of iterations of initial optimization to perform, 
-#'  optional, default 10^4.
-#' @param verbose Boolean, whether to print algorithm progress or not, default TRUE.
+#' @param nIters optional. Default 10^4L. Integer specifying number of iterations to perform.
+#' @param nItersOpt optional. Default 10^4L. 
+#'  Integer specifying number of iterations of initial optimization to perform.
+#' @param verbose optional. Default TRUE. Boolean specifying whether to print algorithm progress.
 #'
-#' @return List of arrays for each parameter containing the MCMC chain.
-#'  Dimension of the form (nIters,paramDim1,paramDim2,...)
+#' @return Returns list of arrays for each parameter containing the MCMC chain.
+#'  Dimension of the form (nIters,paramDim1,paramDim2,...). Names are the same as the params list.
 #'
 #' @export
 #'
@@ -111,7 +112,7 @@ sgnhtcv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = N
 # Create Stochastic Gradient Nose Hoover Thermostat Object
 # 
 # Creates a stochastic gradient Nose Hoover Thermostat (SGNHT) object which can be passed 
-#  to mcmcStep to simulate from 1 step of SGHMC for the posterior defined by logLik and logPrior.
+#  to mcmcStep to simulate from 1 step of SGNHT for the posterior defined by logLik and logPrior.
 genSGNHT = function( logLik, logPrior, dataset, params, stepsize, a, minibatchSize ) {
     # Create generic sgmcmc object
     sgnht = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize )
@@ -128,7 +129,7 @@ genSGNHT = function( logLik, logPrior, dataset, params, stepsize, a, minibatchSi
 
 # Create Stochastic Gradient Nose Hoover Thermostat with Control Variates Object
 # 
-# Creates a stochastic gradient Nose Hoover Thermostat with Control Variates (SGHMCCV) object 
+# Creates a stochastic gradient Nose Hoover Thermostat with Control Variates (SGNHTCV) object 
 #  which can be passed to optUpdate and mcmcStep functions to simulate from SGNHTCV
 #  for the posterior defined by logLik and logPrior.
 genSGNHTCV = function( logLik, logPrior, dataset, params, stepsize, a, 

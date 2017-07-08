@@ -114,8 +114,8 @@
     
 
     <pre class="usage"><span class='fu'>sghmccv</span>(<span class='no'>logLik</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>, <span class='no'>optStepsize</span>, <span class='kw'>logPrior</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>minibatchSize</span> <span class='kw'>=</span> <span class='fl'>500</span>, <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>,
-  <span class='kw'>nItersOpt</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+  <span class='kw'>minibatchSize</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>5L</span>, <span class='kw'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4L</span>,
+  <span class='kw'>nItersOpt</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4L</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -128,67 +128,68 @@ It should return a tensorflow expression which defines the log likelihood of the
     </tr>
     <tr>
       <th>dataset</th>
-      <td><p>list of R arrays which defines the datasets for the problem.
+      <td><p>list of numeric R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions</p></td>
     </tr>
     <tr>
       <th>params</th>
-      <td><p>list of R arrays which define the starting point of each parameter.
+      <td><p>list of numeric R arrays which define the starting point of each parameter.
 The names in the list should correspond to those referred to in the logLik and logPrior functions</p></td>
     </tr>
     <tr>
       <th>stepsize</th>
-      <td><p>list of numeric values corresponding to the SGHMC eta stepsize terms,
-as defined in the paper given in the references. One value should be given 
+      <td><p>list of numeric values corresponding to the SGHMC stepsizes for each parameter
+(\(\eta\) in the original paper). The names in the list should correspond to those in params.
+Alternatively specify a single numeric value to use that stepsize for all parameters.</p></td>
+    </tr>
+    <tr>
+      <th>optStepsize</th>
+      <td><p>numeric value specifying the stepsize for the optimization 
+to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.</p></td>
+    </tr>
+    <tr>
+      <th>logPrior</th>
+      <td><p>optional. Default uninformative improper prior.
+Function which takes parameters (list of tensorflow variables) as input.
+The function should return a tensorflow tensor which defines the log prior of the model.</p></td>
+    </tr>
+    <tr>
+      <th>minibatchSize</th>
+      <td><p>optional. Default 0.01.
+Numeric or integer value that specifies amount of dataset to use at each iteration 
+either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).</p></td>
+    </tr>
+    <tr>
+      <th>alpha</th>
+      <td><p>optional. Default 0.01. 
+List of numeric values corresponding to the SGHMC momentum tuning constants
+(\(\alpha\) in the original paper). One value should be given 
 for each parameter in params, the names should correspond to those in params.
 Alternatively specify a single float to specify that value for all parameters.</p></td>
     </tr>
     <tr>
-      <th>optStepsize</th>
-      <td><p>numeric, stepsize for optimization step to find MAP estimates of parameters.</p></td>
-    </tr>
-    <tr>
-      <th>logPrior</th>
-      <td><p>function which takes parameters (list of tensorflow variables) as input.
-The function should return a tensorflow tensor which defines the log prior of the model.
-Optional. Default uninformative improper prior.</p></td>
-    </tr>
-    <tr>
-      <th>minibatchSize</th>
-      <td><p>either as proportion of dataset size or actual size, assumed float or int.
-Optional. Default 0.01.</p></td>
-    </tr>
-    <tr>
-      <th>alpha</th>
-      <td><p>list of numeric values corresponding to the SGHMC alpha momentum terms,
-as defined in the paper given in the references. One value should be given 
-for each parameter in params, the names should correspond to those in params.
-Alternatively specify a single float to specify that value for all parameters.
-Optional. Default 0.01 for all parameters.</p></td>
-    </tr>
-    <tr>
       <th>L</th>
-      <td><p>integer specifying the trajectory of the simulation, as defined in the main reference.
-Optional. Default 3.</p></td>
+      <td><p>optional. Default 5L. Integer specifying the trajectory parameter of the simulation, 
+as defined in the main reference.</p></td>
     </tr>
     <tr>
       <th>nIters</th>
-      <td><p>integer, number of iterations of SGLD to perform, optional, default 10^4.</p></td>
+      <td><p>optional. Default 10^4L. Integer specifying number of iterations to perform.</p></td>
     </tr>
     <tr>
       <th>nItersOpt</th>
-      <td><p>integer, number of iterations of initial optimization to perform, 
-optional, default 10^4.</p></td>
+      <td><p>optional. Default 10^4L. 
+Integer specifying number of iterations of initial optimization to perform.</p></td>
     </tr>
     <tr>
       <th>verbose</th>
-      <td><p>Boolean, whether to print algorithm progress or not, default TRUE.</p></td>
+      <td><p>optional. Default TRUE. Boolean specifying whether to print algorithm progress.</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>List of arrays for each parameter containing the MCMC chain.
+    <p>Returns list of arrays for each parameter containing the MCMC chain.
  Dimension of the form (nIters,paramDim1,paramDim2,...)</p>
     
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>

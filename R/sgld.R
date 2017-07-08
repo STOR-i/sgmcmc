@@ -11,28 +11,29 @@
 #' @param logLik function which takes parameters and dataset 
 #'  (list of tensorflow variables and placeholders respectively) as input. 
 #'  It should return a tensorflow expression which defines the log likelihood of the model.
-#' @param dataset list of R arrays which defines the datasets for the problem.
+#' @param dataset list of numeric R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
-#' @param params list of R arrays which define the starting point of each parameter.
+#' @param params list of numeric R arrays which define the starting point of each parameter.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
-#' @param stepsize list of stepsizes corresponding to the SGLD stepsizes for each parameter
+#' @param stepsize list of numeric values corresponding to the SGLD stepsizes for each parameter
 #'  The names in the list should correspond to those in params.
-#'  Alternatively specify a single float to use that stepsize for all parameters.
-#' @param logPrior function which takes parameters (list of tensorflow variables) as input.
+#'  Alternatively specify a single numeric value to use that stepsize for all parameters.
+#' @param logPrior optional. Default uninformative improper prior.
+#'  Function which takes parameters (list of tensorflow variables) as input.
 #'  The function should return a tensorflow tensor which defines the log prior of the model.
-#'  Optional. Default uninformative improper prior.
-#' @param minibatchSize either as proportion of dataset size or actual size, assumed float or int.
-#'  Optional. Default 0.01.
-#' @param nIters number of iterations of SGLD to perform, assumed integer. Optional. Default 10^4.
-#' @param verbose whether to print algorithm progress or not, assumed BOOLEAN, default TRUE.
+#' @param minibatchSize optional. Default 0.01.
+#'  Numeric or integer value that specifies amount of dataset to use at each iteration 
+#'  either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).
+#' @param nIters optional. Default 10^4L. Integer specifying number of iterations to perform.
+#' @param verbose optional. Default TRUE. Boolean specifying whether to print algorithm progress
 #'
-#' @return List of arrays for each parameter containing the MCMC chain.
+#' @return Returns list of arrays for each parameter containing the MCMC chain.
 #'  Dimension of the form (nIters,paramDim1,paramDim2,...)
 #'
 #' @export
 #'
 sgld = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
-        nIters = 10^4, verbose = TRUE ) {
+        nIters = 10^4L, verbose = TRUE ) {
     # Create SGLD object
     sgmcmc = genSGLD( logLik, logPrior, dataset, params, stepsize, minibatchSize )
     options = list( "nIters" = nIters, "verbose" = verbose )
@@ -63,27 +64,29 @@ sgld = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSi
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param params list of numeric R arrays which define the starting point of each parameter.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
-#' @param stepsize list of stepsizes corresponding to the SGLD stepsizes for each parameter
+#' @param stepsize list of numeric values corresponding to the SGLD stepsizes for each parameter
 #'  The names in the list should correspond to those in params.
-#'  Alternatively specify a single float to use that stepsize for all parameters.
-#' @param optStepsize stepsize for optimization to find MAP estimates of parameters. Assumed float.
-#' @param logPrior function which takes parameters (list of tensorflow variables) as input.
+#'  Alternatively specify a single numeric value to use that stepsize for all parameters.
+#' @param optStepsize numeric value specifying the stepsize for the optimization 
+#'  to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.
+#' @param logPrior optional. Default uninformative improper prior.
+#'  Function which takes parameters (list of tensorflow variables) as input.
 #'  The function should return a tensorflow tensor which defines the log prior of the model.
-#'  Optional. Default uninformative improper prior.
-#' @param minibatchSize either as proportion of dataset size or actual size, assumed float or int.
-#'  Optional. Default 0.01.
-#' @param nIters integer, number of iterations of SGLD to perform, optional, default 10^4.
-#' @param nItersOpt integer, number of iterations of initial optimization to perform, 
-#'  optional, default 10^4.
-#' @param verbose Boolean, whether to print algorithm progress or not, default TRUE.
+#' @param minibatchSize optional. Default 0.01.
+#'  Numeric or integer value that specifies amount of dataset to use at each iteration 
+#'  either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).
+#' @param nIters optional. Default 10^4L. Integer specifying number of iterations to perform.
+#' @param nItersOpt optional. Default 10^4L. 
+#'  Integer specifying number of iterations of initial optimization to perform.
+#' @param verbose optional. Default TRUE. Boolean specifying whether to print algorithm progress
 #'
-#' @return List of arrays for each parameter containing the MCMC chain.
+#' @return Returns list of arrays for each parameter containing the MCMC chain.
 #'  Dimension of the form (nIters,paramDim1,paramDim2,...)
 #'
 #' @export
 #'
 sgldcv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL,
-        minibatchSize = 0.01, nIters = 10^4, nItersOpt = 10^4, verbose = TRUE ) {
+        minibatchSize = 0.01, nIters = 10^4L, nItersOpt = 10^4L, verbose = TRUE ) {
     # Setup SGLDCV object
     sgmcmcCV = genSGLDCV( logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize )
     options = list( "nIters" = nIters, "nItersOpt" = nItersOpt, "verbose" = verbose )

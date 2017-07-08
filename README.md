@@ -2,12 +2,12 @@
 
 `sgmcmc` implements a lot of the popular stochastic gradient MCMC methods including [SGLD](http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf), [SGHMC](https://arxiv.org/pdf/1402.4102v2.pdf) and [SGNHT](http://papers.nips.cc/paper/5592-bayesian-sampling-using-stochastic-gradient-thermostats.pdf). The package uses automatic differentiation, so all the differentiation needed for the methods is calculated automatically. Control variate methods can be used in order to improve the efficiency of the methods as proposed in the [recent publication](https://github.com/jbaker92/stochasticGradientMCMC).
 
-The package is built on top of the [tensorflow library for R](https://tensorflow.rstudio.com/), which has a lot of support for statistical distributions and operations, which allows a large class of posteriors to be built. For more details on the [tensorflow R library](https://tensorflow.rstudio.com/) follow the link, also see the [tensorflow API](https://www.tensorflow.org/api_docs/) for full documentation.
+The package is built on top of the [TensorFlow library for R](https://tensorflow.rstudio.com/), which has a lot of support for statistical distributions and operations, which allows a large class of posteriors to be built. For more details can be found at the [TensorFlow R library webpage](https://tensorflow.rstudio.com/), also see the [TensorFlow API](https://www.tensorflow.org/api_docs/) for full documentation.
 
 ## Installation
 
 `sgmcmc` requires [TensorFlow for R](https://cran.r-project.org/web/packages/devtools/index.html) to be installed so has a few steps:
-- Install tensorflow for python, instructions for this can be found [here](https://www.tensorflow.org/install/)
+- Install TensorFlow for python, instructions for this can be found [here](https://www.tensorflow.org/install/)
 - Make sure [devtools](https://cran.r-project.org/web/packages/devtools/index.html) are installed, this can be installed simply by running `install.packages("devtools")` 
 - Now run `devtools::install_github("STOR-i/sgmcmc")`.
 
@@ -17,14 +17,14 @@ The TensorFlow API changes a lot, so it's best to make sure your TensorFlow for 
 
 It's recommended you start [here](https://stor-i.github.io/sgmcmc///articles/sgmcmc.html). This getting started page outlines the general structure of the package and its usage.
 
-There's also worked examples for the following models (these will be extended as the package matures)
+There's also worked examples for the following models (these will be extended as the package matures):
  - [Multivariate Gaussian](https://stor-i.github.io/sgmcmc///articles/mvGauss.html)
  - [Gaussian Mixture](https://stor-i.github.io/sgmcmc///articles/gaussMixture.html)
  - [Logistic Regression](https://stor-i.github.io/sgmcmc///articles/logisticRegression.html)
 
-Finally full details of the API can be found [here](https://stor-i.github.io/sgmcmc///reference/index.html)
+Finally full details of the API can be found [here](https://stor-i.github.io/sgmcmc///reference/index.html).
 
-For the source code, and bug reporting, see the [Github page](https://github.com/STOR-i/sgmcmc)
+For the source code, and bug reporting, see the [Github page](https://github.com/STOR-i/sgmcmc).
 
 ## Issues Running Examples
 

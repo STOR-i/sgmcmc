@@ -93,7 +93,7 @@
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sgmcmc)
 <span class="co"># Load data from package</span>
 <span class="kw">data</span>(<span class="st">"covertype"</span>)</code></pre></div>
-<p>First we’ll remove about 10000 observations from the original dataset, this will be used to check that our algorithm did okay. Then we’ll separate out the response variable <code>y</code> and the explanatory variables <code>X</code>. The response variable is the first column in the dataset.</p>
+<p>First we’ll remove about 10000 observations from the original dataset to form a test set, this will be used to check that our algorithm did okay. Then we’ll separate out the response variable <code>y</code> and the explanatory variables <code>X</code>. The response variable is the first column in the dataset.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">testObservations =<span class="st"> </span><span class="kw">sample</span>(<span class="kw">nrow</span>(covertype), <span class="dv">10</span>^<span class="dv">4</span>)
 testSet =<span class="st"> </span>covertype[testObservations,]
 X =<span class="st"> </span>covertype[-<span class="kw">c</span>(testObservations),<span class="dv">2</span>:<span class="kw">ncol</span>(covertype)]
@@ -110,235 +110,232 @@ params =<span class="st"> </span><span class="kw">list</span>( <span class="st">
     logLik =<span class="st"> </span>tf$<span class="kw">reduce_sum</span>(dataset$y *<span class="st"> </span>tf$<span class="kw">log</span>(yEstimated) +<span class="st"> </span>(<span class="dv">1</span> -<span class="st"> </span>dataset$y) *<span class="st"> </span>tf$<span class="kw">log</span>(<span class="dv">1</span> -<span class="st"> </span>yEstimated))
     <span class="kw">return</span>(logLik)
 }</code></pre></div>
-<p><code>R</code> does not play nicely with the tensorflow type system, so make sure you set all your constants in the <code>logLik</code> and <code>logPrior</code> functions to <code>tf$float32</code>. Otherwise you will encounter an error.</p>
-<p>Next we want to define our log prior, we assume each <span class="math inline">\(\beta_i\)</span> have independent prior Laplace distribution, so that <span class="math inline">\(\log p( \beta ) = - \sum_{i=0}^d | \beta_i|\)</span>. Similar to the log likelihood definition, the log prior is defined as a function with input <code>params</code>. In our case the definition is</p>
+<p>Next we want to define our log prior, we assume each <span class="math inline">\(\beta_i\)</span> have independent prior Laplace distribution, with location 0 and scale 1, so that <span class="math inline">\(\log p( \beta ) = - \sum_{i=0}^d | \beta_i|\)</span>. Similar to the log likelihood definition, the log prior is defined as a function with input <code>params</code>. In our case the definition is</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">logPrior =<span class="st"> </span>function(params) {
     logPrior =<span class="st"> </span>-<span class="st"> </span>(tf$<span class="kw">reduce_sum</span>(tf$<span class="kw">abs</span>(params$beta)) +<span class="st"> </span>tf$<span class="kw">reduce_sum</span>(tf$<span class="kw">abs</span>(params$bias)))
     <span class="kw">return</span>(logPrior)
 }</code></pre></div>
-<p>Again make sure you set all your constants inside the function to <code>tf$float32</code>.</p>
-<p>Finally we’ll set the stepsize parameters for the algorithm, along with the minibatch size. <code>sgldcv</code> relies on two stepsize parameters, one for the optimization step and one for the MCMC step. The values of the optimization and MCMC stepsizes will generally be quite similar. To allow stepsizes to be set for different parameters, the form of the stepsizes for the MCMC will be lists with names corresponding to each of the names in <code>params</code>. The optimization step will just be one value as the stepsize is automatically tuned</p>
+<p>Finally we’ll set the stepsize parameters for the algorithm, along with the minibatch size. <code>sgldcv</code> relies on two stepsize parameters, one for the optimization step and one for the MCMC step. To allow stepsizes to be set for different parameters, the form of the stepsizes for the MCMC will be lists with names corresponding to each of the names in <code>params</code>. The optimization step will just be one value as the stepsize is automatically tuned</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stepsizesMCMC =<span class="st"> </span><span class="kw">list</span>(<span class="st">"beta"</span> =<span class="st"> </span><span class="fl">2e-5</span>, <span class="st">"bias"</span> =<span class="st"> </span><span class="fl">2e-5</span>)
-stepsizesOptimization =<span class="st"> </span><span class="fl">1e-1</span>
-<span class="co"># Set minibatch size</span>
-n =<span class="st"> </span><span class="dv">500</span></code></pre></div>
-<p>Now we can run our SGLD-CV algorithm using the function <code>sgldcv</code> from the <code>sgmcmc</code> package, which returns a list of Markov chains for each parameter as output. Use the argument <code>verbose = FALSE</code> to hide the output of the function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw"><a href="../reference/sgldcv.html">sgldcv</a></span>(logLik, logPrior, dataset, params, stepsizesMCMC, stepsizesOptimization, n, <span class="dt">nIters =</span> <span class="fl">1.1e4</span> )</code></pre></div>
+stepsizesOptimization =<span class="st"> </span><span class="fl">1e-1</span></code></pre></div>
+<p>Alternatively we can simply use the shortcut <code>stepsizesMCMC = 2e-5</code> which would set the stepsizes for each parameter to <code>2e-5</code>. The optimization step is performed using the <code>TensorFlow</code> <code>AdamOptimizer</code>.</p>
+<p>Now we can run our SGLD-CV algorithm using the function <code>sgldcv</code> from the <code>sgmcmc</code> package, which returns a list of Markov chains for each parameter as output. Use the argument <code>verbose = FALSE</code> to hide the output of the function. As the dataset size is quite large, we’ll change the <code>minibatchSize</code> from its default <code>0.01 * N</code> to <code>500</code>. To allow a small 1000 iteration burn-in we’ll set the number of iterations to be 11000</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw"><a href="../reference/sgldcv.html">sgldcv</a></span>(logLik, dataset, params, stepsizesMCMC, stepsizesOptimization, <span class="dt">logPrior =</span> logPrior, <span class="dt">minibatchSize =</span> <span class="dv">500</span>, <span class="dt">nIters =</span> <span class="dv">11000</span> ) </code></pre></div>
 <pre><code>## 
 ## Finding initial MAP estimates...
-## Iteration: 100       Log posterior estimate: -299851.8125
-## Iteration: 200       Log posterior estimate: -322078.125
-## Iteration: 300       Log posterior estimate: -300772.0625
-## Iteration: 400       Log posterior estimate: -294399
-## Iteration: 500       Log posterior estimate: -278724.46875
-## Iteration: 600       Log posterior estimate: -299461.625
-## Iteration: 700       Log posterior estimate: -305796.5625
-## Iteration: 800       Log posterior estimate: -312163.5
-## Iteration: 900       Log posterior estimate: -321498.125
-## Iteration: 1000      Log posterior estimate: -262056.0625
-## Iteration: 1100      Log posterior estimate: -290457.3125
-## Iteration: 1200      Log posterior estimate: -301229.34375
-## Iteration: 1300      Log posterior estimate: -287633.1875
-## Iteration: 1400      Log posterior estimate: -284077.28125
-## Iteration: 1500      Log posterior estimate: -293211.25
-## Iteration: 1600      Log posterior estimate: -292521.6875
-## Iteration: 1700      Log posterior estimate: -303707.875
-## Iteration: 1800      Log posterior estimate: -309465.34375
-## Iteration: 1900      Log posterior estimate: -302692.0625
-## Iteration: 2000      Log posterior estimate: -295733.8125
-## Iteration: 2100      Log posterior estimate: -291194.1875
-## Iteration: 2200      Log posterior estimate: -285147
-## Iteration: 2300      Log posterior estimate: -301859.03125
-## Iteration: 2400      Log posterior estimate: -295253.84375
-## Iteration: 2500      Log posterior estimate: -290789.71875
-## Iteration: 2600      Log posterior estimate: -308886.84375
-## Iteration: 2700      Log posterior estimate: -313688.1875
-## Iteration: 2800      Log posterior estimate: -284940.375
-## Iteration: 2900      Log posterior estimate: -313687.71875
-## Iteration: 3000      Log posterior estimate: -297910.46875
-## Iteration: 3100      Log posterior estimate: -314987.1875
-## Iteration: 3200      Log posterior estimate: -284750.1875
-## Iteration: 3300      Log posterior estimate: -295314.09375
-## Iteration: 3400      Log posterior estimate: -315009.28125
-## Iteration: 3500      Log posterior estimate: -314325.28125
-## Iteration: 3600      Log posterior estimate: -266565.28125
-## Iteration: 3700      Log posterior estimate: -297565.46875
-## Iteration: 3800      Log posterior estimate: -298627.21875
-## Iteration: 3900      Log posterior estimate: -310219.15625
-## Iteration: 4000      Log posterior estimate: -273255.5
-## Iteration: 4100      Log posterior estimate: -296741.59375
-## Iteration: 4200      Log posterior estimate: -309084.375
-## Iteration: 4300      Log posterior estimate: -312367.78125
-## Iteration: 4400      Log posterior estimate: -301914.53125
-## Iteration: 4500      Log posterior estimate: -293335.78125
-## Iteration: 4600      Log posterior estimate: -317538.03125
-## Iteration: 4700      Log posterior estimate: -297459.5625
-## Iteration: 4800      Log posterior estimate: -288743.625
-## Iteration: 4900      Log posterior estimate: -285322.03125
-## Iteration: 5000      Log posterior estimate: -291152.21875
-## Iteration: 5100      Log posterior estimate: -305138.09375
-## Iteration: 5200      Log posterior estimate: -314768.65625
-## Iteration: 5300      Log posterior estimate: -289192.8125
-## Iteration: 5400      Log posterior estimate: -282797.0625
-## Iteration: 5500      Log posterior estimate: -320772.21875
-## Iteration: 5600      Log posterior estimate: -315328.9375
-## Iteration: 5700      Log posterior estimate: -302562.78125
-## Iteration: 5800      Log posterior estimate: -296321.8125
-## Iteration: 5900      Log posterior estimate: -277980.625
-## Iteration: 6000      Log posterior estimate: -269311.0625
-## Iteration: 6100      Log posterior estimate: -287340.375
-## Iteration: 6200      Log posterior estimate: -299142.9375
-## Iteration: 6300      Log posterior estimate: -279262.34375
-## Iteration: 6400      Log posterior estimate: -295196.65625
-## Iteration: 6500      Log posterior estimate: -284171.1875
-## Iteration: 6600      Log posterior estimate: -302861.28125
-## Iteration: 6700      Log posterior estimate: -306678.1875
-## Iteration: 6800      Log posterior estimate: -278212.9375
-## Iteration: 6900      Log posterior estimate: -292033.5625
-## Iteration: 7000      Log posterior estimate: -293769.375
-## Iteration: 7100      Log posterior estimate: -273786.59375
-## Iteration: 7200      Log posterior estimate: -297708.03125
-## Iteration: 7300      Log posterior estimate: -280093.6875
-## Iteration: 7400      Log posterior estimate: -309789.78125
-## Iteration: 7500      Log posterior estimate: -303265.15625
-## Iteration: 7600      Log posterior estimate: -274269.4375
-## Iteration: 7700      Log posterior estimate: -308897.375
-## Iteration: 7800      Log posterior estimate: -296710.34375
-## Iteration: 7900      Log posterior estimate: -285607
-## Iteration: 8000      Log posterior estimate: -287215.6875
-## Iteration: 8100      Log posterior estimate: -318733.90625
-## Iteration: 8200      Log posterior estimate: -295050.40625
-## Iteration: 8300      Log posterior estimate: -316826.8125
-## Iteration: 8400      Log posterior estimate: -284820.21875
-## Iteration: 8500      Log posterior estimate: -296042.96875
-## Iteration: 8600      Log posterior estimate: -317057.6875
-## Iteration: 8700      Log posterior estimate: -299920.59375
-## Iteration: 8800      Log posterior estimate: -300132.46875
-## Iteration: 8900      Log posterior estimate: -297135.90625
-## Iteration: 9000      Log posterior estimate: -285629.6875
-## Iteration: 9100      Log posterior estimate: -302978.6875
-## Iteration: 9200      Log posterior estimate: -298859.53125
-## Iteration: 9300      Log posterior estimate: -274128.1875
-## Iteration: 9400      Log posterior estimate: -289839.375
-## Iteration: 9500      Log posterior estimate: -296265.875
-## Iteration: 9600      Log posterior estimate: -285243
-## Iteration: 9700      Log posterior estimate: -304120.8125
-## Iteration: 9800      Log posterior estimate: -285481.90625
-## Iteration: 9900      Log posterior estimate: -312055.21875
-## Iteration: 10000     Log posterior estimate: -288517.09375
+## Iteration: 100       Log posterior estimate: -306558.90625
+## Iteration: 200       Log posterior estimate: -294543
+## Iteration: 300       Log posterior estimate: -289385.78125
+## Iteration: 400       Log posterior estimate: -287818.59375
+## Iteration: 500       Log posterior estimate: -302762.875
+## Iteration: 600       Log posterior estimate: -290571.40625
+## Iteration: 700       Log posterior estimate: -307260.65625
+## Iteration: 800       Log posterior estimate: -297085.375
+## Iteration: 900       Log posterior estimate: -281971.34375
+## Iteration: 1000      Log posterior estimate: -287171.625
+## Iteration: 1100      Log posterior estimate: -284299.46875
+## Iteration: 1200      Log posterior estimate: -304946.28125
+## Iteration: 1300      Log posterior estimate: -302587.90625
+## Iteration: 1400      Log posterior estimate: -289885.65625
+## Iteration: 1500      Log posterior estimate: -284034.96875
+## Iteration: 1600      Log posterior estimate: -282250.90625
+## Iteration: 1700      Log posterior estimate: -290542.53125
+## Iteration: 1800      Log posterior estimate: -291191.40625
+## Iteration: 1900      Log posterior estimate: -273332.65625
+## Iteration: 2000      Log posterior estimate: -277562.3125
+## Iteration: 2100      Log posterior estimate: -311468.0625
+## Iteration: 2200      Log posterior estimate: -320676.8125
+## Iteration: 2300      Log posterior estimate: -304902.375
+## Iteration: 2400      Log posterior estimate: -303174.34375
+## Iteration: 2500      Log posterior estimate: -305907.9375
+## Iteration: 2600      Log posterior estimate: -295816.53125
+## Iteration: 2700      Log posterior estimate: -275839.28125
+## Iteration: 2800      Log posterior estimate: -318150
+## Iteration: 2900      Log posterior estimate: -275842.78125
+## Iteration: 3000      Log posterior estimate: -285982.25
+## Iteration: 3100      Log posterior estimate: -294754.40625
+## Iteration: 3200      Log posterior estimate: -312508.40625
+## Iteration: 3300      Log posterior estimate: -303825.5625
+## Iteration: 3400      Log posterior estimate: -306929.65625
+## Iteration: 3500      Log posterior estimate: -307480.875
+## Iteration: 3600      Log posterior estimate: -294672.3125
+## Iteration: 3700      Log posterior estimate: -286724.5
+## Iteration: 3800      Log posterior estimate: -297325.6875
+## Iteration: 3900      Log posterior estimate: -290604.6875
+## Iteration: 4000      Log posterior estimate: -283937.65625
+## Iteration: 4100      Log posterior estimate: -306148.09375
+## Iteration: 4200      Log posterior estimate: -286010.125
+## Iteration: 4300      Log posterior estimate: -278878.25
+## Iteration: 4400      Log posterior estimate: -277753.46875
+## Iteration: 4500      Log posterior estimate: -297094.25
+## Iteration: 4600      Log posterior estimate: -312554.75
+## Iteration: 4700      Log posterior estimate: -298221.21875
+## Iteration: 4800      Log posterior estimate: -297161.46875
+## Iteration: 4900      Log posterior estimate: -277354.8125
+## Iteration: 5000      Log posterior estimate: -322009.625
+## Iteration: 5100      Log posterior estimate: -282899.5
+## Iteration: 5200      Log posterior estimate: -291323.125
+## Iteration: 5300      Log posterior estimate: -305873.03125
+## Iteration: 5400      Log posterior estimate: -311638.25
+## Iteration: 5500      Log posterior estimate: -330112.46875
+## Iteration: 5600      Log posterior estimate: -292892.71875
+## Iteration: 5700      Log posterior estimate: -287748.75
+## Iteration: 5800      Log posterior estimate: -278904.625
+## Iteration: 5900      Log posterior estimate: -297840.59375
+## Iteration: 6000      Log posterior estimate: -303550.9375
+## Iteration: 6100      Log posterior estimate: -290097.3125
+## Iteration: 6200      Log posterior estimate: -316005.34375
+## Iteration: 6300      Log posterior estimate: -303137.875
+## Iteration: 6400      Log posterior estimate: -298980.53125
+## Iteration: 6500      Log posterior estimate: -307666.65625
+## Iteration: 6600      Log posterior estimate: -285545.71875
+## Iteration: 6700      Log posterior estimate: -279393.59375
+## Iteration: 6800      Log posterior estimate: -281222.3125
+## Iteration: 6900      Log posterior estimate: -297238.75
+## Iteration: 7000      Log posterior estimate: -293479.1875
+## Iteration: 7100      Log posterior estimate: -297484.875
+## Iteration: 7200      Log posterior estimate: -315328.28125
+## Iteration: 7300      Log posterior estimate: -303768.5
+## Iteration: 7400      Log posterior estimate: -281974.5
+## Iteration: 7500      Log posterior estimate: -303285.40625
+## Iteration: 7600      Log posterior estimate: -288758.53125
+## Iteration: 7700      Log posterior estimate: -308933.0625
+## Iteration: 7800      Log posterior estimate: -286858.3125
+## Iteration: 7900      Log posterior estimate: -275078.8125
+## Iteration: 8000      Log posterior estimate: -293806.5625
+## Iteration: 8100      Log posterior estimate: -299821.25
+## Iteration: 8200      Log posterior estimate: -310545.65625
+## Iteration: 8300      Log posterior estimate: -292943.15625
+## Iteration: 8400      Log posterior estimate: -280078.375
+## Iteration: 8500      Log posterior estimate: -294646.46875
+## Iteration: 8600      Log posterior estimate: -289285.53125
+## Iteration: 8700      Log posterior estimate: -301920.5
+## Iteration: 8800      Log posterior estimate: -300733.875
+## Iteration: 8900      Log posterior estimate: -281673.03125
+## Iteration: 9000      Log posterior estimate: -289030.21875
+## Iteration: 9100      Log posterior estimate: -306019.28125
+## Iteration: 9200      Log posterior estimate: -285613.59375
+## Iteration: 9300      Log posterior estimate: -273107.84375
+## Iteration: 9400      Log posterior estimate: -285846.8125
+## Iteration: 9500      Log posterior estimate: -285835.125
+## Iteration: 9600      Log posterior estimate: -306079.03125
+## Iteration: 9700      Log posterior estimate: -277262.875
+## Iteration: 9800      Log posterior estimate: -313948.6875
+## Iteration: 9900      Log posterior estimate: -288085.21875
+## Iteration: 10000     Log posterior estimate: -297637.1875
 ## 
 ## Sampling using SGMCMC...
-## Iteration: 100       Log posterior estimate: -295110.1875
-## Iteration: 200       Log posterior estimate: -286928.90625
-## Iteration: 300       Log posterior estimate: -276459.84375
-## Iteration: 400       Log posterior estimate: -286794.96875
-## Iteration: 500       Log posterior estimate: -305200.25
-## Iteration: 600       Log posterior estimate: -295790.8125
-## Iteration: 700       Log posterior estimate: -277825.03125
-## Iteration: 800       Log posterior estimate: -282012.4375
-## Iteration: 900       Log posterior estimate: -283068.53125
-## Iteration: 1000      Log posterior estimate: -293965.09375
-## Iteration: 1100      Log posterior estimate: -298227.90625
-## Iteration: 1200      Log posterior estimate: -290257.71875
-## Iteration: 1300      Log posterior estimate: -308564.15625
-## Iteration: 1400      Log posterior estimate: -294261.53125
-## Iteration: 1500      Log posterior estimate: -294313.40625
-## Iteration: 1600      Log posterior estimate: -321704.6875
-## Iteration: 1700      Log posterior estimate: -283353.1875
-## Iteration: 1800      Log posterior estimate: -264571.0625
-## Iteration: 1900      Log posterior estimate: -300649.1875
-## Iteration: 2000      Log posterior estimate: -291802.65625
-## Iteration: 2100      Log posterior estimate: -296689.84375
-## Iteration: 2200      Log posterior estimate: -274900.5
-## Iteration: 2300      Log posterior estimate: -299010.59375
-## Iteration: 2400      Log posterior estimate: -285860.59375
-## Iteration: 2500      Log posterior estimate: -333814.0625
-## Iteration: 2600      Log posterior estimate: -289234.34375
-## Iteration: 2700      Log posterior estimate: -298958.125
-## Iteration: 2800      Log posterior estimate: -270659.65625
-## Iteration: 2900      Log posterior estimate: -306953.4375
-## Iteration: 3000      Log posterior estimate: -297066.09375
-## Iteration: 3100      Log posterior estimate: -285262.8125
-## Iteration: 3200      Log posterior estimate: -290766.09375
-## Iteration: 3300      Log posterior estimate: -283050.46875
-## Iteration: 3400      Log posterior estimate: -279300.46875
-## Iteration: 3500      Log posterior estimate: -291918.15625
-## Iteration: 3600      Log posterior estimate: -300380.5
-## Iteration: 3700      Log posterior estimate: -289364.15625
-## Iteration: 3800      Log posterior estimate: -281882.5
-## Iteration: 3900      Log posterior estimate: -299659.09375
-## Iteration: 4000      Log posterior estimate: -317128.625
-## Iteration: 4100      Log posterior estimate: -288633.875
-## Iteration: 4200      Log posterior estimate: -289388.0625
-## Iteration: 4300      Log posterior estimate: -303191.21875
-## Iteration: 4400      Log posterior estimate: -317041.09375
-## Iteration: 4500      Log posterior estimate: -317093.03125
-## Iteration: 4600      Log posterior estimate: -274269.84375
-## Iteration: 4700      Log posterior estimate: -290205.9375
-## Iteration: 4800      Log posterior estimate: -281579.53125
-## Iteration: 4900      Log posterior estimate: -296660.9375
-## Iteration: 5000      Log posterior estimate: -289601.96875
-## Iteration: 5100      Log posterior estimate: -286963.84375
-## Iteration: 5200      Log posterior estimate: -281445.46875
-## Iteration: 5300      Log posterior estimate: -280558.75
-## Iteration: 5400      Log posterior estimate: -283069.875
-## Iteration: 5500      Log posterior estimate: -292791
-## Iteration: 5600      Log posterior estimate: -281902.15625
-## Iteration: 5700      Log posterior estimate: -295016.96875
-## Iteration: 5800      Log posterior estimate: -304313.875
-## Iteration: 5900      Log posterior estimate: -337126.125
-## Iteration: 6000      Log posterior estimate: -297448.125
-## Iteration: 6100      Log posterior estimate: -308031.09375
-## Iteration: 6200      Log posterior estimate: -277985.75
-## Iteration: 6300      Log posterior estimate: -275127.5
-## Iteration: 6400      Log posterior estimate: -289472.1875
-## Iteration: 6500      Log posterior estimate: -294380.65625
-## Iteration: 6600      Log posterior estimate: -308661.53125
-## Iteration: 6700      Log posterior estimate: -271223.3125
-## Iteration: 6800      Log posterior estimate: -275692.03125
-## Iteration: 6900      Log posterior estimate: -302401.53125
-## Iteration: 7000      Log posterior estimate: -291275.9375
-## Iteration: 7100      Log posterior estimate: -304157.15625
-## Iteration: 7200      Log posterior estimate: -276075.84375
-## Iteration: 7300      Log posterior estimate: -299280.125
-## Iteration: 7400      Log posterior estimate: -287227.5
-## Iteration: 7500      Log posterior estimate: -280944
-## Iteration: 7600      Log posterior estimate: -297303.6875
-## Iteration: 7700      Log posterior estimate: -282904.4375
-## Iteration: 7800      Log posterior estimate: -275854.3125
-## Iteration: 7900      Log posterior estimate: -296481.71875
-## Iteration: 8000      Log posterior estimate: -298844.8125
-## Iteration: 8100      Log posterior estimate: -305286.8125
-## Iteration: 8200      Log posterior estimate: -293273.9375
-## Iteration: 8300      Log posterior estimate: -295053.4375
-## Iteration: 8400      Log posterior estimate: -267407.34375
-## Iteration: 8500      Log posterior estimate: -318447.15625
-## Iteration: 8600      Log posterior estimate: -286736
-## Iteration: 8700      Log posterior estimate: -275264.65625
-## Iteration: 8800      Log posterior estimate: -298706.5625
-## Iteration: 8900      Log posterior estimate: -276712.34375
-## Iteration: 9000      Log posterior estimate: -289442.625
-## Iteration: 9100      Log posterior estimate: -315028.1875
-## Iteration: 9200      Log posterior estimate: -306360.75
-## Iteration: 9300      Log posterior estimate: -302600.71875
-## Iteration: 9400      Log posterior estimate: -277767.25
-## Iteration: 9500      Log posterior estimate: -286319.09375
-## Iteration: 9600      Log posterior estimate: -319019.4375
-## Iteration: 9700      Log posterior estimate: -295327.75
-## Iteration: 9800      Log posterior estimate: -291467.9375
-## Iteration: 9900      Log posterior estimate: -291457.46875
-## Iteration: 10000     Log posterior estimate: -295210.375
-## Iteration: 10100     Log posterior estimate: -293657.25
-## Iteration: 10200     Log posterior estimate: -287317.3125
-## Iteration: 10300     Log posterior estimate: -302056.1875
-## Iteration: 10400     Log posterior estimate: -299368.875
-## Iteration: 10500     Log posterior estimate: -293292.0625
-## Iteration: 10600     Log posterior estimate: -305430.0625
-## Iteration: 10700     Log posterior estimate: -286387.90625
-## Iteration: 10800     Log posterior estimate: -285930.03125
-## Iteration: 10900     Log posterior estimate: -285053.6875
-## Iteration: 11000     Log posterior estimate: -273070.0625</code></pre>
-<p>To check the algorithm converged, we’ll plot the average log predictive density of the data from our test set every 10 iterations. Let <span class="math display">\[\hat \pi_i^{(j)} := \frac{1}{1 + \exp\left[-\beta_0^{(j)} - \mathbb x_i \beta^{(j)}\right]},\]</span> here <span class="math inline">\(\hat \pi_i^{(j)}\)</span> denotes the probability that the <span class="math inline">\(j^{\text{th}}\)</span> iteration of our MCMC chain assigned to observation <span class="math inline">\(i\)</span> in our test set. Define our test set by <span class="math inline">\(T\)</span>, the average log predictive is given by <span class="math display">\[A := \frac{1}{|T|} \sum_{y_i \in T} \left[ y_i \log \hat \pi_i^{(j)} + (1 - y_i) \log(1 - \hat \pi_i^{(j)}) \right]\]</span></p>
+## Iteration: 100       Log posterior estimate: -307936.3125
+## Iteration: 200       Log posterior estimate: -301454.96875
+## Iteration: 300       Log posterior estimate: -303885.125
+## Iteration: 400       Log posterior estimate: -312292.5625
+## Iteration: 500       Log posterior estimate: -296410.34375
+## Iteration: 600       Log posterior estimate: -294879.3125
+## Iteration: 700       Log posterior estimate: -280883.3125
+## Iteration: 800       Log posterior estimate: -294681.65625
+## Iteration: 900       Log posterior estimate: -301332.5625
+## Iteration: 1000      Log posterior estimate: -288785.84375
+## Iteration: 1100      Log posterior estimate: -310836.6875
+## Iteration: 1200      Log posterior estimate: -279965.90625
+## Iteration: 1300      Log posterior estimate: -277588.875
+## Iteration: 1400      Log posterior estimate: -289209.6875
+## Iteration: 1500      Log posterior estimate: -272914.03125
+## Iteration: 1600      Log posterior estimate: -289307.03125
+## Iteration: 1700      Log posterior estimate: -317426.46875
+## Iteration: 1800      Log posterior estimate: -298805.46875
+## Iteration: 1900      Log posterior estimate: -306037.21875
+## Iteration: 2000      Log posterior estimate: -287385.375
+## Iteration: 2100      Log posterior estimate: -292980.6875
+## Iteration: 2200      Log posterior estimate: -283287.3125
+## Iteration: 2300      Log posterior estimate: -291023.875
+## Iteration: 2400      Log posterior estimate: -301755.59375
+## Iteration: 2500      Log posterior estimate: -293533.78125
+## Iteration: 2600      Log posterior estimate: -286064.15625
+## Iteration: 2700      Log posterior estimate: -319232.34375
+## Iteration: 2800      Log posterior estimate: -306833
+## Iteration: 2900      Log posterior estimate: -313044.59375
+## Iteration: 3000      Log posterior estimate: -302804.21875
+## Iteration: 3100      Log posterior estimate: -287233.46875
+## Iteration: 3200      Log posterior estimate: -267522.03125
+## Iteration: 3300      Log posterior estimate: -280572.71875
+## Iteration: 3400      Log posterior estimate: -296280.1875
+## Iteration: 3500      Log posterior estimate: -285639.78125
+## Iteration: 3600      Log posterior estimate: -284808.59375
+## Iteration: 3700      Log posterior estimate: -295970.09375
+## Iteration: 3800      Log posterior estimate: -302550.28125
+## Iteration: 3900      Log posterior estimate: -303264.125
+## Iteration: 4000      Log posterior estimate: -276689.8125
+## Iteration: 4100      Log posterior estimate: -272306.65625
+## Iteration: 4200      Log posterior estimate: -296589.8125
+## Iteration: 4300      Log posterior estimate: -298412.53125
+## Iteration: 4400      Log posterior estimate: -299965.875
+## Iteration: 4500      Log posterior estimate: -302037.75
+## Iteration: 4600      Log posterior estimate: -301439.25
+## Iteration: 4700      Log posterior estimate: -288312.875
+## Iteration: 4800      Log posterior estimate: -302664.3125
+## Iteration: 4900      Log posterior estimate: -321502.75
+## Iteration: 5000      Log posterior estimate: -316205.75
+## Iteration: 5100      Log posterior estimate: -272207.125
+## Iteration: 5200      Log posterior estimate: -278043.4375
+## Iteration: 5300      Log posterior estimate: -313072.375
+## Iteration: 5400      Log posterior estimate: -270360.65625
+## Iteration: 5500      Log posterior estimate: -335272.375
+## Iteration: 5600      Log posterior estimate: -287884.375
+## Iteration: 5700      Log posterior estimate: -293264.09375
+## Iteration: 5800      Log posterior estimate: -319302.25
+## Iteration: 5900      Log posterior estimate: -290807.40625
+## Iteration: 6000      Log posterior estimate: -287707.65625
+## Iteration: 6100      Log posterior estimate: -285501.78125
+## Iteration: 6200      Log posterior estimate: -290025.09375
+## Iteration: 6300      Log posterior estimate: -276712.8125
+## Iteration: 6400      Log posterior estimate: -286735.96875
+## Iteration: 6500      Log posterior estimate: -302439.6875
+## Iteration: 6600      Log posterior estimate: -302033.40625
+## Iteration: 6700      Log posterior estimate: -268591.9375
+## Iteration: 6800      Log posterior estimate: -303499.3125
+## Iteration: 6900      Log posterior estimate: -287461.125
+## Iteration: 7000      Log posterior estimate: -293862.1875
+## Iteration: 7100      Log posterior estimate: -288109.6875
+## Iteration: 7200      Log posterior estimate: -314147.65625
+## Iteration: 7300      Log posterior estimate: -301815.625
+## Iteration: 7400      Log posterior estimate: -287293.65625
+## Iteration: 7500      Log posterior estimate: -301617.5625
+## Iteration: 7600      Log posterior estimate: -305773.65625
+## Iteration: 7700      Log posterior estimate: -296016.34375
+## Iteration: 7800      Log posterior estimate: -273612.46875
+## Iteration: 7900      Log posterior estimate: -288263.09375
+## Iteration: 8000      Log posterior estimate: -282188.28125
+## Iteration: 8100      Log posterior estimate: -302846.15625
+## Iteration: 8200      Log posterior estimate: -266591.90625
+## Iteration: 8300      Log posterior estimate: -288454.375
+## Iteration: 8400      Log posterior estimate: -279553.09375
+## Iteration: 8500      Log posterior estimate: -303833.375
+## Iteration: 8600      Log posterior estimate: -289718.65625
+## Iteration: 8700      Log posterior estimate: -292722.65625
+## Iteration: 8800      Log posterior estimate: -294216.375
+## Iteration: 8900      Log posterior estimate: -280375.46875
+## Iteration: 9000      Log posterior estimate: -289706.09375
+## Iteration: 9100      Log posterior estimate: -283137.90625
+## Iteration: 9200      Log posterior estimate: -292342.625
+## Iteration: 9300      Log posterior estimate: -287607.875
+## Iteration: 9400      Log posterior estimate: -288543.09375
+## Iteration: 9500      Log posterior estimate: -279451.8125
+## Iteration: 9600      Log posterior estimate: -290706.53125
+## Iteration: 9700      Log posterior estimate: -284896.6875
+## Iteration: 9800      Log posterior estimate: -272902.21875
+## Iteration: 9900      Log posterior estimate: -300668.5
+## Iteration: 10000     Log posterior estimate: -293386.1875
+## Iteration: 10100     Log posterior estimate: -302134.125
+## Iteration: 10200     Log posterior estimate: -313109.75
+## Iteration: 10300     Log posterior estimate: -303901.78125
+## Iteration: 10400     Log posterior estimate: -310554.78125
+## Iteration: 10500     Log posterior estimate: -280265.4375
+## Iteration: 10600     Log posterior estimate: -275541.125
+## Iteration: 10700     Log posterior estimate: -303707.625
+## Iteration: 10800     Log posterior estimate: -300040.34375
+## Iteration: 10900     Log posterior estimate: -262399.71875
+## Iteration: 11000     Log posterior estimate: -300712.875</code></pre>
+<p>To check the algorithm converged, we’ll plot the average log predictive density of the data from our test set every 10 iterations. Let <span class="math display">\[\hat \pi_i^{(j)} := \frac{1}{1 + \exp\left[-\beta_0^{(j)} - \mathbf x_i \beta^{(j)}\right]},\]</span> here <span class="math inline">\(\hat \pi_i^{(j)}\)</span> denotes the probability that the <span class="math inline">\(j^{\text{th}}\)</span> iteration of our MCMC chain assigned to observation <span class="math inline">\(i\)</span> in our test set. Define our test set by <span class="math inline">\(T\)</span>, the average log predictive is given by <span class="math display">\[A := \frac{1}{|T|} \sum_{y_i \in T} \left[ y_i \log \hat \pi_i^{(j)} + (1 - y_i) \log(1 - \hat \pi_i^{(j)}) \right]\]</span></p>
 <p>To check convergence, we’ll plot the average log predictive every 10 iterations as follows</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">yTest =<span class="st"> </span>testSet[,<span class="dv">1</span>]
 XTest =<span class="st"> </span>testSet[,<span class="dv">2</span>:<span class="kw">ncol</span>(testSet)]
@@ -365,7 +362,7 @@ for ( iter in <span class="dv">1</span>:<span class="kw">length</span>(iteration
 plotFrame =<span class="st"> </span><span class="kw">data.frame</span>(<span class="st">"iteration"</span> =<span class="st"> </span>iterations, <span class="st">"logPredictive"</span> =<span class="st"> </span>avLogPred)
 <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggplot">ggplot</a></span>(plotFrame, <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>(<span class="dt">x =</span> iteration, <span class="dt">y =</span> logPredictive)) +
 <span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/geom_path">geom_line</a></span>() +
-<span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Average log predictive of test set"</span>)</code></pre></div>
+<span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ylab</a></span>(<span class="st">"Average log predictive of test set"</span>)</code></pre></div>
 <p><img src="logisticRegression_files/figure-html/unnamed-chunk-8-1.png" width="672"></p>
 </div>
   </div>

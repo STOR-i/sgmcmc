@@ -26,7 +26,7 @@ The functions assume that each observation is located on the first axis of the o
 
 ### Specifying the Parameters
 
-Again to specify parameters, we simply set what we want their starting points to be. Suppose my model depends on two parameter vectors `theta1` and `theta2`, and we want to start both from 0. If we assume both are length 3, this could be specified like this
+Again parameters are specified as a list, the names are what we will refer to them as in the `logLik` and `logPrior` functions introduced below, the values are the desired starting points. Suppose my model depends on two parameter vectors `theta1` and `theta2`, and we want to start both from 0. If we assume both are length 3, this could be specified like this
 ```{r eval=FALSE}
 params = list("theta1" = rep(0, 3), "theta2" = rep(0, 3))
 ```
@@ -99,4 +99,4 @@ We suggest for more details you read the worked examples in the Articles section
  - [Gaussian Mixture](https://stor-i.github.io/sgmcmc///articles/gaussMixture.html)
  - [Logistic Regression](https://stor-i.github.io/sgmcmc///articles/logisticRegression.html)
 
-Full details of the API can be found [here](https://stor-i.github.io/sgmcmc///reference/index.html)
+Full details of the API can be found [here](https://stor-i.github.io/sgmcmc///reference/index.html).

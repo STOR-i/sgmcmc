@@ -5,52 +5,53 @@
 \title{Stochastic Gradient Hamiltonian Monte Carlo with Control Variates}
 \usage{
 sghmccv(logLik, dataset, params, stepsize, optStepsize, logPrior = NULL,
-  minibatchSize = 500, alpha = 0.01, L = 3, nIters = 10^4,
-  nItersOpt = 10^4, verbose = TRUE)
+  minibatchSize = 0.01, alpha = 0.01, L = 5L, nIters = 10^4L,
+  nItersOpt = 10^4L, verbose = TRUE)
 }
 \arguments{
 \item{logLik}{function which takes parameters and dataset 
 (list of tensorflow variables and placeholders respectively) as input. 
 It should return a tensorflow expression which defines the log likelihood of the model.}
 
-\item{dataset}{list of R arrays which defines the datasets for the problem.
+\item{dataset}{list of numeric R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
-\item{params}{list of R arrays which define the starting point of each parameter.
+\item{params}{list of numeric R arrays which define the starting point of each parameter.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
-\item{stepsize}{list of numeric values corresponding to the SGHMC eta stepsize terms,
-as defined in the paper given in the references. One value should be given 
+\item{stepsize}{list of numeric values corresponding to the SGHMC stepsizes for each parameter
+(\eqn{\eta} in the original paper). The names in the list should correspond to those in params.
+Alternatively specify a single numeric value to use that stepsize for all parameters.}
+
+\item{optStepsize}{numeric value specifying the stepsize for the optimization 
+to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.}
+
+\item{logPrior}{optional. Default uninformative improper prior.
+Function which takes parameters (list of tensorflow variables) as input.
+The function should return a tensorflow tensor which defines the log prior of the model.}
+
+\item{minibatchSize}{optional. Default 0.01.
+Numeric or integer value that specifies amount of dataset to use at each iteration 
+either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).}
+
+\item{alpha}{optional. Default 0.01. 
+List of numeric values corresponding to the SGHMC momentum tuning constants
+(\eqn{\alpha} in the original paper). One value should be given 
 for each parameter in params, the names should correspond to those in params.
 Alternatively specify a single float to specify that value for all parameters.}
 
-\item{optStepsize}{numeric, stepsize for optimization step to find MAP estimates of parameters.}
+\item{L}{optional. Default 5L. Integer specifying the trajectory parameter of the simulation, 
+as defined in the main reference.}
 
-\item{logPrior}{function which takes parameters (list of tensorflow variables) as input.
-The function should return a tensorflow tensor which defines the log prior of the model.
-Optional. Default uninformative improper prior.}
+\item{nIters}{optional. Default 10^4L. Integer specifying number of iterations to perform.}
 
-\item{minibatchSize}{either as proportion of dataset size or actual size, assumed float or int.
-Optional. Default 0.01.}
+\item{nItersOpt}{optional. Default 10^4L. 
+Integer specifying number of iterations of initial optimization to perform.}
 
-\item{alpha}{list of numeric values corresponding to the SGHMC alpha momentum terms,
-as defined in the paper given in the references. One value should be given 
-for each parameter in params, the names should correspond to those in params.
-Alternatively specify a single float to specify that value for all parameters.
-Optional. Default 0.01 for all parameters.}
-
-\item{L}{integer specifying the trajectory of the simulation, as defined in the main reference.
-Optional. Default 3.}
-
-\item{nIters}{integer, number of iterations of SGLD to perform, optional, default 10^4.}
-
-\item{nItersOpt}{integer, number of iterations of initial optimization to perform, 
-optional, default 10^4.}
-
-\item{verbose}{Boolean, whether to print algorithm progress or not, default TRUE.}
+\item{verbose}{optional. Default TRUE. Boolean specifying whether to print algorithm progress.}
 }
 \value{
-List of arrays for each parameter containing the MCMC chain.
+Returns list of arrays for each parameter containing the MCMC chain.
  Dimension of the form (nIters,paramDim1,paramDim2,...)
 }
 \description{

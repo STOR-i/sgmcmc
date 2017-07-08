@@ -8,7 +8,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-In this example we use the package to infer the modes of a bimodal, 2d Gaussian using [stochastic gradient Hamiltonian Monte Carlo](https://arxiv.org/pdf/1402.4102v2.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $x_i | \theta \sim 0.5 N( \theta_1, I_2 ) + 0.5 N( \theta_2, I_2 )$, and we want to infer $\theta_1$ and $\theta_2$.
+In this example we use the package to infer the modes of a bimodal, 2d Gaussian using [stochastic gradient Hamiltonian Monte Carlo](https://arxiv.org/pdf/1402.4102v2.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $X_i | \theta \sim 0.5 N( \theta_1, I_2 ) + 0.5 N( \theta_2, I_2 )$, and we want to infer $\theta_1$ and $\theta_2$.
 
 First let's simulate the data with the following code, we set $N$ to be $10^4$
 ```{r message=FALSE}
@@ -57,9 +57,9 @@ logLik = function( params, dataset ) {
     return( logLik )
 }
 ```
-So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.7 \mathcal N( x_i | \theta_1, I_2 ) + 0.3 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. Most of the time just specifying the constants in these functions, such as `SigmaDiag` as `R` objects will be fine. But there are sometimes issues when these constants get automatically converted to `tf$float64` objects by `TensorFlow` rather than `tf$float32`. If you run into errors involving `tf$float64` then force the constants to be input as `tf$float32` by using `SigmaDiag = tf$constant( c( 1, 1 ), dtype = tf$float32 )`.
+So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.5 \mathcal N( x_i | \theta_1, I_2 ) + 0.5 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. Most of the time just specifying the constants in these functions, such as `SigmaDiag`, as `R` objects will be fine. But there are sometimes issues when these constants get automatically converted to `tf$float64` objects by `TensorFlow` rather than `tf$float32`. If you run into errors involving `tf$float64` then force the constants to be input as `tf$float32` by using `SigmaDiag = tf$constant( c( 1, 1 ), dtype = tf$float32 )`.
 
-Next we want to define our log prior, which we assume is uninformative $\log p( \theta ) = \mathcal N(\theta | 0,10I_2)$. Similar to the log likelihood definition, the log prior is defined as a function, but only with input `params`. In our case the definition is
+Next we want to define our log prior, which we assume is uninformative $\log p( \theta ) = \log \mathcal N(\theta | 0,10I_2)$. Similar to the log likelihood definition, the log prior is defined as a function, but only with input `params`. In our case the definition is
 ```{r}
 logPrior = function( params ) {
     # Declare hyperparameters mu0 and Sigma0
@@ -77,13 +77,12 @@ Finally we set the tuning parameters for SGHMC, this is a list with the same nam
 ```{r}
 stepsize = list( "theta1" = 5e-6, "theta2" = 5e-6 )
 ```
-Optionally we can set the tuning parameter for the momentum `alpha` in the same way as the `stepsize`. But we'll leave this along with the trajectory integer `L`, and the `minibatchSize` as their defaullts, 3 and `0.01 * N = 100` respectively.
+Optionally we can set the tuning parameter for the momentum `alpha` in the same way as the `stepsize`. But we'll leave this along with the trajectory tuning constant `L`, and the `minibatchSize` as their defaults.
 
 Now we can run our SGHMC algorithm using the `sgmcmc` function `sghmc`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function. We'll set the number of iterations as `11000` to allow for `1000` iterations of burn-in.
 ```{r message=FALSE}
 chains = sghmc( logLik, dataset, params, stepsize, logPrior = logPrior, nIters = 11000 )
 ```
-If you don't specify the `logPrior` an uninformative uniform prior will be used.
 
 Finally we'll plot the results after removing burn-in
 ```{r}

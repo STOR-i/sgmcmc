@@ -8,7 +8,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-In this example we use the package to infer the mean of a 2d Gaussian using [stochastic gradient Langevin dynamics](http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $x_i | \theta \sim N( \theta, I_2 )$, and we want to infer $\theta$.
+In this example we use the package to infer the mean of a 2d Gaussian using [stochastic gradient Langevin dynamics](http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $X_i | \theta \sim N( \theta, I_2 )$, and we want to infer $\theta$.
 
 First let's simulate the data with the following code, we set $N$ to be $10^4$
 ```{r message=FALSE}
@@ -42,7 +42,7 @@ logLik = function( params, dataset ) {
 ```
 So this function basically states that our likelihood is $\sum_{i=1}^N \log \mathcal N( x_i | \theta, I_2 )$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. Most of the time just specifying the constants in these functions, such as `SigmaDiag` as `R` objects will be fine. But there are sometimes issues when these constants get automatically converted to `tf$float64` objects by `TensorFlow` rather than `tf$float32`. If you run into errors involving `tf$float64` then force the constants to be input as `tf$float32` by using `SigmaDiag = tf$constant( c( 1, 1 ), dtype = tf$float32 )`.
 
-Next we want to define our log prior, which we assume is $\log p( \theta_j ) = \mathcal N(\theta_j | 0,10)$, for each dimension $j$ of $\theta$. Similar to `logLik`, `logPrior` is defined as a function with input `params`. In our case the definition is
+Next we want to define our log prior, which we assume is $\log p( \theta_j ) = \log \mathcal N(\theta_j | 0,10)$, for each dimension $j$ of $\theta$. Similar to `logLik`, `logPrior` is defined as a function with input `params`. In our case the definition is
 ```{r}
 logPrior = function( params ) {
     baseDist = tf$contrib$distributions$Normal( 0, 10 )
@@ -72,4 +72,4 @@ ggplot( thetaOut, aes( x = V1, y = V2 ) ) +
     stat_density2d( size = 1.5 )
 ```
 
-There are lots of other sgmcmc algorithms implemented in exactly the same way such as `sghmc` and `sgnht`; as well as their [control variate counterparts](https://arxiv.org/pdf/1705.05439.pdf) for improved efficiency, which take the additional small numeric input `optStepsize`, the stepsize of the initial optimization step to find the MAP parameters.
+There are lots of other sgmcmc algorithms implemented in exactly the same way such as `sghmc` and `sgnht`; as well as their [control variate counterparts](https://arxiv.org/pdf/1705.05439.pdf) (`sgldcv`, `sghmccv` and `sgnhtcv`) for improved efficiency, which take the additional small numeric input `optStepsize`, the stepsize of the initial optimization step to find the MAP parameters.
