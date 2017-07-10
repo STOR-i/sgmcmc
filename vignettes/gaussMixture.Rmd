@@ -8,9 +8,9 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-In this example we use the package to infer the modes of a bimodal, 2d Gaussian using [stochastic gradient Hamiltonian Monte Carlo](https://arxiv.org/pdf/1402.4102v2.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $X_i | \theta \sim 0.5 N( \theta_1, I_2 ) + 0.5 N( \theta_2, I_2 )$, and we want to infer $\theta_1$ and $\theta_2$.
+In this example we use the package to infer the modes of a bimodal, 2d Gaussian using [stochastic gradient Hamiltonian Monte Carlo](https://arxiv.org/pdf/1402.4102v2.pdf). So we assume we have independent and identically distributed data $x_1, \dots, x_N$ with $X_i | \theta \sim 0.5 N( \theta_1, I_2 ) + 0.5 N( \theta_2, I_2 )$, and we want to infer $\theta_1$ and $\theta_2$.
 
-First let's simulate the data with the following code, we set $N$ to be $10^4$
+First, let's simulate the data with the following code, we set $N$ to be $10^4$
 ```{r message=FALSE}
 library(sgmcmc)
 library(MASS)
@@ -40,7 +40,7 @@ The parameters are declared very similarly, but this time the value associated w
 params = list( "theta1" = c( 0, 0 ), "theta2" = c( 0.1, 0.1 ) )
 ```
 
-Now we'll define the functions `logLik` and `logPrior`. It should now become clear why the list names come in handy. The function `logLik` should take two parameters as input: `params` and `dataset`. These parameters will be lists with the same names as those you defined for `params` and `dataset` earlier. There is one difference though, the objects in the lists will have automatically been converted to `TensorFlow` objects for you. The `params` list will contain `TensorFlow` tensor variables; the `dataset` list will contain `TensorFlow` placeholders. The `logLik` function should take these lists as input and return the value of the log likelihood as a tensor at point `params` given data `dataset`. The function should do this using `TensorFlow` operations, as this allows the gradient to be automatically calculated; it also allows the wide range of distribution objects as well as matrix operations that `TensorFlow` provides to be taken advantage of. A tutorial of `TensorFlow` for `R` is beyond the scope of this article, for more details we refer the reader to the website of [TensorFlow for R](https://tensorflow.rstudio.com/). With this in place we can define the `logLik` function as follows
+Now we'll define the functions `logLik` and `logPrior`. It should now become clear why the list names come in handy. The function `logLik` should take two parameters as input: `params` and `dataset`. These parameters will be lists with the same names as those you defined for `params` and `dataset` earlier. There is one difference though, the objects in the lists will have automatically been converted to `TensorFlow` objects for you. The `params` list will contain `TensorFlow` tensor variables; the `dataset` list will contain `TensorFlow` placeholders. The `logLik` function should take these lists as input and return the value of the log likelihood as a tensor at point `params` given data `dataset`. The function should do this using `TensorFlow` operations, as this allows the gradient to be automatically calculated; it also allows the wide range of distribution objects as well as matrix operations that `TensorFlow` provides to be taken advantage of. A tutorial of `TensorFlow` for `R` is beyond the scope of this article, for more details we refer the reader to the website of [TensorFlow for R](https://tensorflow.rstudio.com/). With this in place we can define the log-likelihood function `logLik` as follows
 ```{r}
 logLik = function( params, dataset ) {
     # Declare Sigma (assumed known)
@@ -57,9 +57,9 @@ logLik = function( params, dataset ) {
     return( logLik )
 }
 ```
-So this function basically states that our likelihood is $\sum_{i=1}^N \log \left[ 0.5 \mathcal N( x_i | \theta_1, I_2 ) + 0.5 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. Most of the time just specifying the constants in these functions, such as `SigmaDiag`, as `R` objects will be fine. But there are sometimes issues when these constants get automatically converted to `tf$float64` objects by `TensorFlow` rather than `tf$float32`. If you run into errors involving `tf$float64` then force the constants to be input as `tf$float32` by using `SigmaDiag = tf$constant( c( 1, 1 ), dtype = tf$float32 )`.
+So this function basically states that our log-likelihood function is $\sum_{i=1}^N \log \left[ 0.5 \mathcal N( x_i | \theta_1, I_2 ) + 0.5 \mathcal N( x_i | \theta_2, I_2 ) \right]$, where $\mathcal N( x | \mu, \Sigma )$ is a Gaussian density at $x$ with mean $\mu$ and variance $\Sigma$. Most of the time just specifying the constants in these functions, such as `SigmaDiag`, as `R` objects will be fine. But there are sometimes issues when these constants get automatically converted to `tf$float64` objects by `TensorFlow` rather than `tf$float32`. If you run into errors involving `tf$float64` then force the constants to be input as `tf$float32` by using `SigmaDiag = tf$constant( c( 1, 1 ), dtype = tf$float32 )`.
 
-Next we want to define our log prior, which we assume is uninformative $\log p( \theta ) = \log \mathcal N(\theta | 0,10I_2)$. Similar to the log likelihood definition, the log prior is defined as a function, but only with input `params`. In our case the definition is
+Next we want to define our log-prior density, which we assume is uninformative $\log p( \theta ) = \log \mathcal N(\theta | 0,10I_2)$. Similar to the log-likelihood function, the log-prior density is defined as a function, but only with input `params`. In our case the definition is
 ```{r}
 logPrior = function( params ) {
     # Declare hyperparameters mu0 and Sigma0
@@ -77,14 +77,14 @@ Finally we set the tuning parameters for SGHMC, this is a list with the same nam
 ```{r}
 stepsize = list( "theta1" = 5e-6, "theta2" = 5e-6 )
 ```
-Optionally we can set the tuning parameter for the momentum `alpha` in the same way as the `stepsize`. But we'll leave this along with the trajectory tuning constant `L`, and the `minibatchSize` as their defaults.
+Optionally, we can set the tuning parameter for the momentum `alpha` in the same way as the `stepsize`. But we'll leave this along with the trajectory tuning constant `L`, and the `minibatchSize` as their defaults.
 
 Now we can run our SGHMC algorithm using the `sgmcmc` function `sghmc`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function. We'll set the number of iterations as `11000` to allow for `1000` iterations of burn-in.
 ```{r message=FALSE}
 chains = sghmc( logLik, dataset, params, stepsize, logPrior = logPrior, nIters = 11000 )
 ```
 
-Finally we'll plot the results after removing burn-in
+Finally, we'll plot the results after removing burn-in
 ```{r}
 library(ggplot2)
 # Remove burn in
