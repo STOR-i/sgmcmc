@@ -8,9 +8,9 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-In this example we use the package to infer the mean of a 2d Gaussian using [stochastic gradient Langevin dynamics](http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf). So we assume we have iid data $x_1, \dots, x_N$ with $X_i | \theta \sim N( \theta, I_2 )$, and we want to infer $\theta$.
+In this example we use the package to infer the mean of a 2d Gaussian using [stochastic gradient Langevin dynamics](http://machinelearning.wustl.edu/mlpapers/paper_files/ICML2011Welling_398.pdf). So we assume we have independent and identically distributed data $x_1, \dots, x_N$ with $X_i | \theta \sim N( \theta, I_2 )$, and we want to infer $\theta$.
 
-First let's simulate the data with the following code, we set $N$ to be $10^4$
+First, let's simulate the data with the following code, we set $N$ to be $10^4$
 ```{r message=FALSE}
 library(sgmcmc)
 library(MASS)
@@ -72,4 +72,4 @@ ggplot( thetaOut, aes( x = V1, y = V2 ) ) +
     stat_density2d( size = 1.5 )
 ```
 
-There are lots of other sgmcmc algorithms implemented in exactly the same way such as `sghmc` and `sgnht`; as well as their [control variate counterparts](https://arxiv.org/pdf/1705.05439.pdf) (`sgldcv`, `sghmccv` and `sgnhtcv`) for improved efficiency, which take the additional small numeric input `optStepsize`, the stepsize of the initial optimization step to find the MAP parameters.
+There are lots of other sgmcmc algorithms implemented in exactly the same way, such as `sghmc` and `sgnht`; as well as their [control variate counterparts](https://arxiv.org/pdf/1705.05439.pdf) (`sgldcv`, `sghmccv` and `sgnhtcv`) for improved efficiency, which take the additional small numeric input `optStepsize`, the stepsize of the initial optimization step to find the MAP parameters.
