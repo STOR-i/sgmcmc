@@ -3,4 +3,4 @@ cache: packages
 
 install:
     sudo apt-get install python-pip python-virtualenv
-    ./.travis-install.sh
+    pip install tensorflow
