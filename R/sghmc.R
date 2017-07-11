@@ -11,8 +11,8 @@
 #'  In ICML (pp. 1683-1691).}}
 #'
 #' @param logLik function which takes parameters and dataset 
-#'  (list of tensorflow variables and placeholders respectively) as input. 
-#'  It should return a tensorflow expression which defines the log likelihood of the model.
+#'  (list of TensorFlow variables and placeholders respectively) as input. 
+#'  It should return a TensorFlow expression which defines the log likelihood of the model.
 #' @param dataset list of numeric R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param params list of numeric R arrays which define the starting point of each parameter.
@@ -21,8 +21,8 @@
 #'  (\eqn{\eta} in the original paper). The names in the list should correspond to those in params.
 #'  Alternatively specify a single numeric value to use that stepsize for all parameters.
 #' @param logPrior optional. Default uninformative improper prior.
-#'  Function which takes parameters (list of tensorflow variables) as input.
-#'  The function should return a tensorflow tensor which defines the log prior of the model.
+#'  Function which takes parameters (list of TensorFlow variables) as input.
+#'  The function should return a TensorFlow tensor which defines the log prior of the model.
 #' @param minibatchSize optional. Default 0.01.
 #'  Numeric or integer value that specifies amount of dataset to use at each iteration 
 #'  either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).
@@ -69,8 +69,8 @@ sghmc = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchS
 #'  In ICML (pp. 1683-1691).}}
 #'
 #' @param logLik function which takes parameters and dataset 
-#'  (list of tensorflow variables and placeholders respectively) as input. 
-#'  It should return a tensorflow expression which defines the log likelihood of the model.
+#'  (list of TensorFlow variables and placeholders respectively) as input. 
+#'  It should return a TensorFlow expression which defines the log likelihood of the model.
 #' @param dataset list of numeric R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param params list of numeric R arrays which define the starting point of each parameter.
@@ -81,8 +81,8 @@ sghmc = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchS
 #' @param optStepsize numeric value specifying the stepsize for the optimization 
 #'  to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.
 #' @param logPrior optional. Default uninformative improper prior.
-#'  Function which takes parameters (list of tensorflow variables) as input.
-#'  The function should return a tensorflow tensor which defines the log prior of the model.
+#'  Function which takes parameters (list of TensorFlow variables) as input.
+#'  The function should return a TensorFlow tensor which defines the log prior of the model.
 #' @param minibatchSize optional. Default 0.01.
 #'  Numeric or integer value that specifies amount of dataset to use at each iteration 
 #'  either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).
@@ -150,7 +150,7 @@ genSGHMCCV = function( logLik, logPrior, dataset, params, stepsize, alpha, L, op
     return( sghmcCV )
 }
 
-# Declare the tensorflow steps needed for one step of SGHMC, input SGHMC object
+# Declare the TensorFlow steps needed for one step of SGHMC, input SGHMC object
 # @param is an sghmc object
 declareDynamics.sghmc = function( sghmc) {
     dynamics = list( "theta" = list(), "nu" = list(), "refresh" = list(), "grad" = list() )

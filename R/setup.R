@@ -4,7 +4,7 @@ createSGMCMC = function( logLik, logPrior, dataset, params, stepsize, minibatchS
     N = getDatasetSize( dataset )
     # If minibatchSize is a proportion, convert to an integer
     minibatchSize = convertProp( minibatchSize, N )
-    # Convert params and dataset to tensorflow variables and placeholders
+    # Convert params and dataset to TensorFlow variables and placeholders
     paramstf = setupParams( params )
     placeholders = setupPlaceholders( dataset, minibatchSize )
     # Declare estimated log posterior tensor using declared variables and placeholders
@@ -69,7 +69,7 @@ getShape = function( input ) {
     return( shapeInput )
 }
 
-# Redeclare parameters as tensorflow variables, keep starting values
+# Redeclare parameters as TensorFlow variables, keep starting values
 setupParams = function( params ) {
     tfParams = list()
     for ( pname in names( params ) ) {
@@ -78,7 +78,7 @@ setupParams = function( params ) {
     return( tfParams )
 }
 
-# Declare tensorflow placeholders for each dataset based on data list and minibatch size n
+# Declare TensorFlow placeholders for each dataset based on data list and minibatch size n
 setupPlaceholders = function( data, n ) {
     tfPlaceholders = list()
     for ( dname in names( data ) ) {
@@ -117,7 +117,7 @@ convertProp = function( minibatchSize, N ) {
 }
 
 # Get the rank of each of the parameter objects, needed for sghmc
-# @assume paramsRaw object is the original list of numeric R arrays, not tensorflow tensors
+# @assume paramsRaw object is the original list of numeric R arrays, not TensorFlow tensors
 getRanks = function( paramsRaw ) {
     ranks = list()
     for ( pname in names( paramsRaw ) ) {

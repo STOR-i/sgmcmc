@@ -53,7 +53,7 @@ runSGMCMC = function( sgmcmc, paramsRaw, options ) UseMethod("runSGMCMC")
 runSGMCMC.sgmcmc = function( sgmcmc, paramsRaw, options ) {
     # Initialize storage
     paramStorage = initStorage( paramsRaw, options$nIters )
-    # Initalize tensorflow session
+    # Initalize TensorFlow session
     sess = initSess( options$verbose )
     # Perform SGMCMC for desired iterations, storing parameters at each step
     for ( i in 1:options$nIters ) {
@@ -71,7 +71,7 @@ runSGMCMC.sgmcmc = function( sgmcmc, paramsRaw, options ) {
 runSGMCMC.sgmcmcCV = function( sgmcmcCV, paramsRaw, options ) {
     # Initialize storage
     paramStorage = initStorage( paramsRaw, options$nIters )
-    # Initalize tensorflow session
+    # Initalize TensorFlow session
     sess = initSess( options$verbose )
     # Run initial optimization to find mode of parameters
     getMode( sess, sgmcmcCV, options$nItersOpt, options$verbose )
@@ -90,7 +90,7 @@ runSGMCMC.sgmcmcCV = function( sgmcmcCV, paramsRaw, options ) {
     return( paramStorage )
 }
 
-# Creates the feed_dict for each tensorflow placeholder to feed the minibatch of data
+# Creates the feed_dict for each TensorFlow placeholder to feed the minibatch of data
 dataFeed = function( data, placeholders, n ) {
     feed_dict = dict()
     # Get dataset size
@@ -121,7 +121,7 @@ dataSelect = function( data, selection ) {
     return( do.call( `[`, argList ) )
 }
 
-# Initialise tensorflow session and all global variables
+# Initialise TensorFlow session and all global variables
 initSess = function( verbose ) { 
     sess = tf$Session()
     init = tf$global_variables_initializer()

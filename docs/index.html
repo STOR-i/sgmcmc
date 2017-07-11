@@ -85,10 +85,9 @@
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
-<p><code>sgmcmc</code> requires <a href="https://cran.r-project.org/web/packages/devtools/index.html">TensorFlow for R</a> to be installed so has a few steps:</p>
+<p><code>sgmcmc</code> requires <a href="https://github.com/rstudio/tensorflow">TensorFlow for R</a> to be installed so has a few steps:</p>
 <ul>
-<li>Install TensorFlow for python, instructions for this can be found <a href="https://www.tensorflow.org/install/">here</a>
-</li>
+<li>Install <a href="https://github.com/rstudio/tensorflow">TensorFlow for R</a>, first run <code>install.packages("tensorflow")</code>, then after run <code><a href="http://www.rdocumentation.org/packages/tensorflow/topics/install_tensorflow">tensorflow::install_tensorflow()</a></code>.</li>
 <li>Make sure <a href="https://cran.r-project.org/web/packages/devtools/index.html">devtools</a> are installed, this can be installed simply by running <code>install.packages("devtools")</code>
 </li>
 <li>Now run <code><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">devtools::install_github("STOR-i/sgmcmc")</a></code>.</li>

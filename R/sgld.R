@@ -9,8 +9,8 @@
 #'  ICML (pp. 681-688).}}
 #'
 #' @param logLik function which takes parameters and dataset 
-#'  (list of tensorflow variables and placeholders respectively) as input. 
-#'  It should return a tensorflow expression which defines the log likelihood of the model.
+#'  (list of TensorFlow variables and placeholders respectively) as input. 
+#'  It should return a TensorFlow expression which defines the log likelihood of the model.
 #' @param dataset list of numeric R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param params list of numeric R arrays which define the starting point of each parameter.
@@ -19,8 +19,8 @@
 #'  The names in the list should correspond to those in params.
 #'  Alternatively specify a single numeric value to use that stepsize for all parameters.
 #' @param logPrior optional. Default uninformative improper prior.
-#'  Function which takes parameters (list of tensorflow variables) as input.
-#'  The function should return a tensorflow tensor which defines the log prior of the model.
+#'  Function which takes parameters (list of TensorFlow variables) as input.
+#'  The function should return a TensorFlow tensor which defines the log prior of the model.
 #' @param minibatchSize optional. Default 0.01.
 #'  Numeric or integer value that specifies amount of dataset to use at each iteration 
 #'  either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).
@@ -58,8 +58,8 @@ sgld = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSi
 #'  ICML (pp. 681-688).} }
 #'
 #' @param logLik function which takes parameters and dataset 
-#'  (list of tensorflow variables and placeholders respectively) as input. 
-#'  It should return a tensorflow expression which defines the log likelihood of the model.
+#'  (list of TensorFlow variables and placeholders respectively) as input. 
+#'  It should return a TensorFlow expression which defines the log likelihood of the model.
 #' @param dataset list of numeric R arrays which defines the datasets for the problem.
 #'  The names in the list should correspond to those referred to in the logLik and logPrior functions
 #' @param params list of numeric R arrays which define the starting point of each parameter.
@@ -70,8 +70,8 @@ sgld = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSi
 #' @param optStepsize numeric value specifying the stepsize for the optimization 
 #'  to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.
 #' @param logPrior optional. Default uninformative improper prior.
-#'  Function which takes parameters (list of tensorflow variables) as input.
-#'  The function should return a tensorflow tensor which defines the log prior of the model.
+#'  Function which takes parameters (list of TensorFlow variables) as input.
+#'  The function should return a TensorFlow tensor which defines the log prior of the model.
 #' @param minibatchSize optional. Default 0.01.
 #'  Numeric or integer value that specifies amount of dataset to use at each iteration 
 #'  either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).
@@ -124,10 +124,10 @@ genSGLDCV = function( logLik, logPrior, dataset, params, stepsize, optStepsize, 
     return( sgldCV )
 }
 
-# Declare the tensorflow steps needed for one step of SGLD
+# Declare the TensorFlow steps needed for one step of SGLD
 # @param sgld is an sgld object
 declareDynamics.sgld = function( sgld ) {
-    # dynamics is returned, contains list of tensorflow steps for SGLD
+    # dynamics is returned, contains list of TensorFlow steps for SGLD
     dynamics = list()
     # Get the correct gradient estimate given the sgld object (i.e. standard sgld or sgldcv) 
     estLogPostGrads = getGradients( sgld )

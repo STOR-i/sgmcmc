@@ -5,7 +5,7 @@ createSGMCMCCV = function( logLik, logPrior, dataset, params, stepsize, optSteps
     sgmcmccv = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize )
     # If minibatchSize is a proportion, convert to an integer
     minibatchSize = convertProp( minibatchSize, sgmcmccv$N )
-    # Declare tensorflow variables for initial optimizer
+    # Declare TensorFlow variables for initial optimizer
     sgmcmccv$paramsOpt = setupParams( params )
     sgmcmccv$placeholdersFull = setupFullPlaceholders( dataset )
     # Declare container for full gradients at mode
@@ -60,7 +60,7 @@ setupFullLogPost = function( logLik, logPrior, params, placeholders ) {
     return( logPost )
 }
 
-# Create tensorflow placeholders to hold full dataset for full log posterior calculation
+# Create TensorFlow placeholders to hold full dataset for full log posterior calculation
 setupFullPlaceholders = function( data ) {
     tfPlaceholders = list()
     for ( dname in names( data ) ) {
@@ -70,7 +70,7 @@ setupFullPlaceholders = function( data ) {
     return( tfPlaceholders )
 }
 
-# Create tensorflow variables to hold estimates of the full log posterior gradient at the mode
+# Create TensorFlow variables to hold estimates of the full log posterior gradient at the mode
 setupFullGradients = function( params ) {
     gradientContainer = list()
     for ( pname in names( params ) ) {

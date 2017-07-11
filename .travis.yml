@@ -1,2 +1,6 @@
 language: r
 cache: packages
+
+before_install:
+    sudo apt-get install python-pip python-virtualenv
+    Rscript .travis/install-tensorflow.R
