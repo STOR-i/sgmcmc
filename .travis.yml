@@ -2,7 +2,8 @@ language: r
 cache: packages
 
 install:
+- sudo apt-get install python
 - sudo apt-get install python-pip python-virtualenv
-- pip install --upgrade pip
+- sudo pip install --upgrade pip
 - R -e "install.packages('tensorflow', repos='http://cran.us.r-project.org')"  
 - R -e "tensorflow::install_tensorflow()"  
