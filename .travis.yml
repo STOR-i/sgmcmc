@@ -3,5 +3,5 @@ cache: packages
 
 install:
     sudo apt-get install python-pip python-virtualenv
-    Rscript -e "install.packages('tensorflow', repos='http://cran.us.r-project.org')"
-    Rscript -e "tensorflow::install_tensorflow()"
+    R -e "install.packages('tensorflow', repos='http://cran.us.r-project.org')"
+    R -e "tensorflow::install_tensorflow()"
