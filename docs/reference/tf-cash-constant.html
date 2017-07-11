@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Stochastic Gradient Nose Hoover Thermostat — sgnht • sgmcmc</title>
+<title>Convert R Object into TensorFlow Object — tf$constant • sgmcmc</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -101,88 +101,38 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Stochastic Gradient Nose Hoover Thermostat</h1>
+    <h1>Convert R Object into TensorFlow Object</h1>
     </div>
 
     
-    <p>Simulates from the posterior defined by the functions logLik and logPrior using
- stochastic gradient Nose Hoover Thermostat.
- The thermostat step needs a dot product to be calculated between two vectors.
- So when the algorithm uses parameters that are higher order than vectors 
- (e.g. matrices and tensors), the thermostat step uses a tensor contraction.
- Tensor contraction is otherwise known as the inner product between two tensors.</p>
+    <p>In most cases R objects will be automatically converted to TensorFlow objects in a natural way.
+ But we can sometimes run into issues when these are converted in an unexpected way.
+ For example, the type tf$float64 is not as well supported as tf$float32, so we write everything
+ assuming we are working with tf$float32 types. This can sometimes be a problem if an R object
+ in your LogLik or LogPrior functions is converted to tf$float64 type or tf$int64 object.
+ While this is not normally the case it can sometimes happen, and the way to get around it is to
+ explicitly convert that object to a tensorflow inside the logLik or logPrior functions and
+ declare its type. Which is done using the tf$constant function declared below</p>
     
 
-    <pre class="usage"><span class='fu'>sgnht</span>(<span class='no'>logLik</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>, <span class='kw'>logPrior</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>minibatchSize</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4L</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>logLik</th>
-      <td><p>function which takes parameters and dataset 
-(list of tensorflow variables and placeholders respectively) as input. 
-It should return a tensorflow expression which defines the log likelihood of the model.</p></td>
+      <th>object</th>
+      <td><p>R object such as a numeric, matrix or array object.</p></td>
     </tr>
     <tr>
-      <th>dataset</th>
-      <td><p>list of numeric R arrays which defines the datasets for the problem.
-The names in the list should correspond to those referred to in the logLik and logPrior functions</p></td>
-    </tr>
-    <tr>
-      <th>params</th>
-      <td><p>list of numeric R arrays which define the starting point of each parameter.
-The names in the list should correspond to those referred to in the logLik and logPrior functions</p></td>
-    </tr>
-    <tr>
-      <th>stepsize</th>
-      <td><p>list of numeric values corresponding to the SGNHT stepsizes for each parameter
-(\(\eta\) in the original paper, Algorithm 2). 
-The names in the list should correspond to those in params.
-Alternatively specify a single numeric value to use that stepsize for all parameters.</p></td>
-    </tr>
-    <tr>
-      <th>logPrior</th>
-      <td><p>optional. Default uninformative improper prior.
-Function which takes parameters (list of tensorflow variables) as input.
-The function should return a tensorflow tensor which defines the log prior of the model.</p></td>
-    </tr>
-    <tr>
-      <th>minibatchSize</th>
-      <td><p>optional. Default 0.01.
-Numeric or integer value that specifies amount of dataset to use at each iteration 
-either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).</p></td>
-    </tr>
-    <tr>
-      <th>a</th>
-      <td><p>optional. Default 0.01. List of numeric values corresponding to SGNHT diffusion factors
-(see Algorithm 2 of the original paper). One value should be given 
-for each parameter in params, the names should correspond to those in params.
-Alternatively specify a single float to specify that value for all parameters.</p></td>
-    </tr>
-    <tr>
-      <th>nIters</th>
-      <td><p>optional. Default 10^4L. Integer specifying number of iterations to perform.</p></td>
-    </tr>
-    <tr>
-      <th>verbose</th>
-      <td><p>optional. Default TRUE. Boolean specifying whether to print algorithm progress</p></td>
+      <th>dtype</th>
+      <td><p>The TensorFlow type of the object, ensure this is 32-bit so tf$float32 or tf$int32.</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Returns list of arrays for each parameter containing the MCMC chain.
- Dimension of the form (nIters,paramDim1,paramDim2,...)</p>
-    
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
-
-    <ul>
-<li><p><a href='http://people.ee.duke.edu/~lcarin/sgnht-4.pdf'>
- Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., and Neven, H. (2014). 
- Bayesian sampling using stochastic gradient thermostats. NIPS (pp. 3203-3211).</a></p></li>
-</ul>
+    <p>Returns a tensorflow object with the declared dtype which can be used as input to other
+ TensorFlow functions.</p>
     
 
   </div>
@@ -192,8 +142,6 @@ Alternatively specify a single float to specify that value for all parameters.</
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
-
-      <li><a href="#references">References</a></li>
           </ul>
 
   </div>

@@ -108,9 +108,10 @@
     <p>Simulates from the posterior defined by the functions logLik and logPrior using
  stochastic gradient Nose Hoover Thermostat with an improved gradient estimate 
  that is calculated using control variates.
- When used for parameters that are higher dimensional then vectors, the thermostat
- step is approximated by a tensor contraction. Currently the implementation will only
- handle vector or scalar parameters, this will be updated in future implementations.</p>
+ The thermostat step needs a dot product to be calculated between two vectors.
+ So when the algorithm uses parameters that are higher order than vectors 
+ (e.g. matrices and tensors), the thermostat step uses a tensor contraction.
+ Tensor contraction is otherwise known as the inner product between two tensors.</p>
     
 
     <pre class="usage"><span class='fu'>sgnhtcv</span>(<span class='no'>logLik</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>, <span class='no'>optStepsize</span>, <span class='kw'>logPrior</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,

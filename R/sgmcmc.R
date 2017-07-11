@@ -14,8 +14,9 @@
 #'  These are the functions sgldcv, sghmccv and sgnhtcv.
 #'
 #' @docType package
-#' @import tensorflow
 #' @name sgmcmc
+#'
+#' @import tensorflow
 #'
 #' @references Baker, J., Fearnhead, P., Fox, E. B., & Nemeth, C. (2017) 
 #'      control variates for stochastic gradient Langevin dynamics. Preprint.

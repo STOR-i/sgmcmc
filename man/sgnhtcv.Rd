@@ -55,9 +55,10 @@ Returns list of arrays for each parameter containing the MCMC chain.
 Simulates from the posterior defined by the functions logLik and logPrior using
  stochastic gradient Nose Hoover Thermostat with an improved gradient estimate 
  that is calculated using control variates.
- When used for parameters that are higher dimensional then vectors, the thermostat
- step is approximated by a tensor contraction. Currently the implementation will only
- handle vector or scalar parameters, this will be updated in future implementations.
+ The thermostat step needs a dot product to be calculated between two vectors.
+ So when the algorithm uses parameters that are higher order than vectors 
+ (e.g. matrices and tensors), the thermostat step uses a tensor contraction.
+ Tensor contraction is otherwise known as the inner product between two tensors.
 }
 \references{
 \itemize{
