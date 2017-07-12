@@ -4,6 +4,6 @@ cache: packages
 install:
 - sudo apt-get install python
 - sudo apt-get install python-pip python-virtualenv
-- sudo pip install --upgrade pip
+- sudo pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.2.1-cp34-cp34m-linux_x86_64.whl
 - R -e "install.packages('tensorflow', repos='http://cran.us.r-project.org')"  
 - R -e "tensorflow::install_tensorflow()"  
