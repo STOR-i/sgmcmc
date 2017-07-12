@@ -33,12 +33,12 @@
 #' @export
 #'
 sgld = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
-        nIters = 10^4L, verbose = TRUE ) {
+            nIters = 10^4L, verbose = TRUE ) {
     # Create SGLD object
-    sgmcmc = genSGLD( logLik, logPrior, dataset, params, stepsize, minibatchSize )
+    sgld = genSGLD( logLik, logPrior, dataset, params, stepsize, minibatchSize )
     options = list( "nIters" = nIters, "verbose" = verbose )
     # Run MCMC for declared object
-    paramStorage = runSGMCMC( sgmcmc, params, options )
+    paramStorage = runSGMCMC( sgld, params, options )
     return( paramStorage )
 }
 
@@ -88,10 +88,10 @@ sgld = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSi
 sgldcv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL,
         minibatchSize = 0.01, nIters = 10^4L, nItersOpt = 10^4L, verbose = TRUE ) {
     # Setup SGLDCV object
-    sgmcmcCV = genSGLDCV( logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize )
+    sgldcv = genSGLDCV( logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize )
     options = list( "nIters" = nIters, "nItersOpt" = nItersOpt, "verbose" = verbose )
     # Run MCMC for declared object
-    paramStorage = runSGMCMC( sgmcmcCV, params, options )
+    paramStorage = runSGMCMC( sgldcv, params, options )
     return( paramStorage )
 }
 
@@ -100,7 +100,7 @@ sgldcv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NU
 # Creates a stochastic gradient Langevin Dynamics (SGLD) object which can be passed to mcmcStep
 #  to simulate from 1 step of SGLD for the posterior defined by logLik and logPrior.
 genSGLD = function( logLik, logPrior, dataset, params, stepsize, minibatchSize ) {
-    # Create generic sgmcmc object
+    # Create generic sgmcmc object, no extra tuning constants need to be added for sgld
     sgld = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize )
     # Declare object type
     class( sgld ) = c( "sgld", "sgmcmc" )
@@ -115,13 +115,13 @@ genSGLD = function( logLik, logPrior, dataset, params, stepsize, minibatchSize )
 #  which can be passed to optUpdate and mcmcStep to simulate from 1 step of SGLD 
 #  for the posterior defined by logLik and logPrior.
 genSGLDCV = function( logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize ) {
-    # Create generic sgmcmcCV object
-    sgldCV = createSGMCMCCV( 
-        logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize )
-    class(sgldCV) = c( "sgld", "sgmcmcCV" )
+    # Create generic sgmcmccv object, no extra tuning constants need to be added for sgld
+    sgldcv = createSGMCMCCV( 
+            logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize )
+    class(sgldcv) = c( "sgld", "sgmcmccv" )
     # Declare SGLD dynamics
-    sgldCV$dynamics = declareDynamics( sgldCV )
-    return( sgldCV )
+    sgldcv$dynamics = declareDynamics( sgldcv )
+    return( sgldcv )
 }
 
 # Declare the TensorFlow steps needed for one step of SGLD
@@ -131,6 +131,7 @@ declareDynamics.sgld = function( sgld ) {
     dynamics = list()
     # Get the correct gradient estimate given the sgld object (i.e. standard sgld or sgldcv) 
     estLogPostGrads = getGradients( sgld )
+    # Loop over each parameter in params
     for ( pname in names( sgld$params ) ) {
         # Declare simulation parameters
         theta = sgld$params[[pname]]

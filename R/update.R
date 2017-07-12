@@ -68,7 +68,7 @@ runSGMCMC.sgmcmc = function( sgmcmc, paramsRaw, options ) {
 }
 
 # Run stochastic gradient MCMC with Control Variates for declared dynamics
-runSGMCMC.sgmcmcCV = function( sgmcmcCV, paramsRaw, options ) {
+runSGMCMC.sgmcmccv = function( sgmcmcCV, paramsRaw, options ) {
     # Initialize storage
     paramStorage = initStorage( paramsRaw, options$nIters )
     # Initalize TensorFlow session

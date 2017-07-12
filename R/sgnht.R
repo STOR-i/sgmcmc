@@ -41,12 +41,12 @@
 #' @export
 #'
 sgnht = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
-        a = 0.01, nIters = 10^4L, verbose = TRUE ) {
+            a = 0.01, nIters = 10^4L, verbose = TRUE ) {
     # Declare SGNHT object
-    sgmcmc = genSGNHT( logLik, logPrior, dataset, params, stepsize, a, minibatchSize )
+    sgnht = genSGNHT( logLik, logPrior, dataset, params, stepsize, a, minibatchSize )
     options = list( "nIters" = nIters, "verbose" = verbose )
     # Run MCMC for declared object
-    paramStorage = runSGMCMC( sgmcmc, params, options )
+    paramStorage = runSGMCMC( sgnht, params, options )
     return( paramStorage )
 }
 
@@ -102,12 +102,12 @@ sgnht = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchS
 #' @export
 #'
 sgnhtcv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL, 
-        minibatchSize = 500, a = 0.01, nIters = 10^4, nItersOpt = 10^4, verbose = TRUE ) {
+            minibatchSize = 0.01, a = 0.01, nIters = 10^4L, nItersOpt = 10^4L, verbose = TRUE ) {
     # Declare SGNHTCV object
-    sgmcmcCV = genSGNHTCV( logLik, logPrior, dataset, params, stepsize, a, optStepsize, minibatchSize)
+    sgnhtcv = genSGNHTCV( logLik, logPrior, dataset, params, stepsize, a, optStepsize, minibatchSize)
     options = list( "nIters" = nIters, "nItersOpt" = nItersOpt, "verbose" = verbose )
     # Run MCMC for declared object
-    paramStorage = runSGMCMC( sgmcmcCV, params, options )
+    paramStorage = runSGMCMC( sgnhtcv, params, options )
     return( paramStorage )
 }
 
@@ -137,17 +137,17 @@ genSGNHT = function( logLik, logPrior, dataset, params, stepsize, a, minibatchSi
 genSGNHTCV = function( logLik, logPrior, dataset, params, stepsize, a, 
             optStepsize, minibatchSize ) {
     # Create generic sgmcmcCV object
-    sgnhtCV = createSGMCMCCV( 
-        logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize )
+    sgnhtcv = createSGMCMCCV( 
+            logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize )
     # Get ranks for each parameter tensor, required for sgnht dynamics
-    sgnhtCV$ranks = getRanks( params )
+    sgnhtcv$ranks = getRanks( params )
     # Declare sgnht specific tuning constants, checking they're in list format
-    sgnhtCV$a = convertList( a, sgnhtCV$params )
+    sgnhtcv$a = convertList( a, sgnhtcv$params )
     # Declare object types
-    class(sgnhtCV) = c( "sgnht", "sgmcmcCV" )
+    class(sgnhtcv) = c( "sgnht", "sgmcmccv" )
     # Declare SGNHT dynamics
-    sgnhtCV$dynamics = declareDynamics( sgnhtCV )
-    return( sgnhtCV )
+    sgnhtcv$dynamics = declareDynamics( sgnhtcv )
+    return( sgnhtcv )
 }
 
 # Declare the TensorFlow steps needed for one step of SGNHT
@@ -155,6 +155,7 @@ genSGNHTCV = function( logLik, logPrior, dataset, params, stepsize, a,
 declareDynamics.sgnht = function( sgnht ) {
     dynamics = list( "theta" = list(), "u" = list(), "alpha" = list() )
     estLogPostGrads = getGradients( sgnht )
+    # Loop over each parameter in params
     for ( pname in names(sgnht$params) ) {
         # Get constants for this parameter
         stepsize = sgnht$stepsize[[pname]]
@@ -166,18 +167,21 @@ declareDynamics.sgnht = function( sgnht ) {
         alpha = tf$Variable( a, dtype = tf$float32 )
         # Declare dynamics
         gradU = estLogPostGrads[[pname]]
-        dynamics$u[[pname]] = u$assign_sub( u * alpha - stepsize * gradU - 
-                sqrt( 2*a*stepsize ) * tf$random_normal( u$get_shape() ) )
+        dynamics$u[[pname]] = u$assign_add( stepsize * gradU - u * alpha +  
+                sqrt( 2 * a * stepsize ) * tf$random_normal( u$get_shape() ) )
         dynamics$theta[[pname]] = theta$assign_add( u )
-        # tensordot throws error if rank is 0 so catch this edge case
+        # Tensordot throws error if rank is 0 so catch this edge case
+        # For parameters of higher order than vectors we use tensor contraction
+        # to calculate the inner product for the thermostat.
         if ( rankTheta == 0 ) {
             dynamics$alpha[[pname]] = alpha$assign_add( u * u - stepsize )
         } else if( rankTheta >= 1 ) {
+            # Declare axes for tensor contraction
             axes = matrix( rep( 0:( rankTheta - 1 ), each = 2 ), nrow = 2 )
             axes = tf$constant( axes, dtype = tf$int32 )
             dynamics$alpha[[pname]] = alpha$assign_add( 
                     tf$tensordot( u, u, axes ) / tf$size( u, out_type = tf$float32 ) - stepsize )
-        } 
+        }
     }
     return( dynamics )
 }

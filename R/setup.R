@@ -14,8 +14,9 @@ createSGMCMC = function( logLik, logPrior, dataset, params, stepsize, minibatchS
     }, error = function ( e ) throwFloat64Error( e ) )
     # Check stepsize tuning constants are in list format
     stepsize = convertList( stepsize, params )
-    # Declare sgmcmc object as list
-    sgmcmc = list( "N" = N, "data" = dataset, "n" = minibatchSize, "placeholders" = placeholders, "stepsize" = stepsize, "params" = paramstf, "estLogPost" = estLogPost )
+    # Declare sgmcmc object as list, return for custom tuning constants to be added by calling method
+    sgmcmc = list( "N" = N, "data" = dataset, "n" = minibatchSize, "placeholders" = placeholders, 
+            "stepsize" = stepsize, "params" = paramstf, "estLogPost" = estLogPost )
     return( sgmcmc )
 }
 
@@ -38,7 +39,7 @@ getGradients.sgmcmc = function( sgmcmc ) {
 }
 
 # Get gradient estimates for control variate methods
-getGradients.sgmcmcCV = function( sgmcmcCV ) {
+getGradients.sgmcmccv = function( sgmcmcCV ) {
     estLogPostGrads = list()
     for ( pname in names( sgmcmcCV$params ) ) {
         gradCurr = tf$gradients( sgmcmcCV$estLogPost, sgmcmcCV$params[[pname]] )[[1]]
@@ -69,7 +70,7 @@ getShape = function( input ) {
     return( shapeInput )
 }
 
-# Redeclare parameters as TensorFlow variables, keep starting values
+# Redeclare parameters as TensorFlow variables, initialize at starting values
 setupParams = function( params ) {
     tfParams = list()
     for ( pname in names( params ) ) {
@@ -101,7 +102,7 @@ setupEstLogPost = function( logLik, logPrior, params, placeholders, N, n ) {
     return( estLogPost )
 }
 
-# If minibatch size is a proportion convert to an integer
+# If minibatch size is a proportion (i.e. < 1) convert to an integer
 convertProp = function( minibatchSize, N ) {
     if ( minibatchSize < 1 ) {
         out = round( minibatchSize * N )

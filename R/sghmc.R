@@ -42,12 +42,12 @@
 #' @export
 #'
 sghmc = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
-        alpha = 0.01, L = 5L, nIters = 10^4L, verbose = TRUE ) {
+            alpha = 0.01, L = 5L, nIters = 10^4L, verbose = TRUE ) {
     # Setup SGHMC object
-    sgmcmc = genSGHMC( logLik, logPrior, dataset, params, stepsize, alpha, L, minibatchSize )
+    sghmc = genSGHMC( logLik, logPrior, dataset, params, stepsize, alpha, L, minibatchSize )
     options = list( "nIters" = nIters, "verbose" = verbose )
     # Run MCMC for declared object
-    paramStorage = runSGMCMC( sgmcmc, params, options )
+    paramStorage = runSGMCMC( sghmc, params, options )
     return( paramStorage )
 }
 
@@ -104,13 +104,13 @@ sghmc = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchS
 #' @export
 #'
 sghmccv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL, 
-        minibatchSize = 0.01, alpha = 0.01, L = 5L, nIters = 10^4L, nItersOpt = 10^4L, 
-        verbose = TRUE ) {
+            minibatchSize = 0.01, alpha = 0.01, L = 5L, nIters = 10^4L, nItersOpt = 10^4L, 
+            verbose = TRUE ) {
     # Setup SGHMCCV object
-    sgmcmcCV = genSGHMCCV( logLik, logPrior, dataset, params, stepsize, alpha, L, optStepsize, minibatchSize )
+    sghmccv = genSGHMCCV( logLik, logPrior, dataset, params, stepsize, alpha, L, optStepsize, minibatchSize )
     options = list( "nIters" = nIters, "nItersOpt" = nItersOpt, "verbose" = verbose )
     # Run MCMC for declared object
-    paramStorage = runSGMCMC( sgmcmcCV, params, options )
+    paramStorage = runSGMCMC( sghmccv, params, options )
     return( paramStorage )
 }
 
@@ -136,18 +136,19 @@ genSGHMC = function( logLik, logPrior, dataset, params, stepsize, alpha, L, mini
 # Creates a stochastic gradient Hamiltonian Monte Carlo with Control Variates (SGHMCCV) object 
 #  which can be passed to optUpdate and mcmcStep functions to simulate from SGHMCCV
 #  for the posterior defined by logLik and logPrior.
-genSGHMCCV = function( logLik, logPrior, dataset, params, stepsize, alpha, L, optStepsize, minibatchSize ) {
+genSGHMCCV = function( logLik, logPrior, dataset, params, stepsize, alpha, L, 
+            optStepsize, minibatchSize ) {
     # Create generic sgmcmcCV object
-    sghmcCV = createSGMCMCCV( 
-        logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize )
+    sghmccv = createSGMCMCCV( 
+            logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize )
     # Declare SGHMC specific tuning constants and check they're in list format
-    sghmcCV$alpha = convertList( alpha, sghmcCV$params )
-    sghmcCV$L = L
+    sghmccv$alpha = convertList( alpha, sghmccv$params )
+    sghmccv$L = L
     # Declare object type
-    class(sghmcCV) = c( "sghmc", "sgmcmcCV" )
+    class(sghmccv) = c( "sghmc", "sgmcmccv" )
     # Declare SGHMC dynamics
-    sghmcCV$dynamics = declareDynamics( sghmcCV )
-    return( sghmcCV )
+    sghmccv$dynamics = declareDynamics( sghmccv )
+    return( sghmccv )
 }
 
 # Declare the TensorFlow steps needed for one step of SGHMC, input SGHMC object
@@ -156,6 +157,7 @@ declareDynamics.sghmc = function( sghmc) {
     dynamics = list( "theta" = list(), "nu" = list(), "refresh" = list(), "grad" = list() )
     # Get the correct gradient estimate given the sgld object (i.e. standard sgld or sgldcv) 
     estLogPostGrads = getGradients( sghmc )
+    # Loop over each parameter in params
     for ( pname in names( sghmc$params ) ) {
         dynamics$grad[[pname]] = tf$gradients( sghmc$estLogPost, sghmc$params[[pname]] )[[1]]
         # Declare tuning constants
@@ -166,7 +168,8 @@ declareDynamics.sghmc = function( sghmc) {
         nu = tf$Variable( sqrt( stepsize ) * tf$random_normal( theta$get_shape() ) )
         # Declare dynamics
         gradU = estLogPostGrads[[pname]]
-        dynamics$refresh[[pname]] = nu$assign( sqrt( stepsize ) * tf$random_normal( theta$get_shape() ) )
+        dynamics$refresh[[pname]] = nu$assign( sqrt( stepsize ) * tf$random_normal( 
+                theta$get_shape() ) )
         dynamics$nu[[pname]] = nu$assign_add( stepsize*gradU - alpha*nu + 
                 sqrt( 2 * stepsize * alpha ) * tf$random_normal( theta$get_shape() ) )
         dynamics$theta[[pname]] = theta$assign_add( nu )

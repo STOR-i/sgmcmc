@@ -12,13 +12,13 @@ createSGMCMCCV = function( logLik, logPrior, dataset, params, stepsize, optSteps
     sgmcmccv$logPostOptGrad = setupFullGradients( params )
     # Declare estimated log posterior tensor for optimization
     sgmcmccv$estLogPostOpt = setupEstLogPost( 
-        logLik, logPrior, sgmcmccv$paramsOpt, sgmcmccv$placeholders, sgmcmccv$N, minibatchSize )
+            logLik, logPrior, sgmcmccv$paramsOpt, sgmcmccv$placeholders, sgmcmccv$N, minibatchSize )
     # Declare full log posterior for calculation at MAP estimate
     sgmcmccv$fullLogPostOpt = setupFullLogPost( 
-        logLik, logPrior, sgmcmccv$paramsOpt, sgmcmccv$placeholdersFull )
+            logLik, logPrior, sgmcmccv$paramsOpt, sgmcmccv$placeholdersFull )
     # Declare optimizer
     sgmcmccv$optimizer = declareOptimizer( sgmcmccv$estLogPostOpt, sgmcmccv$fullLogPostOpt, 
-        sgmcmccv$paramsOpt, sgmcmccv$params, sgmcmccv$logPostOptGrad, optStepsize )
+            sgmcmccv$paramsOpt, sgmcmccv$params, sgmcmccv$logPostOptGrad, optStepsize )
     return( sgmcmccv )
 }
 

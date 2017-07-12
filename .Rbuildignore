@@ -2,4 +2,4 @@
 ^docs$
 ^_pkgdown\.yml$
 ^LICENSE$
-^.travis$
+^.travis.yml$
