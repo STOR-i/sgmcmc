@@ -9,8 +9,8 @@ sgnht(logLik, dataset, params, stepsize, logPrior = NULL,
 }
 \arguments{
 \item{logLik}{function which takes parameters and dataset 
-(list of tensorflow variables and placeholders respectively) as input. 
-It should return a tensorflow expression which defines the log likelihood of the model.}
+(list of TensorFlow variables and placeholders respectively) as input. 
+It should return a TensorFlow expression which defines the log likelihood of the model.}
 
 \item{dataset}{list of numeric R arrays which defines the datasets for the problem.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
@@ -24,8 +24,8 @@ The names in the list should correspond to those in params.
 Alternatively specify a single numeric value to use that stepsize for all parameters.}
 
 \item{logPrior}{optional. Default uninformative improper prior.
-Function which takes parameters (list of tensorflow variables) as input.
-The function should return a tensorflow tensor which defines the log prior of the model.}
+Function which takes parameters (list of TensorFlow variables) as input.
+The function should return a TensorFlow tensor which defines the log prior of the model.}
 
 \item{minibatchSize}{optional. Default 0.01.
 Numeric or integer value that specifies amount of dataset to use at each iteration 

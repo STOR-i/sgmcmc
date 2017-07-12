@@ -120,8 +120,8 @@
     <tr>
       <th>logLik</th>
       <td><p>function which takes parameters and dataset 
-(list of tensorflow variables and placeholders respectively) as input. 
-It should return a tensorflow expression which defines the log likelihood of the model.</p></td>
+(list of TensorFlow variables and placeholders respectively) as input. 
+It should return a TensorFlow expression which defines the log likelihood of the model.</p></td>
     </tr>
     <tr>
       <th>dataset</th>
@@ -147,8 +147,8 @@ to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.</p></
     <tr>
       <th>logPrior</th>
       <td><p>optional. Default uninformative improper prior.
-Function which takes parameters (list of tensorflow variables) as input.
-The function should return a tensorflow tensor which defines the log prior of the model.</p></td>
+Function which takes parameters (list of TensorFlow variables) as input.
+The function should return a TensorFlow tensor which defines the log prior of the model.</p></td>
     </tr>
     <tr>
       <th>minibatchSize</th>
