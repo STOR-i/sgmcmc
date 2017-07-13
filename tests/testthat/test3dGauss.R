@@ -90,8 +90,8 @@ test_that( "Check SGLD chain reasonable for 3d Gaussian", {
     thetaOut = sgldTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(max(thetaOut[,d]), 0)
-        expect_lte(min(thetaOut[,d]), 0)
+        expect_gte(min(thetaOut[,d]), -1)
+        expect_lte(max(thetaOut[,d]), 1)
     }
 } )
 
@@ -101,8 +101,8 @@ test_that( "Check SGLDCV chain reasonable for 3d Gaussian", {
     thetaOut = sgldcvTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(max(thetaOut[,d]), 0)
-        expect_lte(min(thetaOut[,d]), 0)
+        expect_gte(min(thetaOut[,d]), -1)
+        expect_lte(max(thetaOut[,d]), 1)
     }
 } )
 
@@ -111,8 +111,8 @@ test_that( "Check SGHMC chain reasonable for 3d Gaussian", {
     thetaOut = sghmcTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(max(thetaOut[,d]), 0)
-        expect_lte(min(thetaOut[,d]), 0)
+        expect_gte(min(thetaOut[,d]), -1)
+        expect_lte(max(thetaOut[,d]), 1)
     }
 } )
 
@@ -121,8 +121,8 @@ test_that( "Check SGHMCCV chain reasonable for 3d Gaussian", {
     thetaOut = sghmccvTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(max(thetaOut[,d]), 0)
-        expect_lte(min(thetaOut[,d]), 0)
+        expect_gte(min(thetaOut[,d]), -1)
+        expect_lte(max(thetaOut[,d]), 1)
     }
 } )
 
@@ -131,8 +131,8 @@ test_that( "Check SGNHT chain reasonable for 3d Gaussian", {
     thetaOut = sgnhtTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(max(thetaOut[,d]), 0)
-        expect_lte(min(thetaOut[,d]), 0)
+        expect_gte(min(thetaOut[,d]), -1)
+        expect_lte(max(thetaOut[,d]), 1)
     }
 } )
 
@@ -141,7 +141,7 @@ test_that( "Check SGNHTCV chain reasonable for 3d Gaussian", {
     thetaOut = sgnhtcvTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(max(thetaOut[,d]), 0)
-        expect_lte(min(thetaOut[,d]), 0)
+        expect_gte(min(thetaOut[,d]), -1)
+        expect_lte(max(thetaOut[,d]), 1)
     }
 } )

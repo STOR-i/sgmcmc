@@ -85,48 +85,48 @@ sgnhtcvTest = function( testData ) {
 test_that( "Check SGLD chain reasonable for 1d Gaussian", {
     testData = declareConsts()
     thetaOut = sgldTest( testData )
-    # Check true theta contained in chain
-    expect_gte(max(thetaOut), 0)
-    expect_lte(min(thetaOut), 0)
+    # Check sample is reasonable
+    expect_lte(max(thetaOut), 1)
+    expect_gte(min(thetaOut), -1)
 } )
 
 
 test_that( "Check SGLDCV chain reasonable for 1d Gaussian", {
     testData = declareConsts()
     thetaOut = sgldcvTest( testData )
-    # Check true theta contained in chain
-    expect_gte(max(thetaOut), 0)
-    expect_lte(min(thetaOut), 0)
+    # Check sample is reasonable
+    expect_lte(max(thetaOut), 1)
+    expect_gte(min(thetaOut), -1)
 } )
 
 test_that( "Check SGHMC chain reasonable for 1d Gaussian", {
     testData = declareConsts()
     thetaOut = sghmcTest( testData )
-    # Check true theta contained in chain
-    expect_gte(max(thetaOut), 0)
-    expect_lte(min(thetaOut), 0)
+    # Check sample is reasonable
+    expect_lte(max(thetaOut), 1)
+    expect_gte(min(thetaOut), -1)
 } )
 
 test_that( "Check SGHMCCV chain reasonable for 1d Gaussian", {
     testData = declareConsts()
     thetaOut = sghmccvTest( testData )
-    # Check true theta contained in chain
-    expect_gte(max(thetaOut), 0)
-    expect_lte(min(thetaOut), 0)
+    # Check sample is reasonable
+    expect_lte(max(thetaOut), 1)
+    expect_gte(min(thetaOut), -1)
 } )
 
 test_that( "Check SGNHT chain reasonable for 1d Gaussian", {
     testData = declareConsts()
     thetaOut = sgnhtTest( testData )
-    # Check true theta contained in chain
-    expect_gte(max(thetaOut), 0)
-    expect_lte(min(thetaOut), 0)
+    # Check sample is reasonable
+    expect_lte(max(thetaOut), 1)
+    expect_gte(min(thetaOut), -1)
 } )
 
 test_that( "Check SGNHTCV chain reasonable for 1d Gaussian", {
     testData = declareConsts()
     thetaOut = sgnhtcvTest( testData )
-    # Check true theta contained in chain
-    expect_gte(max(thetaOut), 0)
-    expect_lte(min(thetaOut), 0)
+    # Check sample is reasonable
+    expect_lte(max(thetaOut), 1)
+    expect_gte(min(thetaOut), -1)
 } )
