@@ -1,6 +1,9 @@
 os: linux
 dist: trusty
 language: r
+r:
+- release
+- devel
 cache: packages
 
 before_install:
