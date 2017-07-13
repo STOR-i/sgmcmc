@@ -4,19 +4,16 @@ declareConsts = function() {
     # Simulate data
     testData$N = 10^4
     testData$d = 3
-    testData$mu = rnorm( testData$d, sd = 1 )
+    testData$mu = rep(0, 3)
     testData$Sigma = matrix( c( 1, 0.3, 0.5, 0.3, 1, 0.2, 0.5, 0.2, 1 ), ncol = 3 )
     testData$X = MASS::mvrnorm( testData$N, testData$mu, testData$Sigma )
     testData$n = 100
     testData$data = list( "X" = testData$X )
-    testData$params = list( "theta" = rnorm( 3, mean = 0, sd = 5 ) )
+    testData$params = list( "theta" = rnorm( 3, mean = 0, sd = 1 ) )
     testData$optStepsize = 1e-1
     testData$nIters = 1100
     testData$nItersOpt = 1000
     testData$burnIn = 100
-    testData$alpha = 0.001
-    testData$width = 1
-    testData$modeDistance = 0.5
     return( testData )
 }
 
@@ -35,17 +32,17 @@ logPrior = function( params ) {
 sgldTest = function( testData ) {
     stepsize = list( "theta" = 1e-4 )
     storage = sgld( logLik, testData$data, testData$params, stepsize, testData$n, logPrior = logPrior, nIters = testData$nIters, verbose = FALSE )
-    # Take difference between MCMC and true parameters
-    paramDist = storage$theta - matrix( rep( testData$mu, each = testData$nIters ), ncol = 3 )
     # Remove burn in
-    paramDist = paramDist[-c(1:testData$burnIn),]
-    return( paramDist )
+    thetaOut = storage$theta[-c(1:testData$burnIn),]
+    return( thetaOut )
 }
 
 sgldcvTest = function( testData ) {
     stepsize = list( "theta" = 1e-4 )
     storage = sgldcv( logLik, testData$data, testData$params, stepsize, testData$optStepsize, logPrior = logPrior, minibatchSize = testData$n, nIters = testData$nIters, nItersOpt = testData$nItersOpt, verbose = FALSE )
-    return( storage )
+    # Remove burn in
+    thetaOut = storage$theta[-c(1:testData$burnIn),]
+    return( thetaOut )
 }
 
 sghmcTest = function( testData ) {
@@ -53,11 +50,9 @@ sghmcTest = function( testData ) {
     alpha = list( "theta" = 1e-1 )
     L = 3
     storage = sghmc( logLik, testData$data, testData$params, eta, logPrior = logPrior, minibatchSize = testData$n, alpha = alpha, L = L, nIters = testData$nIters, verbose = FALSE )
-    # Take difference between MCMC and true parameters
-    paramDist = storage$theta - matrix( rep( testData$mu, each = testData$nIters ), ncol = 3 )
     # Remove burn in
-    paramDist = paramDist[-c(1:testData$burnIn),]
-    return( paramDist )
+    thetaOut = storage$theta[-c(1:testData$burnIn),]
+    return( thetaOut )
 }
 
 sghmccvTest = function( testData ) {
@@ -65,7 +60,9 @@ sghmccvTest = function( testData ) {
     alpha = list( "theta" = 1e-1 )
     L = 3
     storage = sghmccv( logLik, testData$data, testData$params, eta, testData$optStepsize, logPrior = logPrior, minibatchSize = testData$n, alpha = alpha, L = L, nIters = testData$nIters, nItersOpt = testData$nItersOpt, verbose = FALSE )
-    return( storage )
+    # Remove burn in
+    thetaOut = storage$theta[-c(1:testData$burnIn),]
+    return( thetaOut )
 }
 
 sgnhtTest = function( testData ) {
@@ -74,113 +71,77 @@ sgnhtTest = function( testData ) {
     # SGNHT tends to need a good starting point to work well
     sgnht = list( "theta" = testData$mu )
     storage = sgnht( logLik, testData$data, testData$params, eta, logPrior = logPrior, minibatchSize = testData$n, a = a, nIters = testData$nIters, verbose = FALSE )
-    # Take difference between MCMC and true parameters
-    paramDist = storage$theta - matrix( rep( testData$mu, each = testData$nIters ), ncol = 3 )
     # Remove burn in
-    paramDist = paramDist[-c(1:testData$burnIn),]
-    return( paramDist )
+    thetaOut = storage$theta[-c(1:testData$burnIn),]
+    return( thetaOut )
 }
 
 sgnhtcvTest = function( testData ) {
     eta = list( "theta" = 1e-4 )
     a = list( "theta" = 1e-2 )
     storage = sgnhtcv( logLik, testData$data, testData$params, eta, testData$optStepsize, logPrior = logPrior, minibatchSize = testData$n, a = a, nIters = testData$nIters, nItersOpt = testData$nItersOpt, verbose = FALSE )
-    return( storage )
+    # Remove burn in
+    thetaOut = storage$theta[-c(1:testData$burnIn),]
+    return( thetaOut )
 }
 
 test_that( "Check SGLD chain reasonable for 3d Gaussian", {
     testData = declareConsts()
-    paramDist = sgldTest( testData )
+    thetaOut = sgldTest( testData )
+    # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        # Check 0 contained within confidence interval
-        confInt = quantile( paramDist[,d], c( testData$alpha, (1 - testData$alpha) ) )
-        expect_lte(confInt[1], 0)
-        expect_gte(confInt[2], 0)
-        # Check width of the confidence interval is small
-        expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+        expect_gte(max(thetaOut[,d]), 0)
+        expect_lte(min(thetaOut[,d]), 0)
     }
 } )
 
 
 test_that( "Check SGLDCV chain reasonable for 3d Gaussian", {
     testData = declareConsts()
-    storage = sgldcvTest( testData )
-    # Check optimization found reasonable mode
-    expect_lte( sum( abs( storage$theta[1,] - testData$mu ) ), testData$modeDistance )
-    # Take difference between MCMC and true parameters
-    paramDist = storage$theta - matrix( rep( testData$mu, each = testData$nIters ), ncol = 3 )
-    # Remove burn in
-    paramDist = paramDist[-c(1:testData$burnIn),]
+    thetaOut = sgldcvTest( testData )
+    # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        # Check 0 contained within confidence interval
-        confInt = quantile( paramDist[,d], c( testData$alpha, (1 - testData$alpha) ) )
-        expect_lte(confInt[1], 0)
-        expect_gte(confInt[2], 0)
-        # Check width of the confidence interval is small
-        expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+        expect_gte(max(thetaOut[,d]), 0)
+        expect_lte(min(thetaOut[,d]), 0)
     }
 } )
 
 test_that( "Check SGHMC chain reasonable for 3d Gaussian", {
     testData = declareConsts()
-    paramDist = sghmcTest( testData )
+    thetaOut = sghmcTest( testData )
+    # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        # Check 0 contained within confidence interval
-        confInt = quantile( paramDist[,d], c( testData$alpha, (1 - testData$alpha) ) )
-        expect_lte(confInt[1], 0)
-        expect_gte(confInt[2], 0)
-        # Check width of the confidence interval is small
-        expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+        expect_gte(max(thetaOut[,d]), 0)
+        expect_lte(min(thetaOut[,d]), 0)
     }
 } )
 
 test_that( "Check SGHMCCV chain reasonable for 3d Gaussian", {
     testData = declareConsts()
-    storage = sghmccvTest( testData )
-    # Check optimization found reasonable mode
-    expect_lte( sum( abs( storage$theta[1,] - testData$mu ) ), testData$modeDistance )
-    # Take difference between MCMC and true parameters
-    paramDist = storage$theta - matrix( rep( testData$mu, each = testData$nIters ), ncol = 3 )
-    # Remove burn in
-    paramDist = paramDist[-c(1:testData$burnIn),]
+    thetaOut = sghmccvTest( testData )
+    # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        # Check 0 contained within confidence interval
-        confInt = quantile( paramDist[,d], c( testData$alpha, (1 - testData$alpha) ) )
-        expect_lte(confInt[1], 0)
-        expect_gte(confInt[2], 0)
-        # Check width of the confidence interval is small
-        expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+        expect_gte(max(thetaOut[,d]), 0)
+        expect_lte(min(thetaOut[,d]), 0)
     }
 } )
 
 test_that( "Check SGNHT chain reasonable for 3d Gaussian", {
     testData = declareConsts()
-    paramDist = sgnhtTest( testData )
+    thetaOut = sgnhtTest( testData )
+    # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        # Check 0 contained within confidence interval
-        confInt = quantile( paramDist[,d], c( testData$alpha, (1 - testData$alpha) ) )
-        expect_lte(confInt[1], 0)
-        expect_gte(confInt[2], 0)
-        # Check width of the confidence interval is small
-        expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+        expect_gte(max(thetaOut[,d]), 0)
+        expect_lte(min(thetaOut[,d]), 0)
     }
 } )
 
 test_that( "Check SGNHTCV chain reasonable for 3d Gaussian", {
     testData = declareConsts()
-    storage = sgnhtcvTest( testData )
-    # Check optimization found reasonable mode
-    expect_lte( sum( abs( storage$theta[1,] - testData$mu ) ), testData$modeDistance )
-    # Take difference between MCMC and true parameters
-    paramDist = storage$theta - matrix( rep( testData$mu, each = testData$nIters ), ncol = 3 )
-    # Remove burn in
-    paramDist = paramDist[-c(1:testData$burnIn),]
+    thetaOut = sgnhtcvTest( testData )
+    # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        # Check 0 contained within confidence interval
-        confInt = quantile( paramDist[,d], c( testData$alpha, (1 - testData$alpha) ) )
-        expect_lte(confInt[1], 0)
-        expect_gte(confInt[2], 0)
-        # Check width of the confidence interval is small
-        expect_lte(abs( confInt[2] - confInt[1] ), testData$width)
+        expect_gte(max(thetaOut[,d]), 0)
+        expect_lte(min(thetaOut[,d]), 0)
     }
 } )
