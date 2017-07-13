@@ -2,4 +2,6 @@
 ^docs$
 ^_pkgdown\.yml$
 ^LICENSE$
-^.travis.yml$
+^\.travis\.yml$
+^cran-comments\.md$
+^NEWS\.md$
