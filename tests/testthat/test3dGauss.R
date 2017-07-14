@@ -86,6 +86,9 @@ sgnhtcvTest = function( testData ) {
 }
 
 test_that( "Check SGLD chain reasonable for 3d Gaussian", {
+    tryCatch({
+        tf$constant(c(1, 1))
+    }, error = skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgldTest( testData )
     # Check true theta contained in chain
@@ -97,6 +100,9 @@ test_that( "Check SGLD chain reasonable for 3d Gaussian", {
 
 
 test_that( "Check SGLDCV chain reasonable for 3d Gaussian", {
+    tryCatch({
+        tf$constant(c(1, 1))
+    }, error = skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgldcvTest( testData )
     # Check true theta contained in chain
@@ -107,6 +113,9 @@ test_that( "Check SGLDCV chain reasonable for 3d Gaussian", {
 } )
 
 test_that( "Check SGHMC chain reasonable for 3d Gaussian", {
+    tryCatch({
+        tf$constant(c(1, 1))
+    }, error = skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sghmcTest( testData )
     # Check true theta contained in chain
@@ -117,6 +126,9 @@ test_that( "Check SGHMC chain reasonable for 3d Gaussian", {
 } )
 
 test_that( "Check SGHMCCV chain reasonable for 3d Gaussian", {
+    tryCatch({
+        tf$constant(c(1, 1))
+    }, error = skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sghmccvTest( testData )
     # Check true theta contained in chain
@@ -127,6 +139,9 @@ test_that( "Check SGHMCCV chain reasonable for 3d Gaussian", {
 } )
 
 test_that( "Check SGNHT chain reasonable for 3d Gaussian", {
+    tryCatch({
+        tf$constant(c(1, 1))
+    }, error = skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgnhtTest( testData )
     # Check true theta contained in chain
@@ -137,6 +152,9 @@ test_that( "Check SGNHT chain reasonable for 3d Gaussian", {
 } )
 
 test_that( "Check SGNHTCV chain reasonable for 3d Gaussian", {
+    tryCatch({
+        tf$constant(c(1, 1))
+    }, error = skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgnhtcvTest( testData )
     # Check true theta contained in chain

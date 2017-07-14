@@ -59,17 +59,40 @@ n = 100
 The stepsize parameters may require a bit of tuning before you get good results. The shorthand `stepsize = 1e-5` can be used, which would set the stepsize of all parameters to be `1e-5`.
 
 Now we can run our SGLD algorithm using the `sgmcmc` function `sgld`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function
-```{r message=FALSE}
+```{r eval=FALSE}
 chains = sgld( logLik, dataset, params, stepsize, logPrior = logPrior, minibatchSize = n)
 ```
 
+```{r echo=FALSE}
+tryCatch({
+    chains = sgld( logLik, dataset, params, stepsize, logPrior = logPrior, minibatchSize = n)
+}, error = function (e) { 
+    writeLines("Not all tensorflow dependencies are met so skipping this...")
+    writeLines("Try running tensorflow::install_tensorflow().")
+})
+```
+
 Finally we'll plot the results after removing burn-in
-```{r}
+```{r eval=FALSE}
 library(ggplot2)
 burnIn = 10^3
 thetaOut = as.data.frame( chains$theta[-c(1:burnIn),] )
 ggplot( thetaOut, aes( x = V1, y = V2 ) ) +
     stat_density2d( size = 1.5 )
+```
+
+```{r echo=FALSE}
+tryCatch({
+    a = tf$constant(c(1, 1))
+    library(ggplot2)
+    burnIn = 10^3
+    thetaOut = as.data.frame( chains$theta[-c(1:burnIn),] )
+    ggplot( thetaOut, aes( x = V1, y = V2 ) ) +
+        stat_density2d( size = 1.5 )
+}, error = function (e) { 
+    writeLines("Not all tensorflow dependencies are met so skipping this...")
+    writeLines("Try running tensorflow::install_tensorflow().")
+})
 ```
 
 There are lots of other sgmcmc algorithms implemented in exactly the same way, such as `sghmc` and `sgnht`; as well as their [control variate counterparts](https://arxiv.org/pdf/1705.05439.pdf) (`sgldcv`, `sghmccv` and `sgnhtcv`) for improved efficiency, which take the additional small numeric input `optStepsize`, the stepsize of the initial optimization step to find the MAP parameters.

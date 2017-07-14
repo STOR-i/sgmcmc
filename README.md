@@ -8,10 +8,9 @@ The package is built on top of the [TensorFlow library for R](https://tensorflow
 
 ## Installation
 
-`sgmcmc` requires [TensorFlow for R](https://github.com/rstudio/tensorflow) to be installed so has a few steps:
+`sgmcmc` requires [TensorFlow for R](https://github.com/rstudio/tensorflow) to be installed, which requires packages that can't be automatically built by `R`, so has a few steps:
 - Install [TensorFlow for R](https://github.com/rstudio/tensorflow), first run `install.packages("tensorflow")`, then after run `tensorflow::install_tensorflow()`.
-- Make sure [devtools](https://cran.r-project.org/web/packages/devtools/index.html) are installed, this can be installed simply by running `install.packages("devtools")` 
-- Now run `devtools::install_github("STOR-i/sgmcmc")`.
+- Now run `install.packages("sgmcmc")`.
 
 The TensorFlow API changes a lot, so it's best to make sure your TensorFlow for python installation is up to date.
 

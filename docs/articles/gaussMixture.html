@@ -146,116 +146,116 @@ dataset =<span class="st"> </span><span class="kw">list</span>(<span class="st">
 <p>Optionally, we can set the tuning parameter for the momentum <code>alpha</code> in the same way as the <code>stepsize</code>. But we’ll leave this along with the trajectory tuning constant <code>L</code>, and the <code>minibatchSize</code> as their defaults.</p>
 <p>Now we can run our SGHMC algorithm using the <code>sgmcmc</code> function <code>sghmc</code>, which returns a list of Markov chains for each parameter as output. Use the argument <code>verbose = FALSE</code> to hide the output of the function. We’ll set the number of iterations as <code>11000</code> to allow for <code>1000</code> iterations of burn-in.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chains =<span class="st"> </span><span class="kw"><a href="../reference/sghmc.html">sghmc</a></span>( logLik, dataset, params, stepsize, <span class="dt">logPrior =</span> logPrior, <span class="dt">nIters =</span> <span class="dv">11000</span> )</code></pre></div>
-<pre><code>## Iteration: 100       Log posterior estimate: -28274.892578125
-## Iteration: 200       Log posterior estimate: -25940.4375
-## Iteration: 300       Log posterior estimate: -29582.640625
-## Iteration: 400       Log posterior estimate: -28361.4453125
-## Iteration: 500       Log posterior estimate: -28731.3203125
-## Iteration: 600       Log posterior estimate: -28746.681640625
-## Iteration: 700       Log posterior estimate: -29005.60546875
-## Iteration: 800       Log posterior estimate: -28524.935546875
-## Iteration: 900       Log posterior estimate: -28101.625
-## Iteration: 1000      Log posterior estimate: -29350.044921875
-## Iteration: 1100      Log posterior estimate: -27920.19921875
-## Iteration: 1200      Log posterior estimate: -28944.591796875
-## Iteration: 1300      Log posterior estimate: -29294.251953125
-## Iteration: 1400      Log posterior estimate: -28353.14453125
-## Iteration: 1500      Log posterior estimate: -30348.162109375
-## Iteration: 1600      Log posterior estimate: -28767.59765625
-## Iteration: 1700      Log posterior estimate: -27385.65234375
-## Iteration: 1800      Log posterior estimate: -28834.328125
-## Iteration: 1900      Log posterior estimate: -28688.52734375
-## Iteration: 2000      Log posterior estimate: -28958.431640625
-## Iteration: 2100      Log posterior estimate: -28561.984375
-## Iteration: 2200      Log posterior estimate: -29069.576171875
-## Iteration: 2300      Log posterior estimate: -29324.806640625
-## Iteration: 2400      Log posterior estimate: -30046.013671875
-## Iteration: 2500      Log posterior estimate: -29867.0703125
-## Iteration: 2600      Log posterior estimate: -26855.263671875
-## Iteration: 2700      Log posterior estimate: -28436.958984375
-## Iteration: 2800      Log posterior estimate: -27250.33203125
-## Iteration: 2900      Log posterior estimate: -29416.34375
-## Iteration: 3000      Log posterior estimate: -27795.1171875
-## Iteration: 3100      Log posterior estimate: -28444.94921875
-## Iteration: 3200      Log posterior estimate: -28097.890625
-## Iteration: 3300      Log posterior estimate: -29615.150390625
-## Iteration: 3400      Log posterior estimate: -30439.98046875
-## Iteration: 3500      Log posterior estimate: -27144.3203125
-## Iteration: 3600      Log posterior estimate: -28511.146484375
-## Iteration: 3700      Log posterior estimate: -27413.162109375
-## Iteration: 3800      Log posterior estimate: -28363.716796875
-## Iteration: 3900      Log posterior estimate: -26631.755859375
-## Iteration: 4000      Log posterior estimate: -28646.3671875
-## Iteration: 4100      Log posterior estimate: -27678.17578125
-## Iteration: 4200      Log posterior estimate: -30042.302734375
-## Iteration: 4300      Log posterior estimate: -30012.85546875
-## Iteration: 4400      Log posterior estimate: -30625.5078125
-## Iteration: 4500      Log posterior estimate: -26340.8984375
-## Iteration: 4600      Log posterior estimate: -27719.2109375
-## Iteration: 4700      Log posterior estimate: -29110.6640625
-## Iteration: 4800      Log posterior estimate: -30314.11328125
-## Iteration: 4900      Log posterior estimate: -27979.796875
-## Iteration: 5000      Log posterior estimate: -29586.453125
-## Iteration: 5100      Log posterior estimate: -29575.90625
-## Iteration: 5200      Log posterior estimate: -28832.533203125
-## Iteration: 5300      Log posterior estimate: -29716.615234375
-## Iteration: 5400      Log posterior estimate: -27531.484375
-## Iteration: 5500      Log posterior estimate: -29903.70703125
-## Iteration: 5600      Log posterior estimate: -29204.341796875
-## Iteration: 5700      Log posterior estimate: -28530.98046875
-## Iteration: 5800      Log posterior estimate: -29339.16015625
-## Iteration: 5900      Log posterior estimate: -28923.904296875
-## Iteration: 6000      Log posterior estimate: -28622.9140625
-## Iteration: 6100      Log posterior estimate: -28279.70703125
-## Iteration: 6200      Log posterior estimate: -29291.20703125
-## Iteration: 6300      Log posterior estimate: -29582.787109375
-## Iteration: 6400      Log posterior estimate: -29635.61328125
-## Iteration: 6500      Log posterior estimate: -30495.583984375
-## Iteration: 6600      Log posterior estimate: -28588.283203125
-## Iteration: 6700      Log posterior estimate: -28223.953125
-## Iteration: 6800      Log posterior estimate: -28876.75390625
-## Iteration: 6900      Log posterior estimate: -26797.7734375
-## Iteration: 7000      Log posterior estimate: -28294.271484375
-## Iteration: 7100      Log posterior estimate: -27794.392578125
-## Iteration: 7200      Log posterior estimate: -28538.34375
-## Iteration: 7300      Log posterior estimate: -26232.216796875
-## Iteration: 7400      Log posterior estimate: -28799.82421875
-## Iteration: 7500      Log posterior estimate: -29006.23046875
-## Iteration: 7600      Log posterior estimate: -28153.29296875
-## Iteration: 7700      Log posterior estimate: -27730.2265625
-## Iteration: 7800      Log posterior estimate: -27002.546875
-## Iteration: 7900      Log posterior estimate: -27244.896484375
-## Iteration: 8000      Log posterior estimate: -28858.10546875
-## Iteration: 8100      Log posterior estimate: -27276.869140625
-## Iteration: 8200      Log posterior estimate: -28367.78515625
-## Iteration: 8300      Log posterior estimate: -27974.21875
-## Iteration: 8400      Log posterior estimate: -27187.771484375
-## Iteration: 8500      Log posterior estimate: -28905.5859375
-## Iteration: 8600      Log posterior estimate: -28580.818359375
-## Iteration: 8700      Log posterior estimate: -28544.22265625
-## Iteration: 8800      Log posterior estimate: -27784.25
-## Iteration: 8900      Log posterior estimate: -27113.83203125
-## Iteration: 9000      Log posterior estimate: -28535.6953125
-## Iteration: 9100      Log posterior estimate: -27858.3828125
-## Iteration: 9200      Log posterior estimate: -27232.33203125
-## Iteration: 9300      Log posterior estimate: -27975.814453125
-## Iteration: 9400      Log posterior estimate: -29469.765625
-## Iteration: 9500      Log posterior estimate: -27928.4296875
-## Iteration: 9600      Log posterior estimate: -29325.181640625
-## Iteration: 9700      Log posterior estimate: -28708.7109375
-## Iteration: 9800      Log posterior estimate: -28783.607421875
-## Iteration: 9900      Log posterior estimate: -28860.7421875
-## Iteration: 10000     Log posterior estimate: -29357.169921875
-## Iteration: 10100     Log posterior estimate: -26695.259765625
-## Iteration: 10200     Log posterior estimate: -27287.3671875
-## Iteration: 10300     Log posterior estimate: -27727.455078125
-## Iteration: 10400     Log posterior estimate: -27418.28125
-## Iteration: 10500     Log posterior estimate: -26062.337890625
-## Iteration: 10600     Log posterior estimate: -27724.025390625
-## Iteration: 10700     Log posterior estimate: -28584.798828125
-## Iteration: 10800     Log posterior estimate: -29728.33984375
-## Iteration: 10900     Log posterior estimate: -28109.630859375
-## Iteration: 11000     Log posterior estimate: -28254.2109375</code></pre>
+<pre><code>## Iteration: 100       Log posterior estimate: -29337.1796875
+## Iteration: 200       Log posterior estimate: -28660.357421875
+## Iteration: 300       Log posterior estimate: -26316.396484375
+## Iteration: 400       Log posterior estimate: -28830.53515625
+## Iteration: 500       Log posterior estimate: -28269.9921875
+## Iteration: 600       Log posterior estimate: -28782.38671875
+## Iteration: 700       Log posterior estimate: -27696.541015625
+## Iteration: 800       Log posterior estimate: -27557.072265625
+## Iteration: 900       Log posterior estimate: -28507.0390625
+## Iteration: 1000      Log posterior estimate: -28665.306640625
+## Iteration: 1100      Log posterior estimate: -29262.294921875
+## Iteration: 1200      Log posterior estimate: -28533.65625
+## Iteration: 1300      Log posterior estimate: -26730.24609375
+## Iteration: 1400      Log posterior estimate: -27099.197265625
+## Iteration: 1500      Log posterior estimate: -30030.431640625
+## Iteration: 1600      Log posterior estimate: -28562.703125
+## Iteration: 1700      Log posterior estimate: -28894.466796875
+## Iteration: 1800      Log posterior estimate: -27642.47265625
+## Iteration: 1900      Log posterior estimate: -30079.017578125
+## Iteration: 2000      Log posterior estimate: -27363.517578125
+## Iteration: 2100      Log posterior estimate: -27316.5
+## Iteration: 2200      Log posterior estimate: -28255.404296875
+## Iteration: 2300      Log posterior estimate: -29034.5234375
+## Iteration: 2400      Log posterior estimate: -29227.921875
+## Iteration: 2500      Log posterior estimate: -26090.919921875
+## Iteration: 2600      Log posterior estimate: -29323.02734375
+## Iteration: 2700      Log posterior estimate: -27993.783203125
+## Iteration: 2800      Log posterior estimate: -27339.703125
+## Iteration: 2900      Log posterior estimate: -27902.712890625
+## Iteration: 3000      Log posterior estimate: -27831.716796875
+## Iteration: 3100      Log posterior estimate: -28981.478515625
+## Iteration: 3200      Log posterior estimate: -27804.0859375
+## Iteration: 3300      Log posterior estimate: -28866.22265625
+## Iteration: 3400      Log posterior estimate: -27920.46484375
+## Iteration: 3500      Log posterior estimate: -28042.3203125
+## Iteration: 3600      Log posterior estimate: -28562.794921875
+## Iteration: 3700      Log posterior estimate: -29031.990234375
+## Iteration: 3800      Log posterior estimate: -30164.01953125
+## Iteration: 3900      Log posterior estimate: -26971.861328125
+## Iteration: 4000      Log posterior estimate: -28857.61328125
+## Iteration: 4100      Log posterior estimate: -28526.43359375
+## Iteration: 4200      Log posterior estimate: -29111.455078125
+## Iteration: 4300      Log posterior estimate: -27515.267578125
+## Iteration: 4400      Log posterior estimate: -27871.76171875
+## Iteration: 4500      Log posterior estimate: -29751.080078125
+## Iteration: 4600      Log posterior estimate: -28619.0390625
+## Iteration: 4700      Log posterior estimate: -26786.470703125
+## Iteration: 4800      Log posterior estimate: -26634.474609375
+## Iteration: 4900      Log posterior estimate: -28594.09375
+## Iteration: 5000      Log posterior estimate: -29381.19140625
+## Iteration: 5100      Log posterior estimate: -28793.4765625
+## Iteration: 5200      Log posterior estimate: -27052.71484375
+## Iteration: 5300      Log posterior estimate: -28745.765625
+## Iteration: 5400      Log posterior estimate: -28301.8359375
+## Iteration: 5500      Log posterior estimate: -27275.6640625
+## Iteration: 5600      Log posterior estimate: -28911.2578125
+## Iteration: 5700      Log posterior estimate: -29392.146484375
+## Iteration: 5800      Log posterior estimate: -28319.294921875
+## Iteration: 5900      Log posterior estimate: -27038.38671875
+## Iteration: 6000      Log posterior estimate: -27936.287109375
+## Iteration: 6100      Log posterior estimate: -27809.640625
+## Iteration: 6200      Log posterior estimate: -28286.10546875
+## Iteration: 6300      Log posterior estimate: -28414.66796875
+## Iteration: 6400      Log posterior estimate: -28048.75
+## Iteration: 6500      Log posterior estimate: -27917.705078125
+## Iteration: 6600      Log posterior estimate: -27316.658203125
+## Iteration: 6700      Log posterior estimate: -28470.330078125
+## Iteration: 6800      Log posterior estimate: -28213.365234375
+## Iteration: 6900      Log posterior estimate: -28058.296875
+## Iteration: 7000      Log posterior estimate: -28690.2734375
+## Iteration: 7100      Log posterior estimate: -27460.890625
+## Iteration: 7200      Log posterior estimate: -28957.27734375
+## Iteration: 7300      Log posterior estimate: -29148.51953125
+## Iteration: 7400      Log posterior estimate: -28481.548828125
+## Iteration: 7500      Log posterior estimate: -27531.388671875
+## Iteration: 7600      Log posterior estimate: -28998.818359375
+## Iteration: 7700      Log posterior estimate: -28112.0234375
+## Iteration: 7800      Log posterior estimate: -28177.43359375
+## Iteration: 7900      Log posterior estimate: -26842.146484375
+## Iteration: 8000      Log posterior estimate: -30035.84765625
+## Iteration: 8100      Log posterior estimate: -27849.908203125
+## Iteration: 8200      Log posterior estimate: -27683.623046875
+## Iteration: 8300      Log posterior estimate: -27305.962890625
+## Iteration: 8400      Log posterior estimate: -27325.6796875
+## Iteration: 8500      Log posterior estimate: -28681.38671875
+## Iteration: 8600      Log posterior estimate: -28168.490234375
+## Iteration: 8700      Log posterior estimate: -25929.802734375
+## Iteration: 8800      Log posterior estimate: -27617.443359375
+## Iteration: 8900      Log posterior estimate: -30623.48828125
+## Iteration: 9000      Log posterior estimate: -28940.70703125
+## Iteration: 9100      Log posterior estimate: -27708.68359375
+## Iteration: 9200      Log posterior estimate: -27741.63671875
+## Iteration: 9300      Log posterior estimate: -27737.91015625
+## Iteration: 9400      Log posterior estimate: -28863.890625
+## Iteration: 9500      Log posterior estimate: -28919.837890625
+## Iteration: 9600      Log posterior estimate: -28340.486328125
+## Iteration: 9700      Log posterior estimate: -27150.375
+## Iteration: 9800      Log posterior estimate: -28210.140625
+## Iteration: 9900      Log posterior estimate: -27983.89453125
+## Iteration: 10000     Log posterior estimate: -29412.71875
+## Iteration: 10100     Log posterior estimate: -30769.130859375
+## Iteration: 10200     Log posterior estimate: -27504.05859375
+## Iteration: 10300     Log posterior estimate: -28848.451171875
+## Iteration: 10400     Log posterior estimate: -29766.53125
+## Iteration: 10500     Log posterior estimate: -28892.720703125
+## Iteration: 10600     Log posterior estimate: -30070.30859375
+## Iteration: 10700     Log posterior estimate: -28255.3359375
+## Iteration: 10800     Log posterior estimate: -27466.884765625
+## Iteration: 10900     Log posterior estimate: -28284.953125
+## Iteration: 11000     Log posterior estimate: -28713.255859375</code></pre>
 <p>Finally, we’ll plot the results after removing burn-in</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
 <span class="co"># Remove burn in</span>
@@ -266,7 +266,7 @@ chains =<span class="st"> </span><span class="kw">list</span>( <span class="st">
 plotData =<span class="st"> </span><span class="kw">rbind</span>(chains$theta1, chains$theta2)
 <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggplot">ggplot</a></span>( plotData, <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>( <span class="dt">x =</span> V1, <span class="dt">y =</span> V2 ) ) +
 <span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/geom_density_2d">stat_density2d</a></span>( <span class="dt">size =</span> <span class="fl">1.5</span>, <span class="dt">alpha =</span> <span class="fl">0.7</span> )</code></pre></div>
-<p><img src="gaussMixture_files/figure-html/unnamed-chunk-7-1.png" width="672"></p>
+<p><img src="gaussMixture_files/figure-html/unnamed-chunk-9-1.png" width="672"></p>
 </div>
   </div>
 
@@ -277,7 +277,7 @@ plotData =<span class="st"> </span><span class="kw">rbind</span>(chains$theta1, 
 
 
       <footer><div class="copyright">
-  <p>Developed by <a href="http://lancs.ac.uk/~bakerj1/">Jack Baker</a>, <a href="http://www.lancs.ac.uk/~nemeth/">Christopher Nemeth</a>, <a href="http://www.maths.lancs.ac.uk/~fearnhea/">Paul Fearnhead</a>, <a href="https://homes.cs.washington.edu/~ebfox/">Emily B. Fox</a>, <a href="http://www.stor-i.lancs.ac.uk/"><img src="http://www.stor-i.lancs.ac.uk/MediaGallery/9-144.jpg" height="18"></a>.</p>
+  <p>Developed by <a href="http://lancs.ac.uk/~bakerj1/">Jack Baker</a>, <a href="http://www.lancs.ac.uk/~nemeth/">Christopher Nemeth</a>, <a href="http://www.maths.lancs.ac.uk/~fearnhea/">Paul Fearnhead</a>, <a href="https://homes.cs.washington.edu/~ebfox/">Emily B. Fox</a>.</p>
 </div>
 
 <div class="pkgdown">

@@ -80,12 +80,21 @@ stepsize = list( "theta1" = 5e-6, "theta2" = 5e-6 )
 Optionally, we can set the tuning parameter for the momentum `alpha` in the same way as the `stepsize`. But we'll leave this along with the trajectory tuning constant `L`, and the `minibatchSize` as their defaults.
 
 Now we can run our SGHMC algorithm using the `sgmcmc` function `sghmc`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function. We'll set the number of iterations as `11000` to allow for `1000` iterations of burn-in.
-```{r message=FALSE}
+```{r eval=FALSE}
 chains = sghmc( logLik, dataset, params, stepsize, logPrior = logPrior, nIters = 11000 )
 ```
 
+```{r echo=FALSE}
+tryCatch({
+    chains = sghmc( logLik, dataset, params, stepsize, logPrior = logPrior, nIters = 11000 )
+}, error = function (e) { 
+    writeLines("Not all tensorflow dependencies are met so skipping this...")
+    writeLines("Try running tensorflow::install_tensorflow().")
+})
+```
+
 Finally, we'll plot the results after removing burn-in
-```{r}
+```{r eval=FALSE}
 library(ggplot2)
 # Remove burn in
 burnIn = 10^3
@@ -95,4 +104,22 @@ chains = list( "theta1" = as.data.frame( chains$theta1[-c(1:burnIn),] ),
 plotData = rbind(chains$theta1, chains$theta2)
 ggplot( plotData, aes( x = V1, y = V2 ) ) +
     stat_density2d( size = 1.5, alpha = 0.7 )
+```
+
+```{r echo=FALSE}
+tryCatch({
+    a = tf$constant(c(1, 1))
+    library(ggplot2)
+    # Remove burn in
+    burnIn = 10^3
+    chains = list( "theta1" = as.data.frame( chains$theta1[-c(1:burnIn),] ),
+            "theta2" = as.data.frame( chains$theta2[-c(1:burnIn),] ) )
+    # Concatenate the two chains for the plot to get a picture of the whole distribution
+    plotData = rbind(chains$theta1, chains$theta2)
+    ggplot( plotData, aes( x = V1, y = V2 ) ) +
+            stat_density2d( size = 1.5, alpha = 0.7 )
+}, error = function (e) { 
+    writeLines("Not all tensorflow dependencies are met so skipping this...")
+    writeLines("Try running tensorflow::install_tensorflow().")
+})
 ```
