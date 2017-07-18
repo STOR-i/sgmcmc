@@ -8,9 +8,13 @@ Authors@R: c(
     person( "Paul", "Fearnhead", role = c( "aut", "cph" ) ),
     person( "Emily B.", "Fox", role = c("aut", "cph") ), 
     person( "STOR-i", role = c( "cph" ) ))
-Description: R library for performing stochastic gradient MCMC
-  including SGLD, SGHMC, SGNHT and control variate methods. Library is built on 'TensorFlow'
-  <https://www.tensorflow.org/>, a library for efficient numerical computation.
+Description: Provides functions that performs popular stochastic gradient Markov chain Monte Carlo 
+  (SGMCMC) methods on user specified models. The required gradients are automatically calculated 
+  using 'TensorFlow' <https://www.tensorflow.org/>, an efficient library for numerical computation.
+  This means only the log likelihood and log prior functions need to be specified. 
+  The methods implemented include stochastic gradient Langevin dynamics (SGLD), stochastic gradient
+  Hamiltonian Monte Carlo (SGHMC), stochastic gradient Nose-Hoover thermostat (SGNHT) and 
+  their respective control variate versions for increased efficiency.
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.0), tensorflow

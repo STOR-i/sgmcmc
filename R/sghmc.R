@@ -41,6 +41,18 @@
 #'
 #' @export
 #'
+#' @examples
+#' \dontrun{
+#' # Simulate from a Normal Distribution with uninformative, improper prior
+#' dataset = list("x" = rnorm(1000))
+#' params = list("theta" = 0)
+#' logLik = function(params, dataset) { 
+#'     distn = tf$contrib$distributions$Normal(params$theta, 1)
+#'     return(tf$reduce_sum(distn$log_prob(dataset$x)))
+#' }
+#' stepsize = list("theta" = 1e-5)
+#' output = sghmc(logLik, dataset, params, stepsize)
+#' }
 sghmc = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
             alpha = 0.01, L = 5L, nIters = 10^4L, verbose = TRUE ) {
     # Setup SGHMC object
@@ -103,6 +115,19 @@ sghmc = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchS
 #'
 #' @export
 #'
+#' @examples
+#' \dontrun{
+#' # Simulate from a Normal Distribution with uninformative prior
+#' dataset = list("x" = rnorm(1000))
+#' params = list("theta" = 0)
+#' logLik = function(params, dataset) { 
+#'     distn = tf$contrib$distributions$Normal(params$theta, 1)
+#'     return(tf$reduce_sum(distn$log_prob(dataset$x)))
+#' }
+#' stepsize = list("theta" = 1e-5)
+#' optStepsize = 1e-1
+#' output = sghmccv(logLik, dataset, params, stepsize, optStepsize)
+#' }
 sghmccv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL, 
             minibatchSize = 0.01, alpha = 0.01, L = 5L, nIters = 10^4L, nItersOpt = 10^4L, 
             verbose = TRUE ) {

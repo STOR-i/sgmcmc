@@ -43,6 +43,17 @@ Simulates from the posterior defined by the functions logLik and logPrior using
  stochastic gradient Langevin Dynamics. The function uses TensorFlow, so needs
  Tensorflow for python installed.
 }
+\examples{
+# Simulate from a Normal Distribution with uninformative prior
+dataset = list("x" = rnorm(1000))
+params = list("theta" = 0)
+logLik = function(params, dataset) { 
+    distn = tf$contrib$distributions$Normal(params$theta, 1)
+    return(tf$reduce_sum(distn$log_prob(dataset$x)))
+}
+stepsize = list("theta" = 1e-4)
+output = sgld(logLik, dataset, params, stepsize)
+}
 \references{
 \itemize{\item \href{http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf}{
  Welling, M., and Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 

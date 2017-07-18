@@ -50,6 +50,18 @@ Simulates from the posterior defined by the functions logLik and logPrior using
  stochastic gradient Langevin Dynamics with an improved gradient estimate using Control Variates.
  The function uses TensorFlow, so needs Tensorflow for python installed.
 }
+\examples{
+# Simulate from a Normal Distribution with uninformative prior
+dataset = list("x" = rnorm(1000))
+params = list("theta" = 0)
+logLik = function(params, dataset) { 
+    distn = tf$contrib$distributions$Normal(params$theta, 1)
+    return(tf$reduce_sum(distn$log_prob(dataset$x)))
+}
+stepsize = list("theta" = 1e-4)
+optStepsize = 1e-1
+output = sgldcv(logLik, dataset, params, stepsize, optStepsize)
+}
 \references{
 \itemize{
  \item \href{https://arxiv.org/pdf/1706.05439.pdf}{

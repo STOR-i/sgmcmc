@@ -55,6 +55,17 @@ Simulates from the posterior defined by the functions logLik and logPrior using
  as used in the simulations by the original reference. 
  This will be changed in future implementations.
 }
+\examples{
+# Simulate from a Normal Distribution with uninformative, improper prior
+dataset = list("x" = rnorm(1000))
+params = list("theta" = 0)
+logLik = function(params, dataset) { 
+    distn = tf$contrib$distributions$Normal(params$theta, 1)
+    return(tf$reduce_sum(distn$log_prob(dataset$x)))
+}
+stepsize = list("theta" = 1e-5)
+output = sghmc(logLik, dataset, params, stepsize)
+}
 \references{
 \itemize{\item \href{https://arxiv.org/pdf/1402.4102v2.pdf}{
  Chen, T., Fox, E. B., and Guestrin, C. (2014). Stochastic gradient Hamiltonian Monte Carlo. 

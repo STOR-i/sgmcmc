@@ -52,6 +52,17 @@ Simulates from the posterior defined by the functions logLik and logPrior using
  (e.g. matrices and tensors), the thermostat step uses a tensor contraction.
  Tensor contraction is otherwise known as the inner product between two tensors.
 }
+\examples{
+# Simulate from a Normal Distribution with uninformative, improper prior
+dataset = list("x" = rnorm(1000))
+params = list("theta" = 0)
+logLik = function(params, dataset) { 
+    distn = tf$contrib$distributions$Normal(params$theta, 1)
+    return(tf$reduce_sum(distn$log_prob(dataset$x)))
+}
+stepsize = list("theta" = 5e-6)
+output = sgnht(logLik, dataset, params, stepsize)
+}
 \references{
 \itemize{\item \href{http://people.ee.duke.edu/~lcarin/sgnht-4.pdf}{
  Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., and Neven, H. (2014). 
