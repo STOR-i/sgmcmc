@@ -53,6 +53,7 @@ Simulates from the posterior defined by the functions logLik and logPrior using
  Tensor contraction is otherwise known as the inner product between two tensors.
 }
 \examples{
+\dontrun{
 # Simulate from a Normal Distribution with uninformative, improper prior
 dataset = list("x" = rnorm(1000))
 params = list("theta" = 0)
@@ -62,6 +63,7 @@ logLik = function(params, dataset) {
 }
 stepsize = list("theta" = 5e-6)
 output = sgnht(logLik, dataset, params, stepsize)
+}
 }
 \references{
 \itemize{\item \href{http://people.ee.duke.edu/~lcarin/sgnht-4.pdf}{

@@ -63,6 +63,7 @@ Simulates from the posterior defined by the functions logLik and logPrior using
  This will be changed in future implementations.
 }
 \examples{
+\dontrun{
 # Simulate from a Normal Distribution with uninformative prior
 dataset = list("x" = rnorm(1000))
 params = list("theta" = 0)
@@ -73,6 +74,7 @@ logLik = function(params, dataset) {
 stepsize = list("theta" = 1e-5)
 optStepsize = 1e-1
 output = sghmccv(logLik, dataset, params, stepsize, optStepsize)
+}
 }
 \references{
 \itemize{

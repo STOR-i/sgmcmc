@@ -193,6 +193,18 @@ as defined in the main reference.</p></td>
 </ul>
     
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><span class='co'># NOT RUN {</span>
+<span class='co'># Simulate from a Normal Distribution with uninformative, improper prior</span>
+<span class='no'>dataset</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='st'>"x"</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='fl'>1000</span>))
+<span class='no'>params</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='st'>"theta"</span> <span class='kw'>=</span> <span class='fl'>0</span>)
+<span class='no'>logLik</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>params</span>, <span class='no'>dataset</span>) {
+    <span class='no'>distn</span> <span class='kw'>=</span> <span class='no'>tf</span>$<span class='no'>contrib</span>$<span class='no'>distributions</span>$<span class='fu'>Normal</span>(<span class='no'>params</span>$<span class='no'>theta</span>, <span class='fl'>1</span>)
+    <span class='fu'>return</span>(<span class='no'>tf</span>$<span class='fu'>reduce_sum</span>(<span class='no'>distn</span>$<span class='fu'>log_prob</span>(<span class='no'>dataset</span>$<span class='no'>x</span>)))
+}
+<span class='no'>stepsize</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='st'>"theta"</span> <span class='kw'>=</span> <span class='fl'>1e-5</span>)
+<span class='no'>output</span> <span class='kw'>=</span> <span class='fu'>sghmc</span>(<span class='no'>logLik</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>)
+<span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -202,7 +214,9 @@ as defined in the main reference.</p></td>
       <li><a href="#value">Value</a></li>
 
       <li><a href="#references">References</a></li>
-          </ul>
+      
+      <li><a href="#examples">Examples</a></li>
+    </ul>
 
   </div>
 </div>

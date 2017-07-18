@@ -51,6 +51,7 @@ Simulates from the posterior defined by the functions logLik and logPrior using
  The function uses TensorFlow, so needs Tensorflow for python installed.
 }
 \examples{
+\dontrun{
 # Simulate from a Normal Distribution with uninformative prior
 dataset = list("x" = rnorm(1000))
 params = list("theta" = 0)
@@ -61,6 +62,7 @@ logLik = function(params, dataset) {
 stepsize = list("theta" = 1e-4)
 optStepsize = 1e-1
 output = sgldcv(logLik, dataset, params, stepsize, optStepsize)
+}
 }
 \references{
 \itemize{
