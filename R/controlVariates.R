@@ -1,8 +1,10 @@
 # Create generic sgmcmccv object from sgmcmc object
 createSGMCMCCV = function( logLik, logPrior, dataset, params, stepsize, optStepsize, 
-        minibatchSize ) {
+        minibatchSize, nItersOpt ) {
     # First create generic sgmcmc object then add specifics
     sgmcmccv = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize )
+    # Add nItersOpt for optimization step
+    sgmcmccv$nItersOpt = nItersOpt
     # If minibatchSize is a proportion, convert to an integer
     minibatchSize = convertProp( minibatchSize, sgmcmccv$N )
     # Declare TensorFlow variables for initial optimizer
@@ -25,28 +27,28 @@ createSGMCMCCV = function( logLik, logPrior, dataset, params, stepsize, optSteps
 # This function performs a single optimization step on the control variate parameters.
 # This initial optimization procedure is needed before SGMCMCCV is applied in order to
 # ensure the control variate parameters estimate the mode well.
-optUpdate = function( sess, sgmcmc ) {
+optUpdate = function( sgmcmc, sess ) {
     feedCurr = dataFeed( sgmcmc$data, sgmcmc$placeholders, sgmcmc$n )
     sess$run( sgmcmc$optimizer$update, feed_dict = feedCurr )
 }
 
 # Initial optimization of parameters for Control Variate methods.
 # Needed to ensure control variate parameters estimate posterior mode.
-getMode = function( sess, sgmcmc, nIters = 10^4, verbose = TRUE ) {
+getMode = function( sgmcmc, sess, verbose = TRUE ) {
     # If verbose parameter is TRUE, print progress
     if ( verbose ) {
-        writeLines( "\nFinding initial MAP estimates..." )
+        message( "\nFinding initial MAP estimates..." )
     }
-    for ( i in 1:nIters ) {
+    for ( i in 1:sgmcmc$nItersOpt ) {
         # Single update of optimization
-        optUpdate( sess, sgmcmc )
+        optUpdate( sgmcmc, sess )
         if ( i %% 100 == 0 ) {
-            checkOptDivergence( sess, sgmcmc, i, verbose )
+            checkOptDivergence( sgmcmc, sess, i, verbose )
         }
     }
     # Calculate the full gradient of the log posterior (i.e. using the full dataset) 
     #   at the mode estimates
-    calcFullGrads( sess, sgmcmc )
+    calcFullGrads( sgmcmc, sess )
 }
 
 # Declare full log posterior density from logLik and logPrior functions
@@ -100,7 +102,7 @@ declareOptimizer = function( estLogPost, fullLogPost, paramsOpt, params, gradFul
 }
 
 # Calculates full log posterior gradient estimate at the mode
-calcFullGrads = function( sess, sgmcmc ) {
+calcFullGrads = function( sgmcmc, sess ) {
     feedCurr = feedFullDataset( sgmcmc$data, sgmcmc$placeholdersFull )
     for ( pname in names( sgmcmc$params ) ) {
         sess$run( sgmcmc$optimizer$fullCalc[[pname]], feed_dict = feedCurr  )
@@ -109,7 +111,7 @@ calcFullGrads = function( sess, sgmcmc ) {
 }
 
 # Check divergence of optimization procedure and print progress if verbose == TRUE
-checkOptDivergence = function( sess, sgmcmc, iter, verbose ) {
+checkOptDivergence = function( sgmcmc, sess, iter, verbose ) {
     currentEstimate = sess$run( sgmcmc$estLogPostOpt, feed_dict = dataFeed( sgmcmc$data, 
             sgmcmc$placeholders, sgmcmc$n ) )
     # If log posterior estimate is NAN, chain is diverged, stop
@@ -117,7 +119,7 @@ checkOptDivergence = function( sess, sgmcmc, iter, verbose ) {
         stop("Chain diverged")
     }
     if ( verbose ) {
-        writeLines( paste0( "Iteration: ", iter, "\t\tLog posterior estimate: ", currentEstimate ) )
+        message( paste0( "Iteration: ", iter, "\t\tLog posterior estimate: ", currentEstimate ) )
     }
 }
 

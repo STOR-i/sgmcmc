@@ -24,6 +24,8 @@ There's also worked examples for the following models (these will be extended as
  - [Gaussian Mixture](https://stor-i.github.io/sgmcmc///articles/gaussMixture.html)
  - [Logistic Regression](https://stor-i.github.io/sgmcmc///articles/logisticRegression.html)
 
+The SGMCMC algorithms can also be run step by step, which allows custom storage of parameters using test functions, or sequential estimates. Useful if your chain is too large to fit into memory! This requires a better knowledge of TensorFlow. An example of this is given in the [neural network](https://stor-i.github.io/sgmcmc///articles/nn.html) vignette.
+
 Finally full details of the API can be found [here](https://stor-i.github.io/sgmcmc///reference/index.html).
 
 For the source code, and bug reporting, see the [Github page](https://github.com/STOR-i/sgmcmc).

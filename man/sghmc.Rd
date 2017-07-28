@@ -19,8 +19,8 @@ The names in the list should correspond to those referred to in the logLik and l
 \item{params}{list of numeric R arrays which define the starting point of each parameter.
 The names in the list should correspond to those referred to in the logLik and logPrior functions}
 
-\item{stepsize}{list of numeric values corresponding to the SGHMC stepsizes for each parameter
-(\eqn{\eta} in the original paper). The names in the list should correspond to those in params.
+\item{stepsize}{list of numeric values corresponding to the SGLD stepsizes for each parameter
+The names in the list should correspond to those in params.
 Alternatively specify a single numeric value to use that stepsize for all parameters.}
 
 \item{logPrior}{optional. Default uninformative improper prior.
@@ -66,6 +66,7 @@ logLik = function(params, dataset) {
 }
 stepsize = list("theta" = 1e-5)
 output = sghmc(logLik, dataset, params, stepsize)
+# For more examples see vignettes
 }
 }
 \references{

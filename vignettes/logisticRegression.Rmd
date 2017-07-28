@@ -3,7 +3,7 @@ title: "Worked Example: Logistic Regression"
 author: "Jack Baker"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Logistic Regression}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

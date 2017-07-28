@@ -76,7 +76,7 @@ sgnhtcvTest = function( testData ) {
 test_that( "sgld: Check Error thrown for float64 input", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     expect_error( sgldTest( testData ) )
 } )
@@ -84,7 +84,7 @@ test_that( "sgld: Check Error thrown for float64 input", {
 test_that( "sgldcv: Check Error thrown for float64 input", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     expect_error( sgldcvTest( testData ) )
 } )
@@ -92,7 +92,7 @@ test_that( "sgldcv: Check Error thrown for float64 input", {
 test_that( "sghmc: Check Error thrown for float64 input", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     expect_error( sghmcTest( testData ) )
 } )
@@ -100,7 +100,7 @@ test_that( "sghmc: Check Error thrown for float64 input", {
 test_that( "sghmccv: Check Error thrown for float64 input", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     expect_error( sghmccvTest( testData ) )
 } )
@@ -108,7 +108,7 @@ test_that( "sghmccv: Check Error thrown for float64 input", {
 test_that( "sgnht: Check Error thrown for float64 input", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     expect_error( sgnhtTest( testData ) )
 } )
@@ -116,7 +116,7 @@ test_that( "sgnht: Check Error thrown for float64 input", {
 test_that( "sgnhtcv: Check Error thrown for float64 input", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     expect_error( sgnhtcvTest( testData ) )
 } )

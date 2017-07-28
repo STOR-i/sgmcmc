@@ -72,7 +72,7 @@ sgnhtcvTest = function( testData ) {
 test_that( "Check SGLD with optional parameters runs okay", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgldTest( testData )
 } )
@@ -81,7 +81,7 @@ test_that( "Check SGLD with optional parameters runs okay", {
 test_that( "Check SGLDCV with optional parameters run okay", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgldcvTest( testData )
 } )
@@ -89,7 +89,7 @@ test_that( "Check SGLDCV with optional parameters run okay", {
 test_that( "Check SGHMC with optional parameters runs okay", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sghmcTest( testData )
 } )
@@ -97,7 +97,7 @@ test_that( "Check SGHMC with optional parameters runs okay", {
 test_that( "Check SGHMCCV with optional parameters runs okay", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sghmccvTest( testData )
 } )
@@ -105,7 +105,7 @@ test_that( "Check SGHMCCV with optional parameters runs okay", {
 test_that( "Check SGNHT with optional parameters runs okay", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgnhtTest( testData )
 } )
@@ -113,7 +113,7 @@ test_that( "Check SGNHT with optional parameters runs okay", {
 test_that( "Check SGNHTCV with optional parameters runs okay", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgnhtcvTest( testData )
 } )

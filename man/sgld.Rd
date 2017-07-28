@@ -54,6 +54,7 @@ logLik = function(params, dataset) {
 }
 stepsize = list("theta" = 1e-4)
 output = sgld(logLik, dataset, params, stepsize)
+# For more examples see vignettes
 }
 }
 \references{

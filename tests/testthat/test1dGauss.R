@@ -85,7 +85,7 @@ sgnhtcvTest = function( testData ) {
 test_that( "Check SGLD chain reasonable for 1d Gaussian", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgldTest( testData )
     # Check sample is reasonable
@@ -97,7 +97,7 @@ test_that( "Check SGLD chain reasonable for 1d Gaussian", {
 test_that( "Check SGLDCV chain reasonable for 1d Gaussian", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgldcvTest( testData )
     # Check sample is reasonable
@@ -108,7 +108,7 @@ test_that( "Check SGLDCV chain reasonable for 1d Gaussian", {
 test_that( "Check SGHMC chain reasonable for 1d Gaussian", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sghmcTest( testData )
     # Check sample is reasonable
@@ -119,7 +119,7 @@ test_that( "Check SGHMC chain reasonable for 1d Gaussian", {
 test_that( "Check SGHMCCV chain reasonable for 1d Gaussian", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sghmccvTest( testData )
     # Check sample is reasonable
@@ -130,7 +130,7 @@ test_that( "Check SGHMCCV chain reasonable for 1d Gaussian", {
 test_that( "Check SGNHT chain reasonable for 1d Gaussian", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgnhtTest( testData )
     # Check sample is reasonable
@@ -141,7 +141,7 @@ test_that( "Check SGNHT chain reasonable for 1d Gaussian", {
 test_that( "Check SGNHTCV chain reasonable for 1d Gaussian", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     thetaOut = sgnhtcvTest( testData )
     # Check sample is reasonable

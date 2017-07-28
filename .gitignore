@@ -1,3 +1,4 @@
 *.swp
 temp/
 tests/tmp
+data-raw/MNIST-data

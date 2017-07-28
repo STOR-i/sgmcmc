@@ -79,6 +79,9 @@
     <li>
       <a href="../articles/mvGauss.html">Worked Example: Simulate from a Multivariate Gaussian</a>
     </li>
+    <li>
+      <a href="../articles/nn.html">Advanced Example: Simulate from a Bayesian Neural Network -- Storage Constraints</a>
+    </li>
   </ul>
 </li>
 <li>
@@ -140,8 +143,7 @@ The names in the list should correspond to those referred to in the logLik and l
     </tr>
     <tr>
       <th>stepsize</th>
-      <td><p>list of numeric values corresponding to the SGNHT stepsizes for each parameter
-(\(\eta\) in the original paper, Algorithm 2). 
+      <td><p>list of numeric values corresponding to the SGLD stepsizes for each parameter
 The names in the list should correspond to those in params.
 Alternatively specify a single numeric value to use that stepsize for all parameters.</p></td>
     </tr>
@@ -199,6 +201,7 @@ Alternatively specify a single float to specify that value for all parameters.</
 }
 <span class='no'>stepsize</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='st'>"theta"</span> <span class='kw'>=</span> <span class='fl'>5e-6</span>)
 <span class='no'>output</span> <span class='kw'>=</span> <span class='fu'>sgnht</span>(<span class='no'>logLik</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>)
+<span class='co'># For more examples see vignettes</span>
 <span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

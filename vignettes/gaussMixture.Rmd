@@ -3,7 +3,7 @@ title: "Worked Example: Simulate from a Gaussian Mixture"
 author: "Jack Baker"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Gaussian Mixture}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -68,7 +68,7 @@ sgnhtcvTest = function( testData ) {
 test_that( "sgld: matrix parameters", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     i = sample( testData$nIters, 1 )
     output = sgldTest( testData )$Sigma[i,,]
@@ -79,7 +79,7 @@ test_that( "sgld: matrix parameters", {
 test_that( "sgldcv: matrix parameters", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     i = sample( testData$nIters, 1 )
     output = sgldcvTest( testData )$Sigma[i,,]
@@ -90,7 +90,7 @@ test_that( "sgldcv: matrix parameters", {
 test_that( "sghmc: matrix parameters", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     i = sample( testData$nIters, 1 )
     output = sghmcTest( testData )$Sigma[i,,]
@@ -101,7 +101,7 @@ test_that( "sghmc: matrix parameters", {
 test_that( "sghmccv: matrix parameters", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     i = sample( testData$nIters, 1 )
     output = sghmccvTest( testData )$Sigma[i,,]
@@ -112,7 +112,7 @@ test_that( "sghmccv: matrix parameters", {
 test_that( "sgnht: matrix parameters", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     i = sample( testData$nIters, 1 )
     output = sgnhtTest( testData )$Sigma[i,,]
@@ -123,7 +123,7 @@ test_that( "sgnht: matrix parameters", {
 test_that( "sgnhtcv: matrix parameters", {
     tryCatch({
         tf$constant(c(1, 1))
-    }, error = skip("tensorflow not fully built, skipping..."))
+    }, error = function (e) skip("tensorflow not fully built, skipping..."))
     testData = declareConsts()
     i = sample( testData$nIters, 1 )
     output = sgnhtcvTest( testData )$Sigma[i,,]

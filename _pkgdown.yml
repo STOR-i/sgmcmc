@@ -13,7 +13,7 @@ authors:
 
 
 reference:
-  - title: SGMCMC
+  - title: "SGMCMC"
     desc: "Functions for running standard SGMCMC algorithms"
     contents: 
         - sgld
@@ -25,7 +25,20 @@ reference:
         - sgldcv
         - sghmccv
         - sgnhtcv
+  - title: "Run SGMCMC algorithms step by step"
+    desc: "Functions to run SGMCMC algorithms step by step within a user-defined loop, similar to standard TensorFlow optimization methods. Useful for chains with a high storage cost"
+    contents:
+        - sgldSetup
+        - sgldcvSetup
+        - sghmcSetup
+        - sghmccvSetup
+        - sgnhtSetup
+        - sgnhtcvSetup
+        - initSess
+        - sgmcmcStep
+        - getParams
   - title: "Datasets"
     desc: "Datasets used in examples"
     contents:
         - covertype
+        - mnist

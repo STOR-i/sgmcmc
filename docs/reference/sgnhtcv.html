@@ -79,6 +79,9 @@
     <li>
       <a href="../articles/mvGauss.html">Worked Example: Simulate from a Multivariate Gaussian</a>
     </li>
+    <li>
+      <a href="../articles/nn.html">Advanced Example: Simulate from a Bayesian Neural Network -- Storage Constraints</a>
+    </li>
   </ul>
 </li>
 <li>
@@ -142,8 +145,7 @@ The names in the list should correspond to those referred to in the logLik and l
     </tr>
     <tr>
       <th>stepsize</th>
-      <td><p>list of numeric values corresponding to the SGNHT stepsizes for each parameter
-(\(\eta\) in the original paper, Algorithm 2). 
+      <td><p>list of numeric values corresponding to the SGLD stepsizes for each parameter
 The names in the list should correspond to those in params.
 Alternatively specify a single numeric value to use that stepsize for all parameters.</p></td>
     </tr>
@@ -182,7 +184,7 @@ Integer specifying number of iterations of initial optimization to perform.</p><
     </tr>
     <tr>
       <th>verbose</th>
-      <td><p>optional. Default TRUE. Boolean specifying whether to print algorithm progress.</p></td>
+      <td><p>optional. Default TRUE. Boolean specifying whether to print algorithm progress</p></td>
     </tr>
     </table>
     

@@ -79,6 +79,9 @@
     <li>
       <a href="../articles/mvGauss.html">Worked Example: Simulate from a Multivariate Gaussian</a>
     </li>
+    <li>
+      <a href="../articles/nn.html">Advanced Example: Simulate from a Bayesian Neural Network -- Storage Constraints</a>
+    </li>
   </ul>
 </li>
 <li>
@@ -106,7 +109,7 @@
     <div class="page-header">
       <h1>
         Reference
-        <small>version&nbsp;0.1.0</small>
+        <small>version&nbsp;0.2.0</small>
       </h1>
     </div>
 
@@ -173,6 +176,68 @@
       </tbody><tbody>
         <tr>
           <th colspan="2">
+            <h2 id="section-run-sgmcmc-algorithms-step-by-step" class="hasAnchor"><a href="#section-run-sgmcmc-algorithms-step-by-step" class="anchor"></a>Run SGMCMC algorithms step by step</h2>
+            <p class="section-desc"><p>Functions to run SGMCMC algorithms step by step within a user-defined loop, similar to standard TensorFlow optimization methods. Useful for chains with a high storage cost</p></p>
+          </th>
+        </tr>
+        <tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sgldSetup.html">sgldSetup</a></code> </p>
+          </td>
+          <td><p>Create an sgld object</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sgldcvSetup.html">sgldcvSetup</a></code> </p>
+          </td>
+          <td><p>Create an sgldcv object</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sghmcSetup.html">sghmcSetup</a></code> </p>
+          </td>
+          <td><p>Create an sghmc object</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sghmccvSetup.html">sghmccvSetup</a></code> </p>
+          </td>
+          <td><p>Create an sghmccv object</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sgnhtSetup.html">sgnhtSetup</a></code> </p>
+          </td>
+          <td><p>Create an sgnht object</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sgnhtcvSetup.html">sgnhtcvSetup</a></code> </p>
+          </td>
+          <td><p>Create an sgnhtcv object</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="initSess.html">initSess</a></code> </p>
+          </td>
+          <td><p>Initialise TensorFlow session and sgmcmc algorithm</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="sgmcmcStep.html">sgmcmcStep</a></code> </p>
+          </td>
+          <td><p>Single step of sgmcmc</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="getParams.html">getParams</a></code> </p>
+          </td>
+          <td><p>Get current parameter values</p></td>
+        </tr>
+      </tbody><tbody>
+        <tr>
+          <th colspan="2">
             <h2 id="section-datasets" class="hasAnchor"><a href="#section-datasets" class="anchor"></a>Datasets</h2>
             <p class="section-desc"><p>Datasets used in examples</p></p>
           </th>
@@ -183,6 +248,12 @@
             <p><code><a href="covertype.html">covertype</a></code> </p>
           </td>
           <td><p>Forest Covertype data</p></td>
+        </tr><tr>
+          <!--  -->
+          <td>
+            <p><code><a href="mnist.html">mnist</a></code> </p>
+          </td>
+          <td><p>MNIST handwritten digit data</p></td>
         </tr>
       </tbody>
       </table>
@@ -194,6 +265,7 @@
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#section-sgmcmc">SGMCMC</a></li>
       <li><a href="#section-sgmcmc-with-control-variates">SGMCMC with Control Variates</a></li>
+      <li><a href="#section-run-sgmcmc-algorithms-step-by-step">Run SGMCMC algorithms step by step</a></li>
       <li><a href="#section-datasets">Datasets</a></li>
     </ul>
   </div>
