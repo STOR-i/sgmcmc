@@ -111,10 +111,10 @@
     </div>
 
     
-    <p>Update parameters by performing a single sgmcmc step with dynamics as defined in the sgmcmc object
- as created by *Setup such as <code><a href='sgldSetup.html'>sgldSetup</a></code> or <code><a href='sgldcvSetup.html'>sgldcvSetup</a></code> etc. This
- can be used to perform sgmcmc steps inside a loop as in TensorFlow optimization procedures.
- This is useful when custom storage options are needed for large chains.</p>
+    <p>Update parameters by performing a single sgmcmc step with dynamics as defined in the sgmcmc 
+ object. This can be used to perform sgmcmc steps inside a loop as in standard
+ TensorFlow optimization procedures.
+ This is useful when high dimensional chains cannot fit into memory.</p>
     
 
     <pre class="usage"><span class='fu'>sgmcmcStep</span>(<span class='no'>sgmcmc</span>, <span class='no'>sess</span>)</pre>

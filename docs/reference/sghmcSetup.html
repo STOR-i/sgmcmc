@@ -119,7 +119,7 @@
     
 
     <pre class="usage"><span class='fu'>sghmcSetup</span>(<span class='no'>logLik</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>, <span class='kw'>logPrior</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>minibatchSize</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>5L</span>)</pre>
+  <span class='kw'>minibatchSize</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>5L</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -171,6 +171,11 @@ Alternatively specify a single float to specify that value for all parameters.</
       <td><p>optional. Default 5L. Integer specifying the trajectory parameter of the simulation, 
 as defined in the main reference.</p></td>
     </tr>
+    <tr>
+      <th>seed</th>
+      <td><p>optional. Default NULL. Numeric seed for random number generation. The default
+does not declare a seed for the TensorFlow session.</p></td>
+    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -187,8 +192,8 @@ as defined in the main reference.</p></td>
 <dt>data</dt><dd><p>dataset as passed to <code>sghmcSetup</code>.</p></dd>
 <dt>n</dt><dd><p>minibatchSize as passed to <code>sghmcSetup</code>.</p></dd>
 <dt>placeholders</dt><dd><p>list of tf$placeholder objects with the same names as dataset
- used to feed minibatches of data to <code><a href='sgmcmcStep.html'>sgmcmcStep</a></code>. These are also the objects
- that gets fed to the dataset argument of the logLik and logPrior functions you declared.</p></dd>
+ used to feed minibatches of data to <code><a href='sgmcmcStep.html'>sgmcmcStep</a></code>. These objects
+ get fed to the dataset argument of the logLik and logPrior functions you declared.</p></dd>
 <dt>stepsize</dt><dd><p>list of stepsizes as passed to <code>sghmcSetup</code>.</p></dd>
 <dt>alpha</dt><dd><p>list of alpha tuning parameters as passed to <code>sghmcSetup</code>.</p></dd>
 <dt>L</dt><dd><p>integer trajectory parameter as passed to <code>sghmcSetup</code>.</p></dd>

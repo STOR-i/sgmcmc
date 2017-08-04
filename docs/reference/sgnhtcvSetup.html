@@ -120,7 +120,8 @@
     
 
     <pre class="usage"><span class='fu'>sgnhtcvSetup</span>(<span class='no'>logLik</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>, <span class='no'>optStepsize</span>, <span class='kw'>logPrior</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>minibatchSize</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>nItersOpt</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4L</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+  <span class='kw'>minibatchSize</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>nItersOpt</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4L</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -150,7 +151,7 @@ Alternatively specify a single numeric value to use that stepsize for all parame
     <tr>
       <th>optStepsize</th>
       <td><p>numeric value specifying the stepsize for the optimization 
-to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.</p></td>
+to find MAP estimates of parameters. The TensorFlow GradientDescentOptimizer is used.</p></td>
     </tr>
     <tr>
       <th>logPrior</th>
@@ -179,6 +180,11 @@ Integer specifying number of iterations of initial optimization to perform.</p><
     <tr>
       <th>verbose</th>
       <td><p>optional. Default TRUE. Boolean specifying whether to print algorithm progress</p></td>
+    </tr>
+    <tr>
+      <th>seed</th>
+      <td><p>optional. Default NULL. Numeric seed for random number generation. The default
+does not declare a seed for the TensorFlow session.</p></td>
     </tr>
     </table>
     
