@@ -1,0 +1,14 @@
+os: linux
+dist: trusty
+language: r
+r:
+- release
+- devel
+cache: packages
+
+before_install:
+- sudo apt-get install python
+- sudo apt-get install python-pip python-virtualenv
+- sudo pip install -U pip
+- R -e "install.packages('tensorflow', repos='http://cran.us.r-project.org')"  
+- R -e "tensorflow::install_tensorflow()"  

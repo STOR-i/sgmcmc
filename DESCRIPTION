@@ -1,0 +1,32 @@
+Package: sgmcmc
+Type: Package
+Title: Stochastic Gradient Markov Chain Monte Carlo
+Version: 0.2.0
+Authors@R: c(
+    person("Jack", "Baker", email = "j.baker1@lancaster.ac.uk", role = c("aut", "cre", "cph")),
+    person( "Christopher", "Nemeth", role = c("aut", "cph") ), 
+    person( "Paul", "Fearnhead", role = c( "aut", "cph" ) ),
+    person( "Emily B.", "Fox", role = c("aut", "cph") ), 
+    person( "STOR-i", role = c( "cph" ) ))
+Description: Provides functions that performs popular stochastic gradient Markov chain Monte Carlo 
+  (SGMCMC) methods on user specified models. The required gradients are automatically calculated 
+  using 'TensorFlow' <https://www.tensorflow.org/>, an efficient library for numerical computation.
+  This means only the log likelihood and log prior functions need to be specified. 
+  The methods implemented include stochastic gradient Langevin dynamics (SGLD), stochastic gradient
+  Hamiltonian Monte Carlo (SGHMC), stochastic gradient Nose-Hoover thermostat (SGNHT) and 
+  their respective control variate versions for increased efficiency.
+License: GPL-3
+Encoding: UTF-8
+Depends: R (>= 3.0), tensorflow
+SystemRequirements: TensorFlow (https://www.tensorflow.org/)
+Suggests:
+    testthat,
+    MASS,
+    knitr,
+    ggplot2,
+    rmarkdown
+LazyData: true
+VignetteBuilder: knitr
+RoxygenNote: 6.0.1
+URL: https://github.com/STOR-i/sgmcmc
+BugReports: https://github.com/STOR-i/sgmcmc/issues

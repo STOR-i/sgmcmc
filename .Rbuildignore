@@ -1,0 +1,6 @@
+^data-raw$
+^docs$
+^_pkgdown\.yml$
+^LICENSE$
+^\.travis\.yml$
+^cran-comments\.md$

@@ -1,0 +1,197 @@
+---
+title: "Advanced Example: Simulate from a Bayesian Neural Network -- Storage Constraints"
+author: "Jack Baker"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Bayesian Neural Network}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Often big datasets and high dimensionality go hand in hand. Sometimes the dimensionality is so high that storage of the full MCMC chain in memory becomes an issue. There are a number of ways around this, including: calculating the Monte Carlo estimate on the fly; reducing the dimensionality of the chain using a test function; or just periodically saving a the chain to the hard disk and starting from scratch. To give you more flexibility we allow an SGMCMC algorithm to be run step by step. This allows you to do what you want with the output of the chain. This guide goes into more detail about how to do this, but it needs more TensorFlow knowledge, such as knowledge of TensorFlow sessions and how to build your own placeholders. For more details on these see the [TensorFlow for R documentation](https://tensorflow.rstudio.com/).
+
+To demonstrate this concept we fit a two layer Bayesian neural network to the MNIST dataset. The MNIST dataset consists of $28 \times 28$ pixel images of handwritten digits from zero to nine. The images are flattened to be a vector of length 784. The dataset is available as a standard dataset from the TensorFlow library, with a matrix of 55000 training vectors and 10000 test vectors, each with their corresponding labels. First, let's construct the dataset and a testset. We assume you've read some of the earlier vignettes, so are familiar with how to do this.
+```{r eval=FALSE}
+library(sgmcmc)
+# Load MNIST dataset from package
+data("mnist")
+# Build dataset list and testset list
+dataset = list("X" = mnist$train$images, "y" = mnist$train$labels)
+testset = list("X" = mnist$test$images, "y" = mnist$test$labels)
+```
+
+We'll build the same neural network model as in the original SGHMC paper [(Chen et. al 2014)](https://arxiv.org/pdf/1402.4102v2.pdf). Suppose $Y_i$ takes values in $\{0,\dots,9\}$, so is the output label of a digit, and $\mathbf x_i$ is the input vector, with $\mathbf X$ the full $N \times 784$ dataset, where $N$ is the number of observations. Then we model as follows
+$$
+    Y_i | \theta, \mathbf x_i \sim \text{Categorical}( \beta(\theta, \mathbf x_i) ), \\
+    \beta(\theta, \mathbf x_i) = \sigma \left( \sigma \left( \mathbf x_i^T B + b \right) A + a \right).
+$$
+Here $A$, $B$, $a$, $b$ are parameters to be inferred with $\theta = (A, B, a, b)$; $\sigma(.)$ is the softmax function. $A$, $B$, $a$ and $b$ are matrices with dimensions: $100 \times 10$, $784 \times 100$, $1 \times 10$ and $1 \times 100$ respectively. Each element of these parameters is given a Normal prior to give
+$$
+    A_{kl} | \lambda_A \sim N(0, \lambda_A^{-1}), \quad B_{jk} | \lambda_B \sim N(0, \lambda_B^{-1}), \\
+    a_l | \lambda_a \sim N(0, \lambda_a^{-1}), \quad b_k | \lambda_b \sim N(0, \lambda_b^{-1}), \\
+    j = 1,\dots,784; \quad k = 1,\dots,100; \quad l = 1,\dots,10;
+$$
+where $\lambda_A$, $\lambda_B$, $\lambda_a$ and $\lambda_b$ are hyperparameters. Finally we assume
+$$
+    \lambda_A, \lambda_B, \lambda_a, \lambda_b \sim \text{Gamma}(1, 1).
+$$
+
+As you can see this is a lot of high dimensional parameters, and unless you have a lot of RAM to hand, a standard chain of length $10^4$ will not fit into memory. First let's create the `params` dictionary, and then we can code the `logLik` and `logPrior` functions. We'll sample initial $\lambda$ parameters from a standard Gamma, and the rest from a standard Normal as follows
+```{r eval=FALSE}
+# Sample initial weights from standard Normal
+d = ncol(dataset$X) # dimension of chain
+params = list()
+params$A = matrix( rnorm(10*100), ncol = 10 )
+params$B = matrix(rnorm(d*100), ncol = 100)
+# Sample initial bias parameters from standard Normal
+params$a = rnorm(10)
+params$b = rnorm(100)
+# Sample initial precision parameters from standard Gamma
+params$lambdaA = rgamma(1, 1)
+params$lambdaB = rgamma(1, 1)
+params$lambdaa = rgamma(1, 1)
+params$lambdab = rgamma(1, 1)
+```
+
+Now let's declare the `logLik` and `logPrior` functions
+```{r}
+logLik = function(params, dataset) {
+    # Calculate estimated probabilities
+    beta = tf$nn$softmax(tf$matmul(dataset$X, params$B) + params$b)
+    beta = tf$nn$softmax(tf$matmul(beta, params$A) + params$a)
+    # Calculate log likelihood of categorical distn with probabilities beta
+    logLik = tf$reduce_sum(dataset$y * tf$log(beta))
+    return(logLik)
+}
+
+logPrior = function(params) {
+    distLambda = tf$contrib$distributions$Gamma(1, 1)
+    distA = tf$contrib$distributions$Normal(0, tf$rsqrt(params$lambdaA))
+    logPriorA = tf$reduce_sum(distA$log_prob(params$A)) + distLambda$log_prob(params$lambdaA)
+    distB = tf$contrib$distributions$Normal(0, tf$rsqrt(params$lambdaB))
+    logPriorB = tf$reduce_sum(distB$log_prob(params$B)) + distLambda$log_prob(params$lambdaB)
+    dista = tf$contrib$distributions$Normal(0, tf$rsqrt(params$lambdaa))
+    logPriora = tf$reduce_sum(dista$log_prob(params$a)) + distLambda$log_prob(params$lambdaa)
+    distb = tf$contrib$distributions$Normal(0, tf$rsqrt(params$lambdab))
+    logPriorb = tf$reduce_sum(distb$log_prob(params$b)) + distLambda$log_prob(params$lambdab)
+    logPrior = logPriorA + logPriorB + logPriora + logPriorb
+    return(logPrior)
+}
+```
+
+Now suppose we want to make inference using stochastic gradient Langevin dynamics (SGLD). If we do this in the normal way then we will most likely run out of memory when the function builds the array to store the output. So instead we just initialize an `sgld` object using `sgldSetup`. Similarly we could build an `sgldcv` object using `sgldcvSetup` or an `sgnht` object using `sgnhtSetup`. Then we can run the SGLD algorithm one step at a time and decide what to do with the output at each iteration ourselves. We'll just set our stepsize to `1e-4` for this example, so to build our `sgld` object we run
+```{r eval=FALSE}
+stepsize = 1e-4
+sgld = sgldSetup(logLik, dataset, params, stepsize, logPrior = logPrior, minibatchSize = 500)
+```
+
+This `sgld` object is a type of `sgmcmc` object, which is basically just a list with a number of entries. The most important of these entries to us is called `params`, which holds a list, with the same names as you had in the `params` you fed to `sgld`, but this list contains `tf$Variable` objects. This is how you access the tensors which hold your current parameter values in the chain. For more details on the attributes of these objects, see the documentation for `sgldSetup`, `sgldcvSetup` etc.
+
+Now that we have created the `sgld` object, you want to initialise the TensorFlow graph and the `sgmcmc` algorithm you've chosen. If you are using a standard algorthm, this will just initialise the TensorFlow graph and all the tensors that were created. If you're using an algorithm with control variates (e.g. `sgldcv`), then this will also find the MAP estimates of the parameter and calculate the full log posterior gradient at that point. The function we use to do this is `initSess` as follows
+```{r eval=FALSE}
+sess = initSess(sgld)
+```
+The `sess` returned by `initSess` is the current TensorFlow session, which is needed to run the SGMCMC algorithm of choice, and to access any of the tensors you need, such as `sgld$params`.
+
+Now we have everything to run an SGLD algorithm step by step as follows
+```{r eval=FALSE}
+for (i in 1:10^3L) {
+    sgmcmcStep(sgld, sess)
+    currentState = getParams(sgld, sess)
+}
+```
+Here the function `sgmcmcStep` will update `sgld$params` using a single update of SGLD, or whichever SGMCMC algorithm you chose. The function `getParams` will return a list of parameters as `R` objects rather than as tensors to make life easier for you. 
+
+Our simple example is fine, but we really would like to calculate a Monte Carlo average of the parameters on the fly. Also with these large examples, they take a long time to run, so it's useful to check how the algorithm is doing every once in a while. This is especially useful when tuning by trial and error as you can stop an algorithm early if it's doing badly. This is why we let you declare the TensorFlow session yourself: it lets you create your custom tensors to print algorithm progress, or to create your own test functions to reduce the chain dimensionality (they have to be declared before the TensorFlow session starts).
+
+Let's delete everything after we created our `sgld` object. Now we're going to demonstrate a more complicated step by step example where we print performance and calulate the Monte Carlo estimate on the fly. Suppose we have test data $X^*$, and test labels $y^*$, and at some iteration $i$ our SGMCMC algorithm outputs values for all the parameters $\theta_t$. Then the probability that our neural network model will classify a given test observation to class $k$ is given by $\beta_k(\theta_t, \mathbf x_i^*)$; i.e. the $k^{th}$ element of $\beta(\theta_t, \mathbf x_i^*)$, which was defined earlier. A common performance measure for a classifier is the [log loss](https://www.kaggle.com/wiki/LogLoss), defined by
+$$
+    ll = - \frac{1}{N} \sum_{i=1}^{N_{\text{test}}} \sum_{k=1}^K y^*_{i,k} \log \beta( \theta_t, \mathbf x_i^* ).
+$$
+
+This is also $-\frac{1}{N}$ times the log likelihood at the current parameter, given the test set. So it's very easy for us to calculate this in practice and output it. We'll do this every 100 iterations to check the algorithm's performance and check for convergence. To do this, we need to create a new placeholder to hold the test set, and then create a tensor that will calculate the log loss, which can easily be done using the `logLik` function already declared. First we'll create a placeholder for both `X` and `y` in the test set, and make sure these have the same dimensions so can hold the full test set.
+```{r eval=FALSE}
+testPlaceholder = list()
+testPlaceholder[["X"]] = tf$placeholder(tf$float32, dim(testset[["X"]]))
+testPlaceholder[["y"]] = tf$placeholder(tf$float32, dim(testset[["y"]]))
+```
+Now we can create a tensor that calculates the log loss. We'll link this to our `testPlaceholder` and the current parameter values, located at `sgld$params`.
+```{r eval=FALSE}
+# Get number of observations in test set, ensuring it's a double (R equivalent of float)
+Ntest = as.double(nrow(testset[["X"]]))
+logLoss = - logLik(sgld$params, testPlaceholder) / Ntest
+```
+
+Now we'll declare the TensorFlow session, and run the chain step by step, calculating an average parameter estimate and printing the log loss of the current state every 100 iterations
+```{r eval=FALSE}
+sess = initSess(sgld)
+# Fill a feed dict with full test set (used to calculate log loss)
+feedDict = dict()
+feedDict[[testPlaceholder[["X"]]]] = testset[["X"]]
+feedDict[[testPlaceholder[["y"]]]] = testset[["y"]]
+# Burn-in chain
+message("Burning-in chain...")
+message("iteration\tlog loss")
+for (i in 1:10^3) {
+    # Print progress
+    if (i %% 100 == 0) {
+        progress = sess$run(logLoss, feed_dict = feedDict)
+        message(paste0(i, "\t", progress))
+    }
+    sgmcmcStep(sgld, sess)
+}
+# Initialise Monte Carlo estimate using value after burn-in
+avParams = getParams(sgld, sess)
+# Run chain
+message("Running SGMCMC...")
+for (i in 1:10^4) {
+    sgmcmcStep(sgld, sess)
+    # Update av Params
+    currentState = getParams(sgld, sess)
+    for (paramName in names(avParams)) {
+        avParams[[paramName]] = (avParams[[paramName]] * i + currentState[[paramName]]) / (i + 1)
+    }
+    # Print progress
+    if (i %% 100 == 0) {
+        progress = sess$run(logLoss, feed_dict = feedDict)
+        message(paste0(i, "\t", progress))
+    }
+}
+```
+
+```{r echo=FALSE, include=FALSE}
+# Check a stripped down version of the vignette runs if TensorFlow built properly, otherwise skip.
+checkRuns = function( logLik, logPrior ) {
+    library(sgmcmc)
+    data("mnist")
+    dataset = list("X" = mnist$train$images, "y" = mnist$train$labels)
+    testset = list("X" = mnist$test$images, "y" = mnist$test$labels)
+    d = ncol(dataset$X) # dimension of chain
+    params = list()
+    params$A = matrix( rnorm(10*100), ncol = 10 )
+    params$B = matrix(rnorm(d*100), ncol = 100)
+    params$a = rnorm(10)
+    params$b = rnorm(100)
+    params$lambdaA = rgamma(1, 1)
+    params$lambdaB = rgamma(1, 1)
+    params$lambdaa = rgamma(1, 1)
+    params$lambdab = rgamma(1, 1)
+    stepsize = 1e-4
+    sgld = sgldSetup(logLik, dataset, params, stepsize, logPrior = logPrior, minibatchSize = 500)
+    sess = initSess(sgld)
+    for (i in 1:100) {
+        sgmcmcStep(sgld, sess)
+        currentState = getParams(sgld, sess)
+    }
+}
+
+# Use try catch in case TensorFlow not build properly
+tryCatch({
+    checkRuns(logLik, logPrior)
+}, error = function (e) {
+    writeLines("Not all tensorflow dependencies are met so skipping this...")
+    writeLines("Try running tensorflow::install_tensorflow().")
+})
+```
+
+Obviously calculating the log loss is costly to do every 100 iterations as the test set has $10^4$ observations itself, this was just for demonstration purposes. In practice we'd recommend subsampling this test set when calculating the log loss, or leaving more iterations until it's calculated.
