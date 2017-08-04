@@ -1,8 +1,8 @@
 # Create generic sgmcmccv object from sgmcmc object
 createSGMCMCCV = function( logLik, logPrior, dataset, params, stepsize, optStepsize, 
-        minibatchSize, nItersOpt ) {
+        minibatchSize, nItersOpt, seed ) {
     # First create generic sgmcmc object then add specifics
-    sgmcmccv = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize )
+    sgmcmccv = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize, seed )
     # Add nItersOpt for optimization step
     sgmcmccv$nItersOpt = nItersOpt
     # If minibatchSize is a proportion, convert to an integer
@@ -84,7 +84,7 @@ setupFullGradients = function( params ) {
 # Initialize optimizer which finds estimates of the mode of the log posterior
 declareOptimizer = function( estLogPost, fullLogPost, paramsOpt, params, gradFull, optStepsize ) {
     optSteps = list()
-    optimizer = tf$train$AdamOptimizer( optStepsize )
+    optimizer = tf$train$GradientDescentOptimizer( optStepsize )
     optSteps[["update"]] = optimizer$minimize( -estLogPost )
     optSteps[["fullCalc"]] = list()
     optSteps[["reassign"]] = list()

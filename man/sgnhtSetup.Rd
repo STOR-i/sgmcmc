@@ -5,7 +5,7 @@
 \title{Create an sgnht object}
 \usage{
 sgnhtSetup(logLik, dataset, params, stepsize, logPrior = NULL,
-  minibatchSize = 0.01, a = 0.01)
+  minibatchSize = 0.01, a = 0.01, seed = NULL)
 }
 \arguments{
 \item{logLik}{function which takes parameters and dataset 
@@ -34,6 +34,9 @@ either as proportion of dataset size (if between 0 and 1) or actual magnitude (i
 (see Algorithm 2 of the original paper). One value should be given 
 for each parameter in params, the names should correspond to those in params.
 Alternatively specify a single float to specify that value for all parameters.}
+
+\item{seed}{optional. Default NULL. Numeric seed for random number generation. The default
+does not declare a seed for the TensorFlow session.}
 }
 \value{
 The function returns an 'sgnht' object, which is used to pass the required information
@@ -49,8 +52,8 @@ The function returns an 'sgnht' object, which is used to pass the required infor
 \item{data}{dataset as passed to \code{\link{sgnhtSetup}}.}
 \item{n}{minibatchSize as passed to \code{\link{sgnhtSetup}}.}
 \item{placeholders}{list of tf$placeholder objects with the same names as dataset
- used to feed minibatches of data to \code{\link{sgmcmcStep}}. These are also the objects
- that gets fed to the dataset argument of the logLik and logPrior functions you declared.}
+ used to feed minibatches of data to \code{\link{sgmcmcStep}}. This object
+ gets fed to the dataset argument of the logLik and logPrior functions you declared.}
 \item{stepsize}{list of stepsizes as passed to \code{\link{sgnhtSetup}}.}
 \item{a}{list of a tuning parameters as passed to \code{\link{sgnhtSetup}}.}
 \item{dynamics}{a list of TensorFlow steps that are evaluated by \code{\link{sgmcmcStep}}.}}

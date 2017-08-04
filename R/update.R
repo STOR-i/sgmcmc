@@ -1,9 +1,9 @@
 #' Single step of sgmcmc
 #' 
-#' Update parameters by performing a single sgmcmc step with dynamics as defined in the sgmcmc object
-#'  as created by *Setup such as \code{\link{sgldSetup}} or \code{\link{sgldcvSetup}} etc. This
-#'  can be used to perform sgmcmc steps inside a loop as in TensorFlow optimization procedures.
-#'  This is useful when custom storage options are needed for large chains.
+#' Update parameters by performing a single sgmcmc step with dynamics as defined in the sgmcmc 
+#'  object. This can be used to perform sgmcmc steps inside a loop as in standard
+#'  TensorFlow optimization procedures.
+#'  This is useful when high dimensional chains cannot fit into memory.
 #' 
 #' @param sgmcmc a stochastic gradient MCMC object returned by *Setup such as 
 #'  \code{\link{sgldSetup}}, \code{\link{sgldcvSetup}} etc.
@@ -35,7 +35,7 @@
 #' # For more examples see vignettes
 #' }
 sgmcmcStep = function( sgmcmc, sess ) UseMethod("sgmcmcStep")
-
+# Method for sgld or sgldcv objects
 #' @export
 sgmcmcStep.sgld = function( sgmcmc, sess ) {
     # Sample minibatch of data
@@ -44,7 +44,7 @@ sgmcmcStep.sgld = function( sgmcmc, sess ) {
         sess$run( step, feed_dict = feedCurr )
     }
 }
-
+# Method for sghmc or sghmccv objects
 #' @export
 sgmcmcStep.sghmc = function( sgmcmc, sess ) {
     # Refresh momentum
@@ -60,7 +60,7 @@ sgmcmcStep.sghmc = function( sgmcmc, sess ) {
         }
     }
 }
-
+# Method for sgnht or sgnhtcv objects
 #' @export
 sgmcmcStep.sgnht = function( sgmcmc, sess ) {
     # Refresh momentum
@@ -117,8 +117,7 @@ sgmcmcStep.sgnht = function( sgmcmc, sess ) {
 #' # For more examples see vignettes
 #' }
 initSess = function( sgmcmc, verbose = TRUE ) UseMethod("initSess") 
-
-#' @describeIn initSess Initialise TensorFlow session and sgmcmc algorith without control variates
+# Method for standard sgmcmc objects: sgld, sghmc, sgnht
 #' @export
 initSess.sgmcmc = function( sgmcmc, verbose = TRUE ) {
     sess = tf$Session()
@@ -126,8 +125,7 @@ initSess.sgmcmc = function( sgmcmc, verbose = TRUE ) {
     sess$run(init)
     return(sess)
 }
-
-#' @describeIn initSess Initialise TensorFlow session and sgmcmc algorith with control variates
+# Method for sgmcmc objects with control variates: sgldcv, sghmccv, sgnhtcv
 #' @export
 initSess.sgmcmccv = function( sgmcmc, verbose = TRUE ) {
     sess = tf$Session()

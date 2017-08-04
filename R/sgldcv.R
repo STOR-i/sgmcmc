@@ -14,7 +14,7 @@
 #'
 #' @inheritParams sgld
 #' @param optStepsize numeric value specifying the stepsize for the optimization 
-#'  to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.
+#'  to find MAP estimates of parameters. The TensorFlow GradientDescentOptimizer is used.
 #' @param nItersOpt optional. Default 10^4L. 
 #'  Integer specifying number of iterations of initial optimization to perform.
 #'
@@ -37,10 +37,10 @@
 #' output = sgldcv(logLik, dataset, params, stepsize, optStepsize)
 #' }
 sgldcv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL,
-        minibatchSize = 0.01, nIters = 10^4L, nItersOpt = 10^4L, verbose = TRUE ) {
+        minibatchSize = 0.01, nIters = 10^4L, nItersOpt = 10^4L, verbose = TRUE, seed = NULL ) {
     # Setup SGLDCV object
     sgldcv = sgldcvSetup( logLik, dataset, params, stepsize, optStepsize, logPrior, minibatchSize,
-            nItersOpt, verbose )
+            nItersOpt, verbose, seed )
     options = list( "nIters" = nIters, "nItersOpt" = nItersOpt, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sgldcv, params, options )
@@ -118,12 +118,12 @@ sgldcv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NU
 #' # For more examples see vignettes
 #' }
 sgldcvSetup = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL, 
-            minibatchSize = 0.01, nItersOpt = 10^4L, verbose = TRUE ) {
+            minibatchSize = 0.01, nItersOpt = 10^4L, verbose = TRUE, seed = NULL ) {
     # Create generic sgmcmccv object, no extra tuning constants need to be added for sgld
-    sgldcv = createSGMCMCCV( 
-            logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize, nItersOpt )
-    class(sgldcv) = c( "sgld", "sgmcmccv" )
+    sgldcv = createSGMCMCCV( logLik, logPrior, dataset, params, stepsize, optStepsize, 
+            minibatchSize, nItersOpt, seed )
+    class(sgldcv) = c( "sgld", "sgmcmccv", "sgmcmc" )
     # Declare SGLD dynamics
-    sgldcv$dynamics = declareDynamics( sgldcv )
+    sgldcv$dynamics = declareDynamics( sgldcv, seed )
     return( sgldcv )
 }

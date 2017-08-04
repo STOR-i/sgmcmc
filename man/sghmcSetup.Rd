@@ -5,7 +5,7 @@
 \title{Create an sghmc object}
 \usage{
 sghmcSetup(logLik, dataset, params, stepsize, logPrior = NULL,
-  minibatchSize = 0.01, alpha = 0.01, L = 5L)
+  minibatchSize = 0.01, alpha = 0.01, L = 5L, seed = NULL)
 }
 \arguments{
 \item{logLik}{function which takes parameters and dataset 
@@ -38,6 +38,9 @@ Alternatively specify a single float to specify that value for all parameters.}
 
 \item{L}{optional. Default 5L. Integer specifying the trajectory parameter of the simulation, 
 as defined in the main reference.}
+
+\item{seed}{optional. Default NULL. Numeric seed for random number generation. The default
+does not declare a seed for the TensorFlow session.}
 }
 \value{
 The function returns an 'sghmc' object, which is used to pass the required information
@@ -53,8 +56,8 @@ The function returns an 'sghmc' object, which is used to pass the required infor
 \item{data}{dataset as passed to \code{\link{sghmcSetup}}.}
 \item{n}{minibatchSize as passed to \code{\link{sghmcSetup}}.}
 \item{placeholders}{list of tf$placeholder objects with the same names as dataset
- used to feed minibatches of data to \code{\link{sgmcmcStep}}. These are also the objects
- that gets fed to the dataset argument of the logLik and logPrior functions you declared.}
+ used to feed minibatches of data to \code{\link{sgmcmcStep}}. These objects
+ get fed to the dataset argument of the logLik and logPrior functions you declared.}
 \item{stepsize}{list of stepsizes as passed to \code{\link{sghmcSetup}}.}
 \item{alpha}{list of alpha tuning parameters as passed to \code{\link{sghmcSetup}}.}
 \item{L}{integer trajectory parameter as passed to \code{\link{sghmcSetup}}.}

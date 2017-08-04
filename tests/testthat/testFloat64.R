@@ -7,7 +7,7 @@ declareConsts = function() {
     testData$n = 100
     testData$data = list( "x" = testData$x )
     testData$params = list( "theta" = rnorm( 1, mean = 0, sd = 10 ) )
-    testData$optStepsize = 1e-1
+    testData$optStepsize = 1e-5
     testData$nIters = 1100
     testData$nItersOpt = 1000
     testData$burnIn = 100

@@ -17,7 +17,7 @@
 #'
 #' @inheritParams sghmc
 #' @param optStepsize numeric value specifying the stepsize for the optimization 
-#'  to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.
+#'  to find MAP estimates of parameters. The TensorFlow GradientDescentOptimizer is used.
 #' @param nItersOpt optional. Default 10^4L. 
 #'  Integer specifying number of iterations of initial optimization to perform.
 #'
@@ -41,10 +41,10 @@
 #' }
 sghmccv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL, 
             minibatchSize = 0.01, alpha = 0.01, L = 5L, nIters = 10^4L, nItersOpt = 10^4L, 
-            verbose = TRUE ) {
+            verbose = TRUE, seed = NULL ) {
     # Setup SGHMCCV object
     sghmccv = sghmccvSetup( logLik, dataset, params, stepsize, optStepsize, logPrior, minibatchSize, 
-            alpha, L, nItersOpt, verbose )
+            alpha, L, nItersOpt, verbose, seed )
     options = list( "nIters" = nIters, "nItersOpt" = nItersOpt, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sghmccv, params, options )
@@ -123,16 +123,17 @@ sghmccv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = N
 #' # For more examples see vignettes
 #' }
 sghmccvSetup = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL, 
-            minibatchSize = 0.01, alpha = 0.01, L = 5L, nItersOpt = 10^4L, verbose = TRUE ) {
+            minibatchSize = 0.01, alpha = 0.01, L = 5L, nItersOpt = 10^4L, 
+            verbose = TRUE, seed = NULL ) {
     # Create generic sgmcmcCV object
-    sghmccv = createSGMCMCCV( 
-            logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize, nItersOpt )
+    sghmccv = createSGMCMCCV( logLik, logPrior, dataset, params, stepsize, optStepsize, 
+            minibatchSize, nItersOpt, seed )
     # Declare SGHMC specific tuning constants and check they're in list format
     sghmccv$alpha = convertList( alpha, sghmccv$params )
     sghmccv$L = L
     # Declare object type
-    class(sghmccv) = c( "sghmc", "sgmcmccv" )
+    class(sghmccv) = c( "sghmc", "sgmcmccv", "sgmcmc" )
     # Declare SGHMC dynamics
-    sghmccv$dynamics = declareDynamics( sghmccv )
+    sghmccv$dynamics = declareDynamics( sghmccv, seed )
     return( sghmccv )
 }

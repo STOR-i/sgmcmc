@@ -36,9 +36,9 @@
 #' # For more examples see vignettes
 #' }
 sgnht = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
-            a = 0.01, nIters = 10^4L, verbose = TRUE ) {
+            a = 0.01, nIters = 10^4L, verbose = TRUE, seed = NULL ) {
     # Declare SGNHT object
-    sgnht = sgnhtSetup( logLik, dataset, params, stepsize, logPrior, minibatchSize, a )
+    sgnht = sgnhtSetup( logLik, dataset, params, stepsize, logPrior, minibatchSize, a, seed )
     options = list( "nIters" = nIters, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sgnht, params, options )
@@ -68,8 +68,8 @@ sgnht = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchS
 #' \item{data}{dataset as passed to \code{\link{sgnhtSetup}}.}
 #' \item{n}{minibatchSize as passed to \code{\link{sgnhtSetup}}.}
 #' \item{placeholders}{list of tf$placeholder objects with the same names as dataset
-#'  used to feed minibatches of data to \code{\link{sgmcmcStep}}. These are also the objects
-#'  that gets fed to the dataset argument of the logLik and logPrior functions you declared.}
+#'  used to feed minibatches of data to \code{\link{sgmcmcStep}}. This object
+#'  gets fed to the dataset argument of the logLik and logPrior functions you declared.}
 #' \item{stepsize}{list of stepsizes as passed to \code{\link{sgnhtSetup}}.}
 #' \item{a}{list of a tuning parameters as passed to \code{\link{sgnhtSetup}}.}
 #' \item{dynamics}{a list of TensorFlow steps that are evaluated by \code{\link{sgmcmcStep}}.}}
@@ -100,9 +100,9 @@ sgnht = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchS
 #' # For more examples see vignettes
 #' }
 sgnhtSetup = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
-            a = 0.01 ) {
+            a = 0.01, seed = NULL ) {
     # Create generic sgmcmc object
-    sgnht = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize )
+    sgnht = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize, seed )
     # Get ranks for each parameter tensor, required for sgnht dynamics
     sgnht$ranks = getRanks( params )
     # Declare sgnht specific tuning constants, checking they're in list format
@@ -110,6 +110,6 @@ sgnhtSetup = function( logLik, dataset, params, stepsize, logPrior = NULL, minib
     # Declare object types
     class(sgnht) = c( "sgnht", "sgmcmc" )
     # Declare SGNHT dynamics
-    sgnht$dynamics = declareDynamics( sgnht )
+    sgnht$dynamics = declareDynamics( sgnht, seed )
     return( sgnht )
 }

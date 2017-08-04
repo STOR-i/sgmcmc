@@ -26,6 +26,8 @@
 #'  either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).
 #' @param nIters optional. Default 10^4L. Integer specifying number of iterations to perform.
 #' @param verbose optional. Default TRUE. Boolean specifying whether to print algorithm progress
+#' @param seed optional. Default NULL. Numeric seed for random number generation. The default
+#'  does not declare a seed for the TensorFlow session.
 #'
 #' @return Returns list of arrays for each parameter containing the MCMC chain.
 #'  Dimension of the form (nIters,paramDim1,paramDim2,...)
@@ -46,9 +48,9 @@
 #' # For more examples see vignettes
 #' }
 sgld = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
-            nIters = 10^4L, verbose = TRUE ) {
+            nIters = 10^4L, verbose = TRUE, seed = NULL ) {
     # Create SGLD object
-    sgld = sgldSetup( logLik, dataset, params, stepsize, logPrior, minibatchSize )
+    sgld = sgldSetup( logLik, dataset, params, stepsize, logPrior, minibatchSize, seed )
     options = list( "nIters" = nIters, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sgld, params, options )
@@ -74,13 +76,13 @@ sgld = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSi
 #'  \code{\link{sgldSetup}}. This is the object passed to the logLik and logPrior functions you
 #'  declared to calculate the log posterior gradient estimate.}
 #' \item{estLogPost}{a tensor that estimates the log posterior given the current 
-#'  placeholders and params.}
+#'  placeholders and params (the placeholders holds the minibatches of data).}
 #' \item{N}{dataset size.}
 #' \item{data}{dataset as passed to \code{\link{sgldSetup}}.}
 #' \item{n}{minibatchSize as passed to \code{\link{sgldSetup}}.}
 #' \item{placeholders}{list of tf$placeholder objects with the same names as dataset
-#'  used to feed minibatches of data to \code{\link{sgmcmcStep}}. These are also the objects
-#'  that gets fed to the dataset argument of the logLik and logPrior functions you declared.}
+#'  used to feed minibatches of data to \code{\link{sgmcmcStep}}. These are the objects
+#'  that get fed to the dataset argument of the logLik and logPrior functions you declared.}
 #' \item{stepsize}{list of stepsizes as passed to \code{\link{sgldSetup}}.}
 #' \item{dynamics}{a list of TensorFlow steps that are evaluated by \code{\link{sgmcmcStep}}.}}
 #'
@@ -109,12 +111,13 @@ sgld = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSi
 #' }
 #' # For more examples see vignettes
 #' }
-sgldSetup = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01 ) {
+sgldSetup = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01,
+            seed = NULL ) {
     # Create generic sgmcmc object, no extra tuning constants need to be added for sgld
-    sgld = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize )
+    sgld = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize, seed )
     # Declare object type
     class( sgld ) = c( "sgld", "sgmcmc" )
     # Declare SGLD dynamics
-    sgld$dynamics = declareDynamics( sgld )
+    sgld$dynamics = declareDynamics( sgld, seed )
     return( sgld )
 }

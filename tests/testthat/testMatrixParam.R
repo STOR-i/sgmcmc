@@ -8,7 +8,7 @@ declareConsts = function() {
     testData$n = 100
     testData$data = list( "X" = testData$X )
     testData$params = list( "Sigma" = diag(2) )
-    testData$optStepsize = 1e-1
+    testData$optStepsize = 1e-5
     testData$nIters = 100
     testData$nItersOpt = 1000
     return( testData )

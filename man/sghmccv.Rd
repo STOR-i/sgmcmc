@@ -6,7 +6,7 @@
 \usage{
 sghmccv(logLik, dataset, params, stepsize, optStepsize, logPrior = NULL,
   minibatchSize = 0.01, alpha = 0.01, L = 5L, nIters = 10^4L,
-  nItersOpt = 10^4L, verbose = TRUE)
+  nItersOpt = 10^4L, verbose = TRUE, seed = NULL)
 }
 \arguments{
 \item{logLik}{function which takes parameters and dataset 
@@ -24,7 +24,7 @@ The names in the list should correspond to those in params.
 Alternatively specify a single numeric value to use that stepsize for all parameters.}
 
 \item{optStepsize}{numeric value specifying the stepsize for the optimization 
-to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.}
+to find MAP estimates of parameters. The TensorFlow GradientDescentOptimizer is used.}
 
 \item{logPrior}{optional. Default uninformative improper prior.
 Function which takes parameters (list of TensorFlow variables) as input.
@@ -49,6 +49,9 @@ as defined in the main reference.}
 Integer specifying number of iterations of initial optimization to perform.}
 
 \item{verbose}{optional. Default TRUE. Boolean specifying whether to print algorithm progress}
+
+\item{seed}{optional. Default NULL. Numeric seed for random number generation. The default
+does not declare a seed for the TensorFlow session.}
 }
 \value{
 Returns list of arrays for each parameter containing the MCMC chain.

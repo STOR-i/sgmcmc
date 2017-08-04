@@ -1,5 +1,10 @@
 # Create generic sgmcmc object
-createSGMCMC = function( logLik, logPrior, dataset, params, stepsize, minibatchSize ) { 
+createSGMCMC = function( logLik, logPrior, dataset, params, stepsize, minibatchSize, seed ) { 
+    # Set seed if required, TensorFlow seeds set inside dynamics
+    if ( !is.null( seed ) ) {
+        tf$set_random_seed(seed)
+        set.seed(seed)
+    }
     # Get dataset size
     N = getDatasetSize( dataset )
     # If minibatchSize is a proportion, convert to an integer
@@ -19,10 +24,6 @@ createSGMCMC = function( logLik, logPrior, dataset, params, stepsize, minibatchS
             "stepsize" = stepsize, "params" = paramstf, "estLogPost" = estLogPost )
     return( sgmcmc )
 }
-
-# Define declareDynamics generic, defined for each SGMCMC method in their respective modules
-# @param sgmcmc a stochastic gradient mcmc object, as defined in the respective modules sgld.r etc.
-declareDynamics = function( sgmcmc ) UseMethod("declareDynamics")
 
 # getGradients generic defines different gradient estimates for 
 # control variate and non-control variate methods

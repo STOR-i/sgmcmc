@@ -5,7 +5,7 @@
 \title{Create an sgld object}
 \usage{
 sgldSetup(logLik, dataset, params, stepsize, logPrior = NULL,
-  minibatchSize = 0.01)
+  minibatchSize = 0.01, seed = NULL)
 }
 \arguments{
 \item{logLik}{function which takes parameters and dataset 
@@ -29,6 +29,9 @@ The function should return a TensorFlow tensor which defines the log prior of th
 \item{minibatchSize}{optional. Default 0.01.
 Numeric or integer value that specifies amount of dataset to use at each iteration 
 either as proportion of dataset size (if between 0 and 1) or actual magnitude (if an integer).}
+
+\item{seed}{optional. Default NULL. Numeric seed for random number generation. The default
+does not declare a seed for the TensorFlow session.}
 }
 \value{
 The function returns an 'sgld' object, which is used to pass the required information
@@ -39,13 +42,13 @@ The function returns an 'sgld' object, which is used to pass the required inform
  \code{\link{sgldSetup}}. This is the object passed to the logLik and logPrior functions you
  declared to calculate the log posterior gradient estimate.}
 \item{estLogPost}{a tensor that estimates the log posterior given the current 
- placeholders and params.}
+ placeholders and params (the placeholders holds the minibatches of data).}
 \item{N}{dataset size.}
 \item{data}{dataset as passed to \code{\link{sgldSetup}}.}
 \item{n}{minibatchSize as passed to \code{\link{sgldSetup}}.}
 \item{placeholders}{list of tf$placeholder objects with the same names as dataset
- used to feed minibatches of data to \code{\link{sgmcmcStep}}. These are also the objects
- that gets fed to the dataset argument of the logLik and logPrior functions you declared.}
+ used to feed minibatches of data to \code{\link{sgmcmcStep}}. These are the objects
+ that get fed to the dataset argument of the logLik and logPrior functions you declared.}
 \item{stepsize}{list of stepsizes as passed to \code{\link{sgldSetup}}.}
 \item{dynamics}{a list of TensorFlow steps that are evaluated by \code{\link{sgmcmcStep}}.}}
 }

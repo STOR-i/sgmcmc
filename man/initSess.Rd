@@ -2,15 +2,9 @@
 % Please edit documentation in R/update.R
 \name{initSess}
 \alias{initSess}
-\alias{initSess.sgmcmc}
-\alias{initSess.sgmcmccv}
 \title{Initialise TensorFlow session and sgmcmc algorithm}
 \usage{
 initSess(sgmcmc, verbose = TRUE)
-
-\method{initSess}{sgmcmc}(sgmcmc, verbose = TRUE)
-
-\method{initSess}{sgmcmccv}(sgmcmc, verbose = TRUE)
 }
 \arguments{
 \item{sgmcmc}{an sgmcmc object created using *Setup e.g. \code{\link{sgldSetup}}, 
@@ -28,13 +22,6 @@ Initalise the TensorFlow session and the sgmcmc algorithm. For algorithms with c
  gradient at this point. For algorithms without control variates this will simply initialise a
  TensorFlow session.
 }
-\section{Methods (by class)}{
-\itemize{
-\item \code{sgmcmc}: Initialise TensorFlow session and sgmcmc algorith without control variates
-
-\item \code{sgmcmccv}: Initialise TensorFlow session and sgmcmc algorith with control variates
-}}
-
 \examples{
 \dontrun{
 # Simulate from a Normal Distribution, unknown location and known scale with uninformative prior

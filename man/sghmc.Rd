@@ -6,7 +6,7 @@
 \usage{
 sghmc(logLik, dataset, params, stepsize, logPrior = NULL,
   minibatchSize = 0.01, alpha = 0.01, L = 5L, nIters = 10^4L,
-  verbose = TRUE)
+  verbose = TRUE, seed = NULL)
 }
 \arguments{
 \item{logLik}{function which takes parameters and dataset 
@@ -43,6 +43,9 @@ as defined in the main reference.}
 \item{nIters}{optional. Default 10^4L. Integer specifying number of iterations to perform.}
 
 \item{verbose}{optional. Default TRUE. Boolean specifying whether to print algorithm progress}
+
+\item{seed}{optional. Default NULL. Numeric seed for random number generation. The default
+does not declare a seed for the TensorFlow session.}
 }
 \value{
 Returns list of arrays for each parameter containing the MCMC chain.

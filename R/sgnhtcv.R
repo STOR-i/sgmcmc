@@ -18,7 +18,7 @@
 #'
 #' @inheritParams sgnht
 #' @param optStepsize numeric value specifying the stepsize for the optimization 
-#'  to find MAP estimates of parameters. The TensorFlow AdamOptimizer is used.
+#'  to find MAP estimates of parameters. The TensorFlow GradientDescentOptimizer is used.
 #' @param nItersOpt optional. Default 10^4L. 
 #'  Integer specifying number of iterations of initial optimization to perform.
 #'
@@ -41,10 +41,11 @@
 #' output = sgnhtcv(logLik, dataset, params, stepsize, optStepsize)
 #' }
 sgnhtcv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL, 
-            minibatchSize = 0.01, a = 0.01, nIters = 10^4L, nItersOpt = 10^4L, verbose = TRUE ) {
+            minibatchSize = 0.01, a = 0.01, nIters = 10^4L, nItersOpt = 10^4L, 
+            verbose = TRUE, seed = NULL ) {
     # Declare SGNHTCV object
     sgnhtcv = sgnhtcvSetup( logLik, dataset, params, stepsize, optStepsize, logPrior, minibatchSize, 
-            a, nItersOpt, verbose )
+            a, nItersOpt, verbose, seed )
     options = list( "nIters" = nIters, "nItersOpt" = nItersOpt, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sgnhtcv, params, options )
@@ -123,17 +124,17 @@ sgnhtcv = function( logLik, dataset, params, stepsize, optStepsize, logPrior = N
 #' # For more examples see vignettes
 #' }
 sgnhtcvSetup = function( logLik, dataset, params, stepsize, optStepsize, logPrior = NULL, 
-            minibatchSize = 0.01, a = 0.01, nItersOpt = 10^4L, verbose = TRUE ) {
+            minibatchSize = 0.01, a = 0.01, nItersOpt = 10^4L, verbose = TRUE, seed = NULL ) {
     # Create generic sgmcmcCV object
-    sgnhtcv = createSGMCMCCV( 
-            logLik, logPrior, dataset, params, stepsize, optStepsize, minibatchSize, nItersOpt )
+    sgnhtcv = createSGMCMCCV( logLik, logPrior, dataset, params, stepsize, optStepsize, 
+            minibatchSize, nItersOpt, seed )
     # Get ranks for each parameter tensor, required for sgnht dynamics
     sgnhtcv$ranks = getRanks( params )
     # Declare sgnht specific tuning constants, checking they're in list format
     sgnhtcv$a = convertList( a, sgnhtcv$params )
     # Declare object types
-    class(sgnhtcv) = c( "sgnht", "sgmcmccv" )
+    class(sgnhtcv) = c( "sgnht", "sgmcmccv", "sgmcmc" )
     # Declare SGNHT dynamics
-    sgnhtcv$dynamics = declareDynamics( sgnhtcv )
+    sgnhtcv$dynamics = declareDynamics( sgnhtcv, seed )
     return( sgnhtcv )
 }

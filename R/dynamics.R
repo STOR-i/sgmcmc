@@ -1,6 +1,10 @@
+# Define declareDynamics generic, defined separately for each SGMCMC method
+# @param sgmcmc a stochastic gradient mcmc object, as defined in the respective modules sgld.r etc.
+declareDynamics = function( sgmcmc, seed ) UseMethod("declareDynamics")
+
 # Declare the TensorFlow steps needed for one step of SGLD
 # @param sgld is an sgld object
-declareDynamics.sgld = function( sgld ) {
+declareDynamics.sgld = function( sgld, seed ) {
     # dynamics is returned, contains list of TensorFlow steps for SGLD
     dynamics = list()
     # Get the correct gradient estimate given the sgld object (i.e. standard sgld or sgldcv) 
@@ -13,14 +17,14 @@ declareDynamics.sgld = function( sgld ) {
         grad = estLogPostGrads[[pname]]
         # Declare form of one step of SGLD
         dynamics[[pname]] = theta$assign_add( 0.5 * epsilon * grad + 
-                sqrt( epsilon ) * tf$random_normal( theta$get_shape() ) )
+                sqrt( epsilon ) * tf$random_normal( theta$get_shape(), seed = seed ) )
     }
     return( dynamics )
 }
 
 # Declare the TensorFlow steps needed for one step of SGHMC, input SGHMC object
 # @param is an sghmc object
-declareDynamics.sghmc = function( sghmc) {
+declareDynamics.sghmc = function( sghmc, seed ) {
     dynamics = list( "theta" = list(), "nu" = list(), "refresh" = list(), "grad" = list() )
     # Get the correct gradient estimate given the sgld object (i.e. standard sgld or sgldcv) 
     estLogPostGrads = getGradients( sghmc )
@@ -32,13 +36,13 @@ declareDynamics.sghmc = function( sghmc) {
         alpha = sghmc$alpha[[pname]]
         # Declare parameters
         theta = sghmc$params[[pname]]
-        nu = tf$Variable( sqrt( stepsize ) * tf$random_normal( theta$get_shape() ) )
+        nu = tf$Variable( sqrt( stepsize ) * tf$random_normal( theta$get_shape(), seed = seed ) )
         # Declare dynamics
         gradU = estLogPostGrads[[pname]]
         dynamics$refresh[[pname]] = nu$assign( sqrt( stepsize ) * tf$random_normal( 
-                theta$get_shape() ) )
+                theta$get_shape(), seed = seed ) )
         dynamics$nu[[pname]] = nu$assign_add( stepsize*gradU - alpha*nu + 
-                sqrt( 2 * stepsize * alpha ) * tf$random_normal( theta$get_shape() ) )
+                sqrt( 2 * stepsize * alpha ) * tf$random_normal( theta$get_shape(), seed = seed ) )
         dynamics$theta[[pname]] = theta$assign_add( nu )
     }
     return( dynamics )
@@ -46,7 +50,7 @@ declareDynamics.sghmc = function( sghmc) {
 
 # Declare the TensorFlow steps needed for one step of SGNHT
 # @param sgnht is an sgnht object
-declareDynamics.sgnht = function( sgnht ) {
+declareDynamics.sgnht = function( sgnht, seed ) {
     dynamics = list( "theta" = list(), "u" = list(), "alpha" = list() )
     estLogPostGrads = getGradients( sgnht )
     # Loop over each parameter in params
@@ -57,12 +61,12 @@ declareDynamics.sgnht = function( sgnht ) {
         rankTheta = sgnht$ranks[[pname]]
         # Declare momentum params
         theta = sgnht$params[[pname]]
-        u = tf$Variable( sqrt(stepsize) * tf$random_normal( theta$get_shape() ) )
+        u = tf$Variable( sqrt(stepsize) * tf$random_normal( theta$get_shape(), seed = seed ) )
         alpha = tf$Variable( a, dtype = tf$float32 )
         # Declare dynamics
         gradU = estLogPostGrads[[pname]]
         dynamics$u[[pname]] = u$assign_add( stepsize * gradU - u * alpha +  
-                sqrt( 2 * a * stepsize ) * tf$random_normal( u$get_shape() ) )
+                sqrt( 2 * a * stepsize ) * tf$random_normal( u$get_shape(), seed = seed ) )
         dynamics$theta[[pname]] = theta$assign_add( u )
         # Tensordot throws error if rank is 0 so catch this edge case
         # For parameters of higher order than vectors we use tensor contraction

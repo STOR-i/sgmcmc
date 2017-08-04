@@ -22,7 +22,7 @@ testset = list("X" = mnist$test$images, "y" = mnist$test$labels)
 
 We'll build the same neural network model as in the original SGHMC paper [(Chen et. al 2014)](https://arxiv.org/pdf/1402.4102v2.pdf). Suppose $Y_i$ takes values in $\{0,\dots,9\}$, so is the output label of a digit, and $\mathbf x_i$ is the input vector, with $\mathbf X$ the full $N \times 784$ dataset, where $N$ is the number of observations. Then we model as follows
 $$
-    Y_i \sim \theta, \mathbf x_i \sim \text{Categorical}( \beta(\theta, \mathbf x_i) ), \\
+    Y_i | \theta, \mathbf x_i \sim \text{Categorical}( \beta(\theta, \mathbf x_i) ), \\
     \beta(\theta, \mathbf x_i) = \sigma \left( \sigma \left( \mathbf x_i^T B + b \right) A + a \right).
 $$
 Here $A$, $B$, $a$, $b$ are parameters to be inferred with $\theta = (A, B, a, b)$; $\sigma(.)$ is the softmax function. $A$, $B$, $a$ and $b$ are matrices with dimensions: $100 \times 10$, $784 \times 100$, $1 \times 10$ and $1 \times 100$ respectively. Each element of these parameters is given a Normal prior to give

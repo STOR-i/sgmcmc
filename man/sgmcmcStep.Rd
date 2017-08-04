@@ -13,10 +13,10 @@ sgmcmcStep(sgmcmc, sess)
 \item{sess}{a TensorFlow session created using \code{\link{initSess}}}
 }
 \description{
-Update parameters by performing a single sgmcmc step with dynamics as defined in the sgmcmc object
- as created by *Setup such as \code{\link{sgldSetup}} or \code{\link{sgldcvSetup}} etc. This
- can be used to perform sgmcmc steps inside a loop as in TensorFlow optimization procedures.
- This is useful when custom storage options are needed for large chains.
+Update parameters by performing a single sgmcmc step with dynamics as defined in the sgmcmc 
+ object. This can be used to perform sgmcmc steps inside a loop as in standard
+ TensorFlow optimization procedures.
+ This is useful when high dimensional chains cannot fit into memory.
 }
 \examples{
 \dontrun{

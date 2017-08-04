@@ -38,9 +38,9 @@
 #' # For more examples see vignettes
 #' }
 sghmc = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
-            alpha = 0.01, L = 5L, nIters = 10^4L, verbose = TRUE ) {
+            alpha = 0.01, L = 5L, nIters = 10^4L, verbose = TRUE, seed = NULL ) {
     # Setup SGHMC object
-    sghmc = sghmcSetup( logLik, dataset, params, stepsize, logPrior, minibatchSize, alpha, L )
+    sghmc = sghmcSetup( logLik, dataset, params, stepsize, logPrior, minibatchSize, alpha, L, seed )
     options = list( "nIters" = nIters, "verbose" = verbose )
     # Run MCMC for declared object
     paramStorage = runSGMCMC( sghmc, params, options )
@@ -70,8 +70,8 @@ sghmc = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchS
 #' \item{data}{dataset as passed to \code{\link{sghmcSetup}}.}
 #' \item{n}{minibatchSize as passed to \code{\link{sghmcSetup}}.}
 #' \item{placeholders}{list of tf$placeholder objects with the same names as dataset
-#'  used to feed minibatches of data to \code{\link{sgmcmcStep}}. These are also the objects
-#'  that gets fed to the dataset argument of the logLik and logPrior functions you declared.}
+#'  used to feed minibatches of data to \code{\link{sgmcmcStep}}. These objects
+#'  get fed to the dataset argument of the logLik and logPrior functions you declared.}
 #' \item{stepsize}{list of stepsizes as passed to \code{\link{sghmcSetup}}.}
 #' \item{alpha}{list of alpha tuning parameters as passed to \code{\link{sghmcSetup}}.}
 #' \item{L}{integer trajectory parameter as passed to \code{\link{sghmcSetup}}.}
@@ -103,15 +103,15 @@ sghmc = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchS
 #' # For more examples see vignettes
 #' }
 sghmcSetup = function( logLik, dataset, params, stepsize, logPrior = NULL, minibatchSize = 0.01, 
-            alpha = 0.01, L = 5L ) {
+            alpha = 0.01, L = 5L, seed = NULL ) {
     # Create generic sgmcmc object
-    sghmc = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize )
+    sghmc = createSGMCMC( logLik, logPrior, dataset, params, stepsize, minibatchSize, seed )
     # Add SGHMC specific tuning constants and check they're in list format
     sghmc$alpha = convertList( alpha, sghmc$params )
     sghmc$L = L
     # Declare object type
     class( sghmc ) = c( "sghmc", "sgmcmc" )
     # Declare SGHMC dynamics
-    sghmc$dynamics = declareDynamics( sghmc )
+    sghmc$dynamics = declareDynamics( sghmc, seed )
     return( sghmc )
 }
