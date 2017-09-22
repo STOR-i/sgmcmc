@@ -31,7 +31,7 @@ logPrior = function( params ) {
 
 sgldTest = function( testData ) {
     stepsize = list( "theta" = 1e-4 )
-    sgmcmc = sgldSetup( logLik, testData$data, testData$params, stepsize, testData$n, logPrior = logPrior )
+    sgmcmc = sgldSetup( logLik, testData$data, testData$params, stepsize, testData$n, logPrior = logPrior, seed = 13 )
     output = array( dim = c( testData$nIters, testData$d ) )
     sess = initSess( sgmcmc, FALSE )
     for ( i in 1:testData$nIters ) {
@@ -45,7 +45,7 @@ sgldTest = function( testData ) {
 
 sgldcvTest = function( testData ) {
     stepsize = list( "theta" = 1e-4 )
-    sgmcmc = sgldcvSetup( logLik, testData$data, testData$params, stepsize, testData$optStepsize, logPrior = logPrior, minibatchSize = testData$n, nItersOpt = testData$nItersOpt, verbose = FALSE )
+    sgmcmc = sgldcvSetup( logLik, testData$data, testData$params, stepsize, testData$optStepsize, logPrior = logPrior, minibatchSize = testData$n, nItersOpt = testData$nItersOpt, verbose = FALSE, seed = 13 )
     output = array( dim = c( testData$nIters, testData$d ) )
     sess = initSess( sgmcmc, FALSE )
     for ( i in 1:testData$nIters ) {
@@ -61,7 +61,7 @@ sghmcTest = function( testData ) {
     eta = list( "theta" = 1e-5 )
     alpha = list( "theta" = 1e-1 )
     L = 3
-    sgmcmc = sghmcSetup( logLik, testData$data, testData$params, eta, logPrior = logPrior, minibatchSize = testData$n, alpha = alpha, L = L )
+    sgmcmc = sghmcSetup( logLik, testData$data, testData$params, eta, logPrior = logPrior, minibatchSize = testData$n, alpha = alpha, L = L, seed = 13 )
     output = array( dim = c( testData$nIters, testData$d ) )
     sess = initSess( sgmcmc, FALSE )
     for ( i in 1:testData$nIters ) {
@@ -77,7 +77,7 @@ sghmccvTest = function( testData ) {
     eta = list( "theta" = 5e-5 )
     alpha = list( "theta" = 1e-1 )
     L = 3
-    sgmcmc = sghmccvSetup( logLik, testData$data, testData$params, eta, testData$optStepsize, logPrior = logPrior, minibatchSize = testData$n, alpha = alpha, L = L, nItersOpt = testData$nItersOpt, verbose = FALSE )
+    sgmcmc = sghmccvSetup( logLik, testData$data, testData$params, eta, testData$optStepsize, logPrior = logPrior, minibatchSize = testData$n, alpha = alpha, L = L, nItersOpt = testData$nItersOpt, verbose = FALSE, seed = 13 )
     output = array( dim = c( testData$nIters, testData$d ) )
     sess = initSess( sgmcmc, FALSE )
     for ( i in 1:testData$nIters ) {
@@ -94,7 +94,7 @@ sgnhtTest = function( testData ) {
     a = list( "theta" = 1e-2 )
     # SGNHT tends to need a good starting point to work well
     sgnht = list( "theta" = testData$mu )
-    sgmcmc = sgnhtSetup( logLik, testData$data, testData$params, eta, logPrior = logPrior, minibatchSize = testData$n, a = a )
+    sgmcmc = sgnhtSetup( logLik, testData$data, testData$params, eta, logPrior = logPrior, minibatchSize = testData$n, a = a, seed = 13 )
     output = array( dim = c( testData$nIters, testData$d ) )
     sess = initSess( sgmcmc, FALSE )
     for ( i in 1:testData$nIters ) {
@@ -109,7 +109,7 @@ sgnhtTest = function( testData ) {
 sgnhtcvTest = function( testData ) {
     eta = list( "theta" = 1e-4 )
     a = list( "theta" = 1e-2 )
-    sgmcmc = sgnhtcvSetup( logLik, testData$data, testData$params, eta, testData$optStepsize, logPrior = logPrior, minibatchSize = testData$n, a = a, nItersOpt = testData$nItersOpt, verbose = FALSE )
+    sgmcmc = sgnhtcvSetup( logLik, testData$data, testData$params, eta, testData$optStepsize, logPrior = logPrior, minibatchSize = testData$n, a = a, nItersOpt = testData$nItersOpt, verbose = FALSE, seed = 13 )
     output = array( dim = c( testData$nIters, testData$d ) )
     sess = initSess( sgmcmc, FALSE )
     for ( i in 1:testData$nIters ) {
@@ -129,8 +129,10 @@ test_that( "Check SGLD chain step by step for 3d Gaussian", {
     thetaOut = sgldTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(min(thetaOut[,d]), -1)
-        expect_lte(max(thetaOut[,d]), 1)
+        expect_gte(min(thetaOut[,d]), -0.5)
+        expect_lte(max(thetaOut[,d]), 0.5)
+        # Check close to zero
+        expect_lte(mean(thetaOut[,d]^2), 0.1)
     }
 } )
 
@@ -143,8 +145,10 @@ test_that( "Check SGLDCV chain step by step for 3d Gaussian", {
     thetaOut = sgldcvTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(min(thetaOut[,d]), -1)
-        expect_lte(max(thetaOut[,d]), 1)
+        expect_gte(min(thetaOut[,d]), -0.5)
+        expect_lte(max(thetaOut[,d]), 0.5)
+        # Check close to zero
+        expect_lte(mean(thetaOut[,d]^2), 0.1)
     }
 } )
 
@@ -156,8 +160,10 @@ test_that( "Check SGHMC chain step by step for 3d Gaussian", {
     thetaOut = sghmcTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(min(thetaOut[,d]), -1)
-        expect_lte(max(thetaOut[,d]), 1)
+        expect_gte(min(thetaOut[,d]), -0.5)
+        expect_lte(max(thetaOut[,d]), 0.5)
+        # Check close to zero
+        expect_lte(mean(thetaOut[,d]^2), 0.1)
     }
 } )
 
@@ -169,8 +175,10 @@ test_that( "Check SGHMCCV chain step by step for 3d Gaussian", {
     thetaOut = sghmccvTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(min(thetaOut[,d]), -1)
-        expect_lte(max(thetaOut[,d]), 1)
+        expect_gte(min(thetaOut[,d]), -0.5)
+        expect_lte(max(thetaOut[,d]), 0.5)
+        # Check close to zero
+        expect_lte(mean(thetaOut[,d]^2), 0.1)
     }
 } )
 
@@ -182,8 +190,10 @@ test_that( "Check SGNHT chain step by step for 3d Gaussian", {
     thetaOut = sgnhtTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(min(thetaOut[,d]), -1)
-        expect_lte(max(thetaOut[,d]), 1)
+        expect_gte(min(thetaOut[,d]), -0.5)
+        expect_lte(max(thetaOut[,d]), 0.5)
+        # Check close to zero
+        expect_lte(mean(thetaOut[,d]^2), 0.1)
     }
 } )
 
@@ -195,7 +205,9 @@ test_that( "Check SGNHTCV chain step by step for 3d Gaussian", {
     thetaOut = sgnhtcvTest( testData )
     # Check true theta contained in chain
     for ( d in 1:testData$d ) {
-        expect_gte(min(thetaOut[,d]), -1)
-        expect_lte(max(thetaOut[,d]), 1)
+        expect_gte(min(thetaOut[,d]), -0.5)
+        expect_lte(max(thetaOut[,d]), 0.5)
+        # Check close to zero
+        expect_lte(mean(thetaOut[,d]^2), 0.1)
     }
 } )
