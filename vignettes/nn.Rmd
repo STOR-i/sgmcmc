@@ -10,11 +10,11 @@ vignette: >
 
 Often big datasets and high dimensionality go hand in hand. Sometimes the dimensionality is so high that storage of the full MCMC chain in memory becomes an issue. There are a number of ways around this, including: calculating the Monte Carlo estimate on the fly; reducing the dimensionality of the chain using a test function; or just periodically saving a the chain to the hard disk and starting from scratch. To give you more flexibility we allow an SGMCMC algorithm to be run step by step. This allows you to do what you want with the output of the chain. This guide goes into more detail about how to do this, but it needs more TensorFlow knowledge, such as knowledge of TensorFlow sessions and how to build your own placeholders. For more details on these see the [TensorFlow for R documentation](https://tensorflow.rstudio.com/).
 
-To demonstrate this concept we fit a two layer Bayesian neural network to the MNIST dataset. The MNIST dataset consists of $28 \times 28$ pixel images of handwritten digits from zero to nine. The images are flattened to be a vector of length 784. The dataset is available as a standard dataset from the TensorFlow library, with a matrix of 55000 training vectors and 10000 test vectors, each with their corresponding labels. First, let's construct the dataset and a testset. We assume you've read some of the earlier vignettes, so are familiar with how to do this.
+To demonstrate this concept we fit a two layer Bayesian neural network to the MNIST dataset. The MNIST dataset consists of $28 \times 28$ pixel images of handwritten digits from zero to nine. The images are flattened to be a vector of length 784. The dataset is available as a standard dataset from the TensorFlow library, with a matrix of 55000 training vectors and 10000 test vectors, each with their corresponding labels. First, let's construct the dataset and a testset. We assume you've read some of the earlier vignettes, so are familiar with how to do this. The MNIST dataset can be downloaded using the `sgmcmc` function `getDataset` as follows:
 ```{r eval=FALSE}
 library(sgmcmc)
-# Load MNIST dataset from package
-data("mnist")
+# Download and load MNIST dataset
+mnist = getDataset("mnist")
 # Build dataset list and testset list
 dataset = list("X" = mnist$train$images, "y" = mnist$train$labels)
 testset = list("X" = mnist$test$images, "y" = mnist$test$labels)
