@@ -13,11 +13,11 @@ In this example we use the package to infer the bias and coefficients in a logis
     p(\mathbf X, \mathbf y | \beta, \beta_0 ) = \prod_{i=1}^N \left[ \frac{1}{1+e^{-\beta_0 + \mathbf x_i \beta}} \right]^{y_i} \left[ 1 - \frac{1}{1+e^{-\beta_0 + \mathbf x_i \beta}} \right]^{1-y_i}
 \]
 
-First let's load in the data, we will use the [cover type dataset](https://archive.ics.uci.edu/ml/datasets/covertype) commonly used to benchmark classification models. We use the [dataset from LIBSVM](https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html), which transforms the problem from multiclass to binary.
+First let's load in the data, we will use the [cover type dataset](https://archive.ics.uci.edu/ml/datasets/covertype) commonly used to benchmark classification models. We use the [dataset from LIBSVM](https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html), which transforms the problem from multiclass to binary. The covertype dataset can be downloaded using the `sgmcmc` function `getDataset` as follows:
 ```{r message=FALSE}
 library(sgmcmc)
-# Load data from package
-data("covertype")
+# Download and load covertype dataset
+covertype = getDataset("covertype")
 ```
 
 First we'll remove about 10000 observations from the original dataset to form a test set, this will be used to check the validity of the algorithm. Then we'll separate out the response variable `y` and the explanatory variables `X`. The response variable is the first column in the dataset.

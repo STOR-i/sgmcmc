@@ -95,10 +95,10 @@
 <p>In this example we use the package to infer the bias and coefficients in a logistic regression model using <a href="https://arxiv.org/pdf/1706.05439.pdf">stochastic gradient Langevin Dynamics with control variates</a>. We assume we have data <span class="math inline">\(\mathbf x_1, \dots, \mathbf x_N\)</span> and response variables <span class="math inline">\(y_1, \dots, y_N\)</span> with likelihood <span class="math display">\[
     p(\mathbf X, \mathbf y | \beta, \beta_0 ) = \prod_{i=1}^N \left[ \frac{1}{1+e^{-\beta_0 + \mathbf x_i \beta}} \right]^{y_i} \left[ 1 - \frac{1}{1+e^{-\beta_0 + \mathbf x_i \beta}} \right]^{1-y_i}
 \]</span></p>
-<p>First let’s load in the data, we will use the <a href="https://archive.ics.uci.edu/ml/datasets/covertype">cover type dataset</a> commonly used to benchmark classification models. We use the <a href="https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html">dataset from LIBSVM</a>, which transforms the problem from multiclass to binary.</p>
+<p>First let’s load in the data, we will use the <a href="https://archive.ics.uci.edu/ml/datasets/covertype">cover type dataset</a> commonly used to benchmark classification models. We use the <a href="https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html">dataset from LIBSVM</a>, which transforms the problem from multiclass to binary. The covertype dataset can be downloaded using the <code>sgmcmc</code> function <code>getDataset</code> as follows:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sgmcmc)
-<span class="co"># Load data from package</span>
-<span class="kw">data</span>(<span class="st">"covertype"</span>)</code></pre></div>
+<span class="co"># Download and load covertype dataset</span>
+covertype =<span class="st"> </span><span class="kw"><a href="../reference/getDataset.html">getDataset</a></span>(<span class="st">"covertype"</span>)</code></pre></div>
 <p>First we’ll remove about 10000 observations from the original dataset to form a test set, this will be used to check the validity of the algorithm. Then we’ll separate out the response variable <code>y</code> and the explanatory variables <code>X</code>. The response variable is the first column in the dataset.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">testObservations =<span class="st"> </span><span class="kw">sample</span>(<span class="kw">nrow</span>(covertype), <span class="dv">10</span>^<span class="dv">4</span>)
 testSet =<span class="st"> </span>covertype[testObservations,]

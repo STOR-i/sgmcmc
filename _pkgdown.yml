@@ -38,7 +38,6 @@ reference:
         - sgmcmcStep
         - getParams
   - title: "Datasets"
-    desc: "Datasets used in examples"
+    desc: "Download and load datasets used in the examples and vignettes"
     contents:
-        - covertype
-        - mnist
+        - getDataset
