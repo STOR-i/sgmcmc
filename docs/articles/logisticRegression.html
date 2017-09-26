@@ -100,7 +100,8 @@
 <span class="co"># Download and load covertype dataset</span>
 covertype =<span class="st"> </span><span class="kw"><a href="../reference/getDataset.html">getDataset</a></span>(<span class="st">"covertype"</span>)</code></pre></div>
 <p>First we’ll remove about 10000 observations from the original dataset to form a test set, this will be used to check the validity of the algorithm. Then we’ll separate out the response variable <code>y</code> and the explanatory variables <code>X</code>. The response variable is the first column in the dataset.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">testObservations =<span class="st"> </span><span class="kw">sample</span>(<span class="kw">nrow</span>(covertype), <span class="dv">10</span>^<span class="dv">4</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">13</span>)
+testObservations =<span class="st"> </span><span class="kw">sample</span>(<span class="kw">nrow</span>(covertype), <span class="dv">10</span>^<span class="dv">4</span>)
 testSet =<span class="st"> </span>covertype[testObservations,]
 X =<span class="st"> </span>covertype[-<span class="kw">c</span>(testObservations),<span class="dv">2</span>:<span class="kw">ncol</span>(covertype)]
 y =<span class="st"> </span>covertype[-<span class="kw">c</span>(testObservations),<span class="dv">1</span>]
@@ -122,25 +123,22 @@ params =<span class="st"> </span><span class="kw">list</span>( <span class="st">
     <span class="kw">return</span>(logPrior)
 }</code></pre></div>
 <p>Finally, we’ll set the stepsize parameters for the algorithm, along with the minibatch size. <code>sgldcv</code> relies on two stepsize parameters, one for the optimization step and one for the MCMC step. To allow stepsizes to be set for different parameters, the form of the stepsizes for the MCMC will be lists with names corresponding to each of the names in <code>params</code>. The optimization step will just be one value as the stepsize is automatically tuned</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stepsizesMCMC =<span class="st"> </span><span class="kw">list</span>(<span class="st">"beta"</span> =<span class="st"> </span><span class="fl">2e-5</span>, <span class="st">"bias"</span> =<span class="st"> </span><span class="fl">2e-5</span>)
-stepsizesOptimization =<span class="st"> </span><span class="fl">1e-1</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stepsizesMCMC =<span class="st"> </span><span class="kw">list</span>(<span class="st">"beta"</span> =<span class="st"> </span><span class="fl">5e-6</span>, <span class="st">"bias"</span> =<span class="st"> </span><span class="fl">5e-6</span>)
+stepsizesOptimization =<span class="st"> </span><span class="fl">5e-6</span></code></pre></div>
 <p>Alternatively, we can simply use the shortcut <code>stepsizesMCMC = 2e-5</code> which would set the stepsizes for each parameter to <code>2e-5</code>. The optimization step is performed using the <code>TensorFlow</code> <code>AdamOptimizer</code>.</p>
-<p>Now we can run our SGLD-CV algorithm using the function <code>sgldcv</code> from the <code>sgmcmc</code> package, which returns a list of Markov chains for each parameter as output. Use the argument <code>verbose = FALSE</code> to hide the output of the function. As the dataset size is quite large, we’ll change the <code>minibatchSize</code> from its default <code>0.01 * N</code> to <code>500</code>. To allow a small 1000 iteration burn-in we’ll set the number of iterations to be 11000</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw"><a href="../reference/sgldcv.html">sgldcv</a></span>(logLik, dataset, params, stepsizesMCMC, stepsizesOptimization, <span class="dt">logPrior =</span> logPrior, <span class="dt">minibatchSize =</span> <span class="dv">500</span>, <span class="dt">nIters =</span> <span class="dv">11000</span> ) </code></pre></div>
-<pre><code>## 
-## Finding initial MAP estimates...</code></pre>
-<pre><code>## Not all tensorflow dependencies are met so skipping this...
-## Try running tensorflow::install_tensorflow().</code></pre>
-<p>To check the algorithm converged, we’ll plot the average log-predictive density of the data from our test set every 10 iterations. Let <span class="math display">\[\hat \pi_i^{(j)} := \frac{1}{1 + \exp\left[-\beta_0^{(j)} - \mathbf x_i \beta^{(j)}\right]},\]</span> here <span class="math inline">\(\hat \pi_i^{(j)}\)</span> denotes the probability that the <span class="math inline">\(j^{\text{th}}\)</span> iteration of our MCMC chain assigned to observation <span class="math inline">\(i\)</span> is in our test set. Define our test set by <span class="math inline">\(T\)</span>, the average log-predictive density is given by <span class="math display">\[A := \frac{1}{|T|} \sum_{y_i \in T} \left[ y_i \log \hat \pi_i^{(j)} + (1 - y_i) \log(1 - \hat \pi_i^{(j)}) \right]\]</span></p>
-<p>To check convergence, we’ll plot the average log-predictive density every 10 iterations as follows</p>
+<p>Now we can run our SGLD-CV algorithm using the function <code>sgldcv</code> from the <code>sgmcmc</code> package, which returns a list of Markov chains for each parameter as output. Use the argument <code>verbose = FALSE</code> to hide the output of the function. To make the results reproducible we’ll set the seed to 13. As the dataset size is quite large, we’ll change the <code>minibatchSize</code> from its default <code>0.01 * N</code> to <code>500</code>. To allow a small 1000 iteration burn-in we’ll set the number of iterations to be 11000</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw"><a href="../reference/sgldcv.html">sgldcv</a></span>(logLik, dataset, params, stepsizesMCMC, stepsizesOptimization, <span class="dt">logPrior =</span> logPrior, 
+        <span class="dt">minibatchSize =</span> <span class="dv">500</span>, <span class="dt">nIters =</span> <span class="dv">11000</span>, <span class="dt">verbose =</span> <span class="ot">FALSE</span>, <span class="dt">seed =</span> <span class="dv">13</span> ) </code></pre></div>
+<p>A common performance measure for a classifier is the <a href="https://www.kaggle.com/wiki/LogLoss">log loss</a>. To check the algorithm converged, we’ll plot the log loss of the data from our test set every 10 iterations. Let <span class="math display">\[\hat \pi_i^{(j)} := \frac{1}{1 + \exp\left[-\beta_0^{(j)} - \mathbf x_i \beta^{(j)}\right]},\]</span> here <span class="math inline">\(\hat \pi_i^{(j)}\)</span> denotes the probability that the <span class="math inline">\(j^{\text{th}}\)</span> iteration of our MCMC chain assigned to observation <span class="math inline">\(i\)</span> is in our test set. Define our test set by <span class="math inline">\(T\)</span>, the log loss is given by <span class="math display">\[A := \frac{1}{|T|} \sum_{y_i \in T} \left[ y_i \log \hat \pi_i^{(j)} + (1 - y_i) \log(1 - \hat \pi_i^{(j)}) \right]\]</span></p>
+<p>To check convergence, we’ll plot the log loss every 10 iterations as follows</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">yTest =<span class="st"> </span>testSet[,<span class="dv">1</span>]
 XTest =<span class="st"> </span>testSet[,<span class="dv">2</span>:<span class="kw">ncol</span>(testSet)]
 <span class="co"># Remove burn-in</span>
 output$bias =<span class="st"> </span>output$bias[-<span class="kw">c</span>(<span class="dv">1</span>:<span class="dv">1000</span>)]
 output$beta =<span class="st"> </span>output$beta[-<span class="kw">c</span>(<span class="dv">1</span>:<span class="dv">1000</span>),,]
 iterations =<span class="st"> </span><span class="kw">seq</span>(<span class="dt">from =</span> <span class="dv">1</span>, <span class="dt">to =</span> <span class="dv">10</span>^<span class="dv">4</span>, <span class="dt">by =</span> <span class="dv">10</span>)
-avLogPred =<span class="st"> </span><span class="kw">rep</span>(<span class="dv">0</span>, <span class="kw">length</span>(iterations))
-<span class="co"># Calculate log predictive every 10 iterations</span>
+logLoss =<span class="st"> </span><span class="kw">rep</span>(<span class="dv">0</span>, <span class="kw">length</span>(iterations))
+<span class="co"># Calculate log loss every 10 iterations</span>
 for ( iter in <span class="dv">1</span>:<span class="kw">length</span>(iterations) ) {
     j =<span class="st"> </span>iterations[iter]
     <span class="co"># Get parameters at iteration j</span>
@@ -149,18 +147,17 @@ for ( iter in <span class="dv">1</span>:<span class="kw">length</span>(iteration
     for ( i in <span class="dv">1</span>:<span class="kw">length</span>(yTest) ) {
         pihat_ij =<span class="st"> </span><span class="dv">1</span> /<span class="st"> </span>(<span class="dv">1</span> +<span class="st"> </span><span class="kw">exp</span>(-<span class="st"> </span>beta0_j -<span class="st"> </span><span class="kw">sum</span>(XTest[i,] *<span class="st"> </span>beta_j)))
         y_i =<span class="st"> </span>yTest[i]
-        <span class="co"># Calculate log predictive at current test set point</span>
+        <span class="co"># Calculate log loss at current test set point</span>
         LogPred_curr =<span class="st"> </span>-<span class="st"> </span>(y_i *<span class="st"> </span><span class="kw">log</span>(pihat_ij) +<span class="st"> </span>(<span class="dv">1</span> -<span class="st"> </span>y_i) *<span class="st"> </span><span class="kw">log</span>(<span class="dv">1</span> -<span class="st"> </span>pihat_ij))
-        avLogPred[iter] =<span class="st"> </span>avLogPred[iter] +<span class="st"> </span><span class="dv">1</span> /<span class="st"> </span><span class="kw">length</span>(yTest) *<span class="st"> </span>LogPred_curr
+        logLoss[iter] =<span class="st"> </span>logLoss[iter] +<span class="st"> </span><span class="dv">1</span> /<span class="st"> </span><span class="kw">length</span>(yTest) *<span class="st"> </span>LogPred_curr
     }
 }
 <span class="kw">library</span>(ggplot2)
-plotFrame =<span class="st"> </span><span class="kw">data.frame</span>(<span class="st">"iteration"</span> =<span class="st"> </span>iterations, <span class="st">"logPredictive"</span> =<span class="st"> </span>avLogPred)
-<span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggplot">ggplot</a></span>(plotFrame, <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>(<span class="dt">x =</span> iteration, <span class="dt">y =</span> logPredictive)) +
+plotFrame =<span class="st"> </span><span class="kw">data.frame</span>(<span class="st">"iteration"</span> =<span class="st"> </span>iterations, <span class="st">"logLoss"</span> =<span class="st"> </span>logLoss)
+<span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggplot">ggplot</a></span>(plotFrame, <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>(<span class="dt">x =</span> iteration, <span class="dt">y =</span> logLoss)) +
 <span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/geom_path">geom_line</a></span>() +
-<span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ylab</a></span>(<span class="st">"Average log predictive of test set"</span>)</code></pre></div>
-<pre><code>## Not all tensorflow dependencies are met so skipping this...
-## Try running tensorflow::install_tensorflow().</code></pre>
+<span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ylab</a></span>(<span class="st">"Log loss of test set"</span>)</code></pre></div>
+<p><img src="logisticRegression_files/figure-html/unnamed-chunk-10-1.png" width="672"></p>
 </div>
   </div>
 

@@ -101,6 +101,7 @@ N =<span class="st"> </span><span class="dv">10</span>^<span class="dv">4</span>
 <span class="co"># Set theta to be 0 and simulate the data</span>
 theta =<span class="st"> </span><span class="kw">c</span>( <span class="dv">0</span>, <span class="dv">0</span> )
 Sigma =<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>)
+<span class="kw">set.seed</span>(<span class="dv">13</span>)
 X =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/MASS/topics/mvrnorm">mvrnorm</a></span>( N, theta, Sigma )
 dataset =<span class="st"> </span><span class="kw">list</span>(<span class="st">"X"</span> =<span class="st"> </span>X)</code></pre></div>
 <p>In the last line we defined the dataset as it will be input to the relevant <code>sgmcmc</code> function. A lot of the inputs to functions in <code>sgmcmc</code> are defined as lists. This improves flexibility by enabling models to be specified with multiple parameters, datasets and allows separate tuning constants to be set for each parameter. We assume that observations are always accessed on the first dimension of each object, i.e. the point <span class="math inline">\(x_i\)</span> is located at <code>X[i,]</code> rather than <code>X[,i]</code>. Similarly the observation <span class="math inline">\(i\)</span> from a 3d object <code>Y</code> would be located at <code>Y[i,,]</code>.</p>
@@ -126,110 +127,9 @@ dataset =<span class="st"> </span><span class="kw">list</span>(<span class="st">
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stepsize =<span class="st"> </span><span class="kw">list</span>( <span class="st">"theta"</span> =<span class="st"> </span><span class="fl">1e-5</span> )
 n =<span class="st"> </span><span class="dv">100</span></code></pre></div>
 <p>The stepsize parameters may require a bit of tuning before you get good results. The shorthand <code>stepsize = 1e-5</code> can be used, which would set the stepsize of all parameters to be <code>1e-5</code>.</p>
-<p>Now we can run our SGLD algorithm using the <code>sgmcmc</code> function <code>sgld</code>, which returns a list of Markov chains for each parameter as output. Use the argument <code>verbose = FALSE</code> to hide the output of the function</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chains =<span class="st"> </span><span class="kw"><a href="../reference/sgld.html">sgld</a></span>( logLik, dataset, params, stepsize, <span class="dt">logPrior =</span> logPrior, <span class="dt">minibatchSize =</span> n)</code></pre></div>
-<pre><code>## 
-## Simulating from SGMCMC algorithm...</code></pre>
-<pre><code>## Iteration: 100       Log posterior estimate: -28428.341796875</code></pre>
-<pre><code>## Iteration: 200       Log posterior estimate: -29417.0703125</code></pre>
-<pre><code>## Iteration: 300       Log posterior estimate: -27884.021484375</code></pre>
-<pre><code>## Iteration: 400       Log posterior estimate: -28420.42578125</code></pre>
-<pre><code>## Iteration: 500       Log posterior estimate: -29067.966796875</code></pre>
-<pre><code>## Iteration: 600       Log posterior estimate: -27948.66796875</code></pre>
-<pre><code>## Iteration: 700       Log posterior estimate: -27362.54296875</code></pre>
-<pre><code>## Iteration: 800       Log posterior estimate: -29005.197265625</code></pre>
-<pre><code>## Iteration: 900       Log posterior estimate: -28715.779296875</code></pre>
-<pre><code>## Iteration: 1000      Log posterior estimate: -27714.4453125</code></pre>
-<pre><code>## Iteration: 1100      Log posterior estimate: -28110.001953125</code></pre>
-<pre><code>## Iteration: 1200      Log posterior estimate: -27506.828125</code></pre>
-<pre><code>## Iteration: 1300      Log posterior estimate: -30454.099609375</code></pre>
-<pre><code>## Iteration: 1400      Log posterior estimate: -28035.814453125</code></pre>
-<pre><code>## Iteration: 1500      Log posterior estimate: -29121.677734375</code></pre>
-<pre><code>## Iteration: 1600      Log posterior estimate: -27398.033203125</code></pre>
-<pre><code>## Iteration: 1700      Log posterior estimate: -26906.67578125</code></pre>
-<pre><code>## Iteration: 1800      Log posterior estimate: -28810.4296875</code></pre>
-<pre><code>## Iteration: 1900      Log posterior estimate: -28685.619140625</code></pre>
-<pre><code>## Iteration: 2000      Log posterior estimate: -28313.107421875</code></pre>
-<pre><code>## Iteration: 2100      Log posterior estimate: -30114.875</code></pre>
-<pre><code>## Iteration: 2200      Log posterior estimate: -27902.228515625</code></pre>
-<pre><code>## Iteration: 2300      Log posterior estimate: -29135.34375</code></pre>
-<pre><code>## Iteration: 2400      Log posterior estimate: -27819.720703125</code></pre>
-<pre><code>## Iteration: 2500      Log posterior estimate: -28279.0390625</code></pre>
-<pre><code>## Iteration: 2600      Log posterior estimate: -28195.15234375</code></pre>
-<pre><code>## Iteration: 2700      Log posterior estimate: -29552.658203125</code></pre>
-<pre><code>## Iteration: 2800      Log posterior estimate: -27952.54296875</code></pre>
-<pre><code>## Iteration: 2900      Log posterior estimate: -28244.400390625</code></pre>
-<pre><code>## Iteration: 3000      Log posterior estimate: -28956.638671875</code></pre>
-<pre><code>## Iteration: 3100      Log posterior estimate: -28250.30859375</code></pre>
-<pre><code>## Iteration: 3200      Log posterior estimate: -28743.73828125</code></pre>
-<pre><code>## Iteration: 3300      Log posterior estimate: -28073.431640625</code></pre>
-<pre><code>## Iteration: 3400      Log posterior estimate: -29016.97265625</code></pre>
-<pre><code>## Iteration: 3500      Log posterior estimate: -29252.048828125</code></pre>
-<pre><code>## Iteration: 3600      Log posterior estimate: -27981.2109375</code></pre>
-<pre><code>## Iteration: 3700      Log posterior estimate: -27039.083984375</code></pre>
-<pre><code>## Iteration: 3800      Log posterior estimate: -28848.3984375</code></pre>
-<pre><code>## Iteration: 3900      Log posterior estimate: -28582.38671875</code></pre>
-<pre><code>## Iteration: 4000      Log posterior estimate: -26189.544921875</code></pre>
-<pre><code>## Iteration: 4100      Log posterior estimate: -29544.181640625</code></pre>
-<pre><code>## Iteration: 4200      Log posterior estimate: -26145.712890625</code></pre>
-<pre><code>## Iteration: 4300      Log posterior estimate: -28617.642578125</code></pre>
-<pre><code>## Iteration: 4400      Log posterior estimate: -28524.443359375</code></pre>
-<pre><code>## Iteration: 4500      Log posterior estimate: -26953.5078125</code></pre>
-<pre><code>## Iteration: 4600      Log posterior estimate: -28087.634765625</code></pre>
-<pre><code>## Iteration: 4700      Log posterior estimate: -28415.9765625</code></pre>
-<pre><code>## Iteration: 4800      Log posterior estimate: -30994.251953125</code></pre>
-<pre><code>## Iteration: 4900      Log posterior estimate: -27977.830078125</code></pre>
-<pre><code>## Iteration: 5000      Log posterior estimate: -25856.615234375</code></pre>
-<pre><code>## Iteration: 5100      Log posterior estimate: -28064.4453125</code></pre>
-<pre><code>## Iteration: 5200      Log posterior estimate: -27441.1171875</code></pre>
-<pre><code>## Iteration: 5300      Log posterior estimate: -28263.224609375</code></pre>
-<pre><code>## Iteration: 5400      Log posterior estimate: -29668.052734375</code></pre>
-<pre><code>## Iteration: 5500      Log posterior estimate: -26580.826171875</code></pre>
-<pre><code>## Iteration: 5600      Log posterior estimate: -26733.357421875</code></pre>
-<pre><code>## Iteration: 5700      Log posterior estimate: -27492.119140625</code></pre>
-<pre><code>## Iteration: 5800      Log posterior estimate: -25981.529296875</code></pre>
-<pre><code>## Iteration: 5900      Log posterior estimate: -28201.31640625</code></pre>
-<pre><code>## Iteration: 6000      Log posterior estimate: -26659.74609375</code></pre>
-<pre><code>## Iteration: 6100      Log posterior estimate: -28312.318359375</code></pre>
-<pre><code>## Iteration: 6200      Log posterior estimate: -28489.748046875</code></pre>
-<pre><code>## Iteration: 6300      Log posterior estimate: -27967.69140625</code></pre>
-<pre><code>## Iteration: 6400      Log posterior estimate: -27962.232421875</code></pre>
-<pre><code>## Iteration: 6500      Log posterior estimate: -27404.94140625</code></pre>
-<pre><code>## Iteration: 6600      Log posterior estimate: -29440.0546875</code></pre>
-<pre><code>## Iteration: 6700      Log posterior estimate: -28145.63671875</code></pre>
-<pre><code>## Iteration: 6800      Log posterior estimate: -27360.572265625</code></pre>
-<pre><code>## Iteration: 6900      Log posterior estimate: -27016.3828125</code></pre>
-<pre><code>## Iteration: 7000      Log posterior estimate: -26899.478515625</code></pre>
-<pre><code>## Iteration: 7100      Log posterior estimate: -28412.623046875</code></pre>
-<pre><code>## Iteration: 7200      Log posterior estimate: -26459.2265625</code></pre>
-<pre><code>## Iteration: 7300      Log posterior estimate: -26993.330078125</code></pre>
-<pre><code>## Iteration: 7400      Log posterior estimate: -28671.8671875</code></pre>
-<pre><code>## Iteration: 7500      Log posterior estimate: -26841.708984375</code></pre>
-<pre><code>## Iteration: 7600      Log posterior estimate: -28045.658203125</code></pre>
-<pre><code>## Iteration: 7700      Log posterior estimate: -28832.966796875</code></pre>
-<pre><code>## Iteration: 7800      Log posterior estimate: -28744.751953125</code></pre>
-<pre><code>## Iteration: 7900      Log posterior estimate: -27359.291015625</code></pre>
-<pre><code>## Iteration: 8000      Log posterior estimate: -28128.703125</code></pre>
-<pre><code>## Iteration: 8100      Log posterior estimate: -27778.12890625</code></pre>
-<pre><code>## Iteration: 8200      Log posterior estimate: -27634.57421875</code></pre>
-<pre><code>## Iteration: 8300      Log posterior estimate: -27608.966796875</code></pre>
-<pre><code>## Iteration: 8400      Log posterior estimate: -27216.728515625</code></pre>
-<pre><code>## Iteration: 8500      Log posterior estimate: -28224.13671875</code></pre>
-<pre><code>## Iteration: 8600      Log posterior estimate: -29911.912109375</code></pre>
-<pre><code>## Iteration: 8700      Log posterior estimate: -28497.734375</code></pre>
-<pre><code>## Iteration: 8800      Log posterior estimate: -28329.220703125</code></pre>
-<pre><code>## Iteration: 8900      Log posterior estimate: -28304.5546875</code></pre>
-<pre><code>## Iteration: 9000      Log posterior estimate: -29003.556640625</code></pre>
-<pre><code>## Iteration: 9100      Log posterior estimate: -27501.759765625</code></pre>
-<pre><code>## Iteration: 9200      Log posterior estimate: -27819.474609375</code></pre>
-<pre><code>## Iteration: 9300      Log posterior estimate: -26788.828125</code></pre>
-<pre><code>## Iteration: 9400      Log posterior estimate: -29219.9375</code></pre>
-<pre><code>## Iteration: 9500      Log posterior estimate: -28447.578125</code></pre>
-<pre><code>## Iteration: 9600      Log posterior estimate: -28826.3046875</code></pre>
-<pre><code>## Iteration: 9700      Log posterior estimate: -27940.66015625</code></pre>
-<pre><code>## Iteration: 9800      Log posterior estimate: -29051.28515625</code></pre>
-<pre><code>## Iteration: 9900      Log posterior estimate: -27574.6171875</code></pre>
-<pre><code>## Iteration: 10000     Log posterior estimate: -29370.17578125</code></pre>
+<p>Now we can run our SGLD algorithm using the <code>sgmcmc</code> function <code>sgld</code>, which returns a list of Markov chains for each parameter as output. To make the results reproducible we’ll set the seed to 13. Use the argument <code>verbose = FALSE</code> to hide the output of the function</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chains =<span class="st"> </span><span class="kw"><a href="../reference/sgld.html">sgld</a></span>( logLik, dataset, params, stepsize, <span class="dt">logPrior =</span> logPrior, <span class="dt">minibatchSize =</span> n, 
+              <span class="dt">verbose =</span> <span class="ot">FALSE</span>, <span class="dt">seed =</span> <span class="dv">13</span> )</code></pre></div>
 <p>Finally we’ll plot the results after removing burn-in</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
 burnIn =<span class="st"> </span><span class="dv">10</span>^<span class="dv">3</span>

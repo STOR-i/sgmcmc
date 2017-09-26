@@ -19,6 +19,7 @@ N = 10^4
 # Set theta to be 0 and simulate the data
 theta = c( 0, 0 )
 Sigma = diag(2)
+set.seed(13)
 X = mvrnorm( N, theta, Sigma )
 dataset = list("X" = X)
 ```
@@ -58,14 +59,16 @@ n = 100
 ```
 The stepsize parameters may require a bit of tuning before you get good results. The shorthand `stepsize = 1e-5` can be used, which would set the stepsize of all parameters to be `1e-5`.
 
-Now we can run our SGLD algorithm using the `sgmcmc` function `sgld`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function
+Now we can run our SGLD algorithm using the `sgmcmc` function `sgld`, which returns a list of Markov chains for each parameter as output. To make the results reproducible we'll set the seed to 13. Use the argument `verbose = FALSE` to hide the output of the function
 ```{r eval=FALSE}
-chains = sgld( logLik, dataset, params, stepsize, logPrior = logPrior, minibatchSize = n)
+chains = sgld( logLik, dataset, params, stepsize, logPrior = logPrior, minibatchSize = n, 
+              verbose = FALSE, seed = 13 )
 ```
 
 ```{r echo=FALSE}
 tryCatch({
-    chains = sgld( logLik, dataset, params, stepsize, logPrior = logPrior, minibatchSize = n)
+chains = sgld( logLik, dataset, params, stepsize, logPrior = logPrior, minibatchSize = n, 
+              verbose = FALSE, seed = 13 )
 }, error = function (e) { 
     writeLines("Not all tensorflow dependencies are met so skipping this...")
     writeLines("Try running tensorflow::install_tensorflow().")

@@ -20,6 +20,7 @@ N = 10^4
 theta1 = c( 0, 0 )
 theta2 = c( 0.1, 0.1 )
 # Allocate observations to each component
+set.seed(13)
 z = sample( 2, N, replace = TRUE, prob = c( 0.5, 0.5 ) )
 # Predeclare data matrix
 X = matrix( rep( NA, 2*N ), ncol = 2 )
@@ -75,18 +76,20 @@ logPrior = function( params ) {
 
 Finally we set the tuning parameters for SGHMC, this is a list with the same names as the `params` list you defined earlier, and values are the stepsize for that parameter.
 ```{r}
-stepsize = list( "theta1" = 5e-6, "theta2" = 5e-6 )
+stepsize = list( "theta1" = 2e-5, "theta2" = 2e-5 )
 ```
 Optionally, we can set the tuning parameter for the momentum `alpha` in the same way as the `stepsize`. But we'll leave this along with the trajectory tuning constant `L`, and the `minibatchSize` as their defaults.
 
-Now we can run our SGHMC algorithm using the `sgmcmc` function `sghmc`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function. We'll set the number of iterations as `11000` to allow for `1000` iterations of burn-in.
+Now we can run our SGHMC algorithm using the `sgmcmc` function `sghmc`, which returns a list of Markov chains for each parameter as output. Use the argument `verbose = FALSE` to hide the output of the function. To make the results reproducible we'll set the seed to 13. We'll set the number of iterations as `11000` to allow for `1000` iterations of burn-in.
 ```{r eval=FALSE}
-chains = sghmc( logLik, dataset, params, stepsize, logPrior = logPrior, nIters = 11000 )
+chains = sghmc( logLik, dataset, params, stepsize, logPrior = logPrior, nIters = 11000, 
+        verbose = FALSE, seed = 13 )
 ```
 
 ```{r echo=FALSE}
 tryCatch({
-    chains = sghmc( logLik, dataset, params, stepsize, logPrior = logPrior, nIters = 11000 )
+    chains = sghmc( logLik, dataset, params, stepsize, logPrior = logPrior, nIters = 11000, 
+            verbose = FALSE, seed = 13 )
 }, error = function (e) { 
     writeLines("Not all tensorflow dependencies are met so skipping this...")
     writeLines("Try running tensorflow::install_tensorflow().")

@@ -79,10 +79,11 @@ logPrior = function(params) {
 }
 ```
 
-Now suppose we want to make inference using stochastic gradient Langevin dynamics (SGLD). If we do this in the normal way then we will most likely run out of memory when the function builds the array to store the output. So instead we just initialize an `sgld` object using `sgldSetup`. Similarly we could build an `sgldcv` object using `sgldcvSetup` or an `sgnht` object using `sgnhtSetup`. Then we can run the SGLD algorithm one step at a time and decide what to do with the output at each iteration ourselves. We'll just set our stepsize to `1e-4` for this example, so to build our `sgld` object we run
+Now suppose we want to make inference using stochastic gradient Langevin dynamics (SGLD). If we do this in the normal way then we will most likely run out of memory when the function builds the array to store the output. So instead we just initialize an `sgld` object using `sgldSetup`. Similarly we could build an `sgldcv` object using `sgldcvSetup` or an `sgnht` object using `sgnhtSetup`. Then we can run the SGLD algorithm one step at a time and decide what to do with the output at each iteration ourselves. We'll just set our stepsize to `1e-4` for this example. To make the results reproducible we'll set the seed to 13.
 ```{r eval=FALSE}
 stepsize = 1e-4
-sgld = sgldSetup(logLik, dataset, params, stepsize, logPrior = logPrior, minibatchSize = 500)
+sgld = sgldSetup(logLik, dataset, params, stepsize, logPrior = logPrior, 
+        minibatchSize = 500, seed = 13)
 ```
 
 This `sgld` object is a type of `sgmcmc` object, which is basically just a list with a number of entries. The most important of these entries to us is called `params`, which holds a list, with the same names as you had in the `params` you fed to `sgld`, but this list contains `tf$Variable` objects. This is how you access the tensors which hold your current parameter values in the chain. For more details on the attributes of these objects, see the documentation for `sgldSetup`, `sgldcvSetup` etc.
@@ -159,11 +160,11 @@ for (i in 1:10^4) {
 }
 ```
 
-```{r echo=FALSE, include=FALSE}
+```{r echo=FALSE}
 # Check a stripped down version of the vignette runs if TensorFlow built properly, otherwise skip.
 checkRuns = function( logLik, logPrior ) {
-    library(sgmcmc)
-    data("mnist")
+    suppressMessages(library(sgmcmc))
+    mnist = getDataset("mnist")
     dataset = list("X" = mnist$train$images, "y" = mnist$train$labels)
     testset = list("X" = mnist$test$images, "y" = mnist$test$labels)
     d = ncol(dataset$X) # dimension of chain
@@ -189,8 +190,9 @@ checkRuns = function( logLik, logPrior ) {
 tryCatch({
     checkRuns(logLik, logPrior)
 }, error = function (e) {
-    writeLines("Not all tensorflow dependencies are met so skipping this...")
-    writeLines("Try running tensorflow::install_tensorflow().")
+    print(e)
+#    writeLines("Not all tensorflow dependencies are met so skipping this...")
+#    writeLines("Try running tensorflow::install_tensorflow().")
 })
 ```
 
