@@ -1,11 +1,18 @@
 ## Previous submissions
 > your have a tarball size of 17671928 bytes. Please reduce to less than 5 MB.
+
 Done
+
 > Can you provide some references in the 'Description' field of your DESCRIPTION file
+
 Done
+
 > Please replace all double spaces in your description by single spaces
+
 Done
+
 > Your examples are all in dontrun. Please add small executable examples
+
 My examples need to be set to dontrun because the package relies on tensorflow which is on CRAN but has a nonstandard install step, so the examples cannot be run. I have cleared this with another maintainer, and the maintainer which flagged this.
 
 ## Test environments
