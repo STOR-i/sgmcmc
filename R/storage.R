@@ -1,6 +1,6 @@
 #' Get current parameter values
 #' 
-#' Return the current parameter values as a list of R arrays (converted from tensorflow tensors).
+#' Return the current parameter values as a list of R arrays (converted from TensorFlow tensors).
 #' 
 #' @param sgmcmc a stochastic gradient MCMC object returned by *Setup such as 
 #'  \code{\link{sgldSetup}}, \code{\link{sgldcvSetup}} etc.

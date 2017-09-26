@@ -2,7 +2,7 @@
 #' 
 #' Simulates from the posterior defined by the functions logLik and logPrior using
 #'  stochastic gradient Langevin Dynamics with an improved gradient estimate using Control Variates.
-#'  The function uses TensorFlow, so needs Tensorflow for python installed.
+#'  The function uses TensorFlow, so needs TensorFlow for python installed.
 #'
 #' @references \itemize{
 #'  \item \href{https://arxiv.org/pdf/1706.05439.pdf}{

@@ -79,7 +79,7 @@ sgmcmcStep.sgnht = function( sgmcmc, sess ) {
 
 #' Initialise TensorFlow session and sgmcmc algorithm
 #'
-#' Initalise the TensorFlow session and the sgmcmc algorithm. For algorithms with control variates
+#' Initialise the TensorFlow session and the sgmcmc algorithm. For algorithms with control variates
 #'  this will find the MAP estimates of the log posterior and calculate the full log posterior
 #'  gradient at this point. For algorithms without control variates this will simply initialise a
 #'  TensorFlow session.

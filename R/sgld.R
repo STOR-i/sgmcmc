@@ -2,7 +2,7 @@
 #' 
 #' Simulates from the posterior defined by the functions logLik and logPrior using
 #'  stochastic gradient Langevin Dynamics. The function uses TensorFlow, so needs
-#'  Tensorflow for python installed.
+#'  TensorFlow for python installed.
 #'
 #' @references \itemize{\item \href{http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf}{
 #'  Welling, M., and Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. 
