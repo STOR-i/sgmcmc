@@ -54,7 +54,7 @@ Returns list of arrays for each parameter containing the MCMC chain.
 \description{
 Simulates from the posterior defined by the functions logLik and logPrior using
  stochastic gradient Hamiltonian Monte Carlo. The function uses TensorFlow, so needs
- Tensorflow for python installed. Currently we use the approximation \eqn{\hat \beta = 0},
+ TensorFlow for python installed. Currently we use the approximation \eqn{\hat \beta = 0},
  as used in the simulations by the original reference. 
  This will be changed in future implementations.
 }

@@ -17,7 +17,7 @@ sess a TensorFlow session, see the
  \href{https://tensorflow.rstudio.com/}{TensorFlow for R website} for more details.
 }
 \description{
-Initalise the TensorFlow session and the sgmcmc algorithm. For algorithms with control variates
+Initialise the TensorFlow session and the sgmcmc algorithm. For algorithms with control variates
  this will find the MAP estimates of the log posterior and calculate the full log posterior
  gradient at this point. For algorithms without control variates this will simply initialise a
  TensorFlow session.

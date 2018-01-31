@@ -17,7 +17,7 @@ Returns a list with the same names as \code{params}, with \code{R} arrays of the
  parameter values
 }
 \description{
-Return the current parameter values as a list of R arrays (converted from tensorflow tensors).
+Return the current parameter values as a list of R arrays (converted from TensorFlow tensors).
 }
 \examples{
 \dontrun{

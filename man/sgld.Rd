@@ -44,7 +44,7 @@ Returns list of arrays for each parameter containing the MCMC chain.
 \description{
 Simulates from the posterior defined by the functions logLik and logPrior using
  stochastic gradient Langevin Dynamics. The function uses TensorFlow, so needs
- Tensorflow for python installed.
+ TensorFlow for python installed.
 }
 \examples{
 \dontrun{
