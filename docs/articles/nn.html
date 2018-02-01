@@ -96,7 +96,7 @@
 <p>To demonstrate this concept we fit a two layer Bayesian neural network to the MNIST dataset. The MNIST dataset consists of <span class="math inline">\(28 \times 28\)</span> pixel images of handwritten digits from zero to nine. The images are flattened to be a vector of length 784. The dataset is available as a standard dataset from the TensorFlow library, with a matrix of 55000 training vectors and 10000 test vectors, each with their corresponding labels. First, let’s construct the dataset and a testset. We assume you’ve read some of the earlier vignettes, so are familiar with how to do this. The MNIST dataset can be downloaded using the <code>sgmcmc</code> function <code>getDataset</code> as follows:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sgmcmc)
 <span class="co"># Download and load MNIST dataset</span>
-mnist =<span class="st"> </span><span class="kw"><a href="../reference/getDataset.html">getDataset</a></span>(<span class="st">"mnist"</span>)
+mnist =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/getDataset">getDataset</a></span>(<span class="st">"mnist"</span>)
 <span class="co"># Build dataset list and testset list</span>
 dataset =<span class="st"> </span><span class="kw">list</span>(<span class="st">"X"</span> =<span class="st"> </span>mnist$train$images, <span class="st">"y"</span> =<span class="st"> </span>mnist$train$labels)
 testset =<span class="st"> </span><span class="kw">list</span>(<span class="st">"X"</span> =<span class="st"> </span>mnist$test$images, <span class="st">"y"</span> =<span class="st"> </span>mnist$test$labels)</code></pre></div>
@@ -149,16 +149,16 @@ logPrior =<span class="st"> </span>function(params) {
 }</code></pre></div>
 <p>Now suppose we want to make inference using stochastic gradient Langevin dynamics (SGLD). If we do this in the normal way then we will most likely run out of memory when the function builds the array to store the output. So instead we just initialize an <code>sgld</code> object using <code>sgldSetup</code>. Similarly we could build an <code>sgldcv</code> object using <code>sgldcvSetup</code> or an <code>sgnht</code> object using <code>sgnhtSetup</code>. Then we can run the SGLD algorithm one step at a time and decide what to do with the output at each iteration ourselves. We’ll just set our stepsize to <code>1e-4</code> for this example. To make the results reproducible we’ll set the seed to 13.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stepsize =<span class="st"> </span><span class="fl">1e-4</span>
-sgld =<span class="st"> </span><span class="kw"><a href="../reference/sgldSetup.html">sgldSetup</a></span>(logLik, dataset, params, stepsize, <span class="dt">logPrior =</span> logPrior, 
+sgld =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/sgldSetup">sgldSetup</a></span>(logLik, dataset, params, stepsize, <span class="dt">logPrior =</span> logPrior, 
         <span class="dt">minibatchSize =</span> <span class="dv">500</span>, <span class="dt">seed =</span> <span class="dv">13</span>)</code></pre></div>
 <p>This <code>sgld</code> object is a type of <code>sgmcmc</code> object, which is basically just a list with a number of entries. The most important of these entries to us is called <code>params</code>, which holds a list, with the same names as you had in the <code>params</code> you fed to <code>sgld</code>, but this list contains <code>tf$Variable</code> objects. This is how you access the tensors which hold your current parameter values in the chain. For more details on the attributes of these objects, see the documentation for <code>sgldSetup</code>, <code>sgldcvSetup</code> etc.</p>
 <p>Now that we have created the <code>sgld</code> object, you want to initialise the TensorFlow graph and the <code>sgmcmc</code> algorithm you’ve chosen. If you are using a standard algorthm, this will just initialise the TensorFlow graph and all the tensors that were created. If you’re using an algorithm with control variates (e.g. <code>sgldcv</code>), then this will also find the MAP estimates of the parameter and calculate the full log posterior gradient at that point. The function we use to do this is <code>initSess</code> as follows</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sess =<span class="st"> </span><span class="kw"><a href="../reference/initSess.html">initSess</a></span>(sgld)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sess =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/initSess">initSess</a></span>(sgld)</code></pre></div>
 <p>The <code>sess</code> returned by <code>initSess</code> is the current TensorFlow session, which is needed to run the SGMCMC algorithm of choice, and to access any of the tensors you need, such as <code>sgld$params</code>.</p>
 <p>Now we have everything to run an SGLD algorithm step by step as follows</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">for (i in <span class="dv">1</span>:<span class="dv">10</span>^3L) {
-    <span class="kw"><a href="../reference/sgmcmcStep.html">sgmcmcStep</a></span>(sgld, sess)
-    currentState =<span class="st"> </span><span class="kw"><a href="../reference/getParams.html">getParams</a></span>(sgld, sess)
+    <span class="kw"><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/sgmcmcStep">sgmcmcStep</a></span>(sgld, sess)
+    currentState =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/getParams">getParams</a></span>(sgld, sess)
 }</code></pre></div>
 <p>Here the function <code>sgmcmcStep</code> will update <code>sgld$params</code> using a single update of SGLD, or whichever SGMCMC algorithm you chose. The function <code>getParams</code> will return a list of parameters as <code>R</code> objects rather than as tensors to make life easier for you.</p>
 <p>Our simple example is fine, but we really would like to calculate a Monte Carlo average of the parameters on the fly. Also with these large examples, they take a long time to run, so it’s useful to check how the algorithm is doing every once in a while. This is especially useful when tuning by trial and error as you can stop an algorithm early if it’s doing badly. This is why we let you declare the TensorFlow session yourself: it lets you create your custom tensors to print algorithm progress, or to create your own test functions to reduce the chain dimensionality (they have to be declared before the TensorFlow session starts).</p>
@@ -174,7 +174,7 @@ testPlaceholder[[<span class="st">"y"</span>]] =<span class="st"> </span>tf$<spa
 Ntest =<span class="st"> </span><span class="kw">as.double</span>(<span class="kw">nrow</span>(testset[[<span class="st">"X"</span>]]))
 logLoss =<span class="st"> </span>-<span class="st"> </span><span class="kw">logLik</span>(sgld$params, testPlaceholder) /<span class="st"> </span>Ntest</code></pre></div>
 <p>Now we’ll declare the TensorFlow session, and run the chain step by step, calculating an average parameter estimate and printing the log loss of the current state every 100 iterations</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sess =<span class="st"> </span><span class="kw"><a href="../reference/initSess.html">initSess</a></span>(sgld)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sess =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/initSess">initSess</a></span>(sgld)
 <span class="co"># Fill a feed dict with full test set (used to calculate log loss)</span>
 feedDict =<span class="st"> </span><span class="kw">dict</span>()
 feedDict[[testPlaceholder[[<span class="st">"X"</span>]]]] =<span class="st"> </span>testset[[<span class="st">"X"</span>]]
@@ -188,16 +188,16 @@ for (i in <span class="dv">1</span>:<span class="dv">10</span>^<span class="dv">
         progress =<span class="st"> </span>sess$<span class="kw">run</span>(logLoss, <span class="dt">feed_dict =</span> feedDict)
         <span class="kw">message</span>(<span class="kw">paste0</span>(i, <span class="st">"</span><span class="ch">\t</span><span class="st">"</span>, progress))
     }
-    <span class="kw"><a href="../reference/sgmcmcStep.html">sgmcmcStep</a></span>(sgld, sess)
+    <span class="kw"><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/sgmcmcStep">sgmcmcStep</a></span>(sgld, sess)
 }
 <span class="co"># Initialise Monte Carlo estimate using value after burn-in</span>
-avParams =<span class="st"> </span><span class="kw"><a href="../reference/getParams.html">getParams</a></span>(sgld, sess)
+avParams =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/getParams">getParams</a></span>(sgld, sess)
 <span class="co"># Run chain</span>
 <span class="kw">message</span>(<span class="st">"Running SGMCMC..."</span>)
 for (i in <span class="dv">1</span>:<span class="dv">10</span>^<span class="dv">4</span>) {
-    <span class="kw"><a href="../reference/sgmcmcStep.html">sgmcmcStep</a></span>(sgld, sess)
+    <span class="kw"><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/sgmcmcStep">sgmcmcStep</a></span>(sgld, sess)
     <span class="co"># Update av Params</span>
-    currentState =<span class="st"> </span><span class="kw"><a href="../reference/getParams.html">getParams</a></span>(sgld, sess)
+    currentState =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/getParams">getParams</a></span>(sgld, sess)
     for (paramName in <span class="kw">names</span>(avParams)) {
         avParams[[paramName]] =<span class="st"> </span>(avParams[[paramName]] *<span class="st"> </span>i +<span class="st"> </span>currentState[[paramName]]) /<span class="st"> </span>(i +<span class="st"> </span><span class="dv">1</span>)
     }

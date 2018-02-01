@@ -122,11 +122,11 @@
     <tr>
       <th>sgmcmc</th>
       <td><p>a stochastic gradient MCMC object returned by *Setup such as 
-<code><a href='sgldSetup.html'>sgldSetup</a></code>, <code><a href='sgldcvSetup.html'>sgldcvSetup</a></code> etc.</p></td>
+<code>sgldSetup</code>, <code>sgldcvSetup</code> etc.</p></td>
     </tr>
     <tr>
       <th>sess</th>
-      <td><p>a TensorFlow session created using <code><a href='initSess.html'>initSess</a></code></p></td>
+      <td><p>a TensorFlow session created using <code>initSess</code></p></td>
     </tr>
     </table>
     
@@ -147,14 +147,14 @@
     <span class='fu'>return</span>(<span class='no'>tf</span>$<span class='fu'>reduce_sum</span>(<span class='no'>distn</span>$<span class='fu'>log_prob</span>(<span class='no'>dataset</span>$<span class='no'>x</span>)))
 }
 <span class='no'>stepsize</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='st'>"theta"</span> <span class='kw'>=</span> <span class='fl'>1e-4</span>)
-<span class='no'>sgld</span> <span class='kw'>=</span> <span class='fu'><a href='sgldSetup.html'>sgldSetup</a></span>(<span class='no'>logLik</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>)
+<span class='no'>sgld</span> <span class='kw'>=</span> <span class='fu'>sgldSetup</span>(<span class='no'>logLik</span>, <span class='no'>dataset</span>, <span class='no'>params</span>, <span class='no'>stepsize</span>)
 <span class='no'>nIters</span> <span class='kw'>=</span> <span class='fl'>10</span>^<span class='fl'>4L</span>
 <span class='co'># Initialize location estimate</span>
 <span class='no'>locEstimate</span> <span class='kw'>=</span> <span class='fl'>0</span>
 <span class='co'># Initialise TensorFlow session</span>
-<span class='no'>sess</span> <span class='kw'>=</span> <span class='fu'><a href='initSess.html'>initSess</a></span>(<span class='no'>sgld</span>)
+<span class='no'>sess</span> <span class='kw'>=</span> <span class='fu'>initSess</span>(<span class='no'>sgld</span>)
 <span class='kw'>for</span> ( <span class='no'>i</span> <span class='kw'>in</span> <span class='fl'>1</span>:<span class='no'>nIters</span> ) {
-    <span class='fu'><a href='sgmcmcStep.html'>sgmcmcStep</a></span>(<span class='no'>sgld</span>, <span class='no'>sess</span>)
+    <span class='fu'>sgmcmcStep</span>(<span class='no'>sgld</span>, <span class='no'>sess</span>)
     <span class='no'>locEstimate</span> <span class='kw'>=</span> <span class='no'>locEstimate</span> + <span class='fl'>1</span> / <span class='no'>nIters</span> * <span class='fu'>getParams</span>(<span class='no'>sgld</span>, <span class='no'>sess</span>)$<span class='no'>theta</span>
 }
 <span class='co'># For more examples see vignettes</span>

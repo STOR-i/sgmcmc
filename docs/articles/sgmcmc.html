@@ -146,14 +146,14 @@ logPrior =<span class="st"> </span>function(params) {
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stepsize =<span class="st"> </span><span class="kw">list</span>( <span class="st">"theta = 1e-5"</span> )</code></pre></div>
 <p>A short hand is just to set <code>stepsize = 1e-5</code> which just sets the stepsize of each parameter to be <code>1e-5</code>. This shorthand can be used for any of the tuning constants.</p>
 <p>So to get <code>sgld</code> working for the multivariate Normal log-likelihood function we specified, and an uninformative uniform prior, we can simply run</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/sgld.html">sgld</a></span>( logLik, dataset, params, stepsize )</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sgld</span>( logLik, dataset, params, stepsize )</code></pre></div>
 <p>similarly for <code>sghmc</code> and <code>sgnht</code>.</p>
 <p>To use the Student-t prior we specified, and set a minibatch size of <code>500</code>, we’d use</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/sgld.html">sgld</a></span>( logLik, dataset, params, stepsize, <span class="dt">logPrior =</span> logPrior, <span class="dt">minibatchSize =</span> <span class="dv">500</span> )</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sgld</span>( logLik, dataset, params, stepsize, <span class="dt">logPrior =</span> logPrior, <span class="dt">minibatchSize =</span> <span class="dv">500</span> )</code></pre></div>
 <p>For more details of the other optional arguments see the main documentation in the <a href="https://stor-i.github.io/sgmcmc/reference/index.html">reference</a>.</p>
 <p>All of the <a href="https://arxiv.org/pdf/1706.05439.pdf">control variate methods</a> <code>sgldcv</code>, <code>sghmccv</code> and <code>sgnhtcv</code> require an extra input <code>optStepsize</code>, which is the stepsize tuning constant for the initial optimization to find the MAP estimates. This argument is simply a small numeric value, such as <code>0.1</code>, and may require some tuning, which we talk about below. To run <code>sgldcv</code> on the multivariate Normal model, with specified prior we’d use</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">optStepsize =<span class="st"> </span><span class="fl">0.1</span>
-<span class="kw"><a href="../reference/sgldcv.html">sgldcv</a></span>( logLik, dataset, params, stepsize, optStepsize, <span class="dt">logPrior =</span> logPrior, <span class="dt">minibatchSize =</span> <span class="dv">500</span> )</code></pre></div>
+<span class="kw">sgldcv</span>( logLik, dataset, params, stepsize, optStepsize, <span class="dt">logPrior =</span> logPrior, <span class="dt">minibatchSize =</span> <span class="dv">500</span> )</code></pre></div>
 <p>similar for <code>sghmccv</code> and <code>sgnhtcv</code>.</p>
 <p>Most of the time, parameters need tuning, we suggest doing this using cross validation. You can roughly check the algorithm is converging by inspection by checking that the <code>Log-posterior estimate</code> output by the algorithm settles down eventually (it should decrease at first unless the chain converges very quickly).</p>
 </div>

@@ -128,7 +128,7 @@ dataset =<span class="st"> </span><span class="kw">list</span>(<span class="st">
 n =<span class="st"> </span><span class="dv">100</span></code></pre></div>
 <p>The stepsize parameters may require a bit of tuning before you get good results. The shorthand <code>stepsize = 1e-5</code> can be used, which would set the stepsize of all parameters to be <code>1e-5</code>.</p>
 <p>Now we can run our SGLD algorithm using the <code>sgmcmc</code> function <code>sgld</code>, which returns a list of Markov chains for each parameter as output. To make the results reproducible we’ll set the seed to 13. Use the argument <code>verbose = FALSE</code> to hide the output of the function</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chains =<span class="st"> </span><span class="kw"><a href="../reference/sgld.html">sgld</a></span>( logLik, dataset, params, stepsize, <span class="dt">logPrior =</span> logPrior, <span class="dt">minibatchSize =</span> n, 
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chains =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/sgld">sgld</a></span>( logLik, dataset, params, stepsize, <span class="dt">logPrior =</span> logPrior, <span class="dt">minibatchSize =</span> n, 
               <span class="dt">verbose =</span> <span class="ot">FALSE</span>, <span class="dt">seed =</span> <span class="dv">13</span> )</code></pre></div>
 <p>Finally we’ll plot the results after removing burn-in</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
