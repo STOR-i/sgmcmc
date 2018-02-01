@@ -39,16 +39,35 @@ getGradients.sgmcmc = function( sgmcmc ) {
     return( estLogPostGrads )
 }
 
-# Get gradient estimates for control variate methods
+# Get gradient estimates for control variate methods, handle IndexedSlices gradients gracefully
 getGradients.sgmcmccv = function( sgmcmcCV ) {
     estLogPostGrads = list()
     for ( pname in names( sgmcmcCV$params ) ) {
         gradCurr = tf$gradients( sgmcmcCV$estLogPost, sgmcmcCV$params[[pname]] )[[1]]
+        isSparse = gradIsIndexed(gradCurr)
         optGradCurr = tf$gradients( sgmcmcCV$estLogPostOpt, sgmcmcCV$paramsOpt[[pname]] )[[1]]
         optGradFull = sgmcmcCV$logPostOptGrad[[pname]]
-        estLogPostGrads[[pname]] = optGradFull - optGradCurr + gradCurr
+        if (isSparse) {
+            # Get the current gradient estimate but ensure to keep it as IndexedSlices object
+            fullGradCurr = tf$gather(optGradFull, gradCurr$indices)
+            currentVals = fullGradCurr - optGradCurr$values + gradCurr$values
+            estLogPostGrads[[pname]] = tf$IndexedSlices(currentVals, gradCurr$indices)
+        } else {
+            estLogPostGrads[[pname]] = optGradFull - optGradCurr + gradCurr
+        }
     }
     return( estLogPostGrads )
+}
+
+# Check if gradCurr is IndexedSlices object for minibatched parameters
+gradIsIndexed = function(grad) {
+    isSparse = tryCatch({
+        temp = grad$indices
+        TRUE
+    }, error = function (e) { 
+        return(FALSE)
+    })
+    return(isSparse)
 }
 
 # Calculate size of dataset

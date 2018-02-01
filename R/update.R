@@ -47,16 +47,20 @@ sgmcmcStep.sgld = function( sgmcmc, sess ) {
 # Method for sghmc or sghmccv objects
 #' @export
 sgmcmcStep.sghmc = function( sgmcmc, sess ) {
-    # Refresh momentum
-    for ( step in sgmcmc$dynamics$refresh ) {
-        sess$run( step )
+    # Refresh momentum at indexes required, preload data feed
+    feedCurr = list()
+    for ( l in 1:sgmcmc$L ) {
+        # Sample minibatch for trajectory l
+        feedCurr[[l]] = dataFeed( sgmcmc$data, sgmcmc$placeholders, sgmcmc$n )
+        for ( step in sgmcmc$dynamics$refresh ) {
+            sess$run( step, feed_dict = feedCurr[[l]] )
+        }
     }
     for ( l in 1:sgmcmc$L ) {
         # Sample minibatch of data
-        feedCurr = dataFeed( sgmcmc$data, sgmcmc$placeholders, sgmcmc$n )
         for ( pname in names( sgmcmc$params ) ) {
-            sess$run( sgmcmc$dynamics$nu[[pname]], feed_dict = feedCurr )
-            sess$run( sgmcmc$dynamics$theta[[pname]], feed_dict = feedCurr )
+            sess$run( sgmcmc$dynamics$nu[[pname]], feed_dict = feedCurr[[l]] )
+            sess$run( sgmcmc$dynamics$theta[[pname]], feed_dict = feedCurr[[l]] )
         }
     }
 }
