@@ -12,3 +12,10 @@ before_install:
 - sudo pip install -U pip
 - R -e "install.packages('tensorflow', repos='http://cran.us.r-project.org')"  
 - R -e "tensorflow::install_tensorflow()"  
+
+install:
+- R -e 'devtools::install_deps(dep = T)'
+
+script:
+- R CMD build .
+- travis_wait 30 R CMD check *tar.gz # Additional wait time, building vignettes takes a while
