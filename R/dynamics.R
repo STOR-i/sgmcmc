@@ -134,9 +134,9 @@ checkSparse = function(grad) {
 # Declare injected noise
 getNoise = function(gathered, grad, epsilon, seed) {
     if (gathered) {
-        noise = sqrt(2 * epsilon) * tf$random_normal(grad$values$get_shape(), seed = seed)
+        noise = sqrt(2 * epsilon) * tf$random_normal(tf$shape(grad$values), seed = seed)
     } else {
-        noise = sqrt(2 * epsilon) * tf$random_normal(grad$get_shape(), seed = seed)
+        noise = sqrt(2 * epsilon) * tf$random_normal(tf$shape(grad), seed = seed)
     }
     return(noise)
 }

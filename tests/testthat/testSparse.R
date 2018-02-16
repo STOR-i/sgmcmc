@@ -39,4 +39,7 @@ test_that("Check sparsity works", {
     for (method in c("sgldcv", "sghmccv", "sgnhtcv")) {
         output = do.call(method, argsStd)
     }
+    # We're just checking valid run behaviour
+    # Put this dummy expect to stop testthat skipping 'empty test'
+    expect_that(T, is_true())
 } )
