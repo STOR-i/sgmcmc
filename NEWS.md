@@ -1,3 +1,7 @@
+# sgmcmc 0.2.1.9000
+
+* Added better support for sparse variables and minibatching parameters.
+
 # sgmcmc 0.2.0
 
 * Added the ability to run algorithms step by step. This allows custom storage of parameters, useful when the full chain does not fit into memory!
