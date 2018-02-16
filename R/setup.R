@@ -169,5 +169,5 @@ convertList = function( tuningConst, params ) {
 
 # If tf$float64 error encountered, provide a more useful message
 throwFloat64Error = function( e ) {
-    stop(paste0("Problem building log posterior estimate from supplied logLik and logPrior functions. This can sometimes be due to constants declared in these functions resulting in objects of type tf$float64. Full output below should make it clear if this is the issue.\n\n", e))
+    stop(paste0("Problem building log posterior estimate from supplied logLik and logPrior functions. This is usually due to one of two things: a problem with the TensorFlow code used to declare logLik or logPrior functions; or that some constants declared in this function are read as type tf$float64. Maybe try to specify all constants as tf$float32. Full TensorFlow output below should make it clear if the issue is a float64 issue, or just a generic TensorFlow code issue.\n\n", e))
 }
