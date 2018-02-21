@@ -1,4 +1,4 @@
-# sgmcmc 0.2.1.9000
+# sgmcmc 0.2.1
 
 * Added better support for sparse variables and minibatching parameters.
 
