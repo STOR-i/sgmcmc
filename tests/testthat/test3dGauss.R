@@ -20,12 +20,12 @@ declareConsts = function() {
 logLik = function( params, data ) {
     Sigma = matrix( c( 1, 0.3, 0.5, 0.3, 1, 0.2, 0.5, 0.2, 1 ), ncol = 3 )
     Sigma = tf$constant( Sigma, dtype = tf$float32 )
-    baseDist = tf$contrib$distributions$MultivariateNormalFullCovariance( params$theta, Sigma )
+    baseDist = tf$distributions$MultivariateNormalFullCovariance( params$theta, Sigma )
     return( tf$reduce_sum( baseDist$log_prob( data$X ) ) )
 }
 
 logPrior = function( params ) {
-    baseDist = tf$contrib$distributions$Normal( 0, 5 )
+    baseDist = tf$distributions$Normal( 0, 5 )
     return( tf$reduce_sum( baseDist$log_prob( params$theta ) ) )
 }
 

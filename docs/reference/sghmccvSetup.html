@@ -112,7 +112,7 @@
 
     
     <p>Creates an sghmccv (stochastic gradient Hamiltonian Monte Carlo with Control Variates) object 
- which can be passed to <code>sgmcmcStep</code> to simulate from 1 step of sghmc, using a 
+ which can be passed to <code><a href='sgmcmcStep.html'>sgmcmcStep</a></code> to simulate from 1 step of sghmc, using a 
  gradient estimate with control variates for the posterior defined by logLik and logPrior.
  This allows the user to code the loop themselves, as in many standard 
  TensorFlow procedures (such as optimization). Which means they do not need to store 
@@ -198,7 +198,7 @@ does not declare a seed for the TensorFlow session.</p></td>
 
     <p>The function returns an 'sghmccv' object, a type of sgmcmc object. 
  Which is used to pass the required information about the current model to the 
- <code>sgmcmcStep</code> function. The function <code>sgmcmcStep</code> runs one 
+ <code><a href='sgmcmcStep.html'>sgmcmcStep</a></code> function. The function <code><a href='sgmcmcStep.html'>sgmcmcStep</a></code> runs one 
  step of sghmc with a gradient estimate that uses control variates. 
  Attributes of the sghmccv object you'll probably find most useful are:</p><dl class='dl-horizontal'>
 <dt>params</dt><dd><p>list of tf$Variables with the same names as the params list passed to
@@ -215,12 +215,12 @@ does not declare a seed for the TensorFlow session.</p></td>
 <dt>data</dt><dd><p>dataset as passed to <code>sghmccvSetup</code>.</p></dd>
 <dt>n</dt><dd><p>minibatchSize as passed to <code>sghmccvSetup</code>.</p></dd>
 <dt>placeholders</dt><dd><p>list of tf$placeholder objects with the same names as dataset
- used to feed minibatches of data to <code>sgmcmcStep</code>. These are also the objects
+ used to feed minibatches of data to <code><a href='sgmcmcStep.html'>sgmcmcStep</a></code>. These are also the objects
  that gets fed to the dataset argument of the logLik and logPrior functions you declared.</p></dd>
 <dt>stepsize</dt><dd><p>list of stepsizes as passed to <code>sghmccvSetup</code></p></dd>
-<dt>alpha</dt><dd><p>list of alpha tuning parameters as passed to <code>sghmcSetup</code>.</p></dd>
-<dt>L</dt><dd><p>integer trajectory parameter as passed to <code>sghmcSetup</code>.</p></dd>
-<dt>dynamics</dt><dd><p>a list of TensorFlow steps that are evaluated by <code>sgmcmcStep</code>.</p></dd>
+<dt>alpha</dt><dd><p>list of alpha tuning parameters as passed to <code><a href='sghmcSetup.html'>sghmcSetup</a></code>.</p></dd>
+<dt>L</dt><dd><p>integer trajectory parameter as passed to <code><a href='sghmcSetup.html'>sghmcSetup</a></code>.</p></dd>
+<dt>dynamics</dt><dd><p>a list of TensorFlow steps that are evaluated by <code><a href='sgmcmcStep.html'>sgmcmcStep</a></code>.</p></dd>
 <dt>estLogPostOpt</dt><dd><p>a TensorFlow tensor relying on <code>paramsOpt</code> and <code>placeholders</code> which
  estimates the log posterior at the optimal parameters. Used in the initial optimization step.</p></dd>
 <dt>fullLogPostOpt</dt><dd><p>a TensorFlow tensor used in the calculation of the full log posterior
@@ -246,10 +246,10 @@ does not declare a seed for the TensorFlow session.</p></td>
 <span class='co'># Initialize location estimate</span>
 <span class='no'>locEstimate</span> <span class='kw'>=</span> <span class='fl'>0</span>
 <span class='co'># Initialise TensorFlow session</span>
-<span class='no'>sess</span> <span class='kw'>=</span> <span class='fu'>initSess</span>(<span class='no'>sghmccv</span>)
+<span class='no'>sess</span> <span class='kw'>=</span> <span class='fu'><a href='initSess.html'>initSess</a></span>(<span class='no'>sghmccv</span>)
 <span class='kw'>for</span> ( <span class='no'>i</span> <span class='kw'>in</span> <span class='fl'>1</span>:<span class='no'>nIters</span> ) {
-    <span class='fu'>sgmcmcStep</span>(<span class='no'>sghmccv</span>, <span class='no'>sess</span>)
-    <span class='no'>locEstimate</span> <span class='kw'>=</span> <span class='no'>locEstimate</span> + <span class='fl'>1</span> / <span class='no'>nIters</span> * <span class='fu'>getParams</span>(<span class='no'>sghmccv</span>, <span class='no'>sess</span>)$<span class='no'>theta</span>
+    <span class='fu'><a href='sgmcmcStep.html'>sgmcmcStep</a></span>(<span class='no'>sghmccv</span>, <span class='no'>sess</span>)
+    <span class='no'>locEstimate</span> <span class='kw'>=</span> <span class='no'>locEstimate</span> + <span class='fl'>1</span> / <span class='no'>nIters</span> * <span class='fu'><a href='getParams.html'>getParams</a></span>(<span class='no'>sghmccv</span>, <span class='no'>sess</span>)$<span class='no'>theta</span>
 }
 <span class='co'># For more examples see vignettes</span>
 <span class='co'># }</span></pre>

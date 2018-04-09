@@ -35,6 +35,8 @@ params = list("theta1" = rep(0, 3), "theta2" = rep(0, 3))
 
 The log-likelihood function is specified as a function of the `dataset` and `params`, which have the same names as the lists you just specified. The only difference is that the objects inside the lists will have automatically been converted to TensorFlow objects for you. The `dataset` list will contain TensorFlow placeholders. The `params` list will contain TensorFlow variables. The `logLik` function should be a function that takes these lists as input and returns what the log-likelihood value should be given the current parameter and data values. It should do this using TensorFlow operations. More details about how TensorFlow works in `R` can be found [here](https://tensorflow.rstudio.com/).
 
+Specifying the `logLik` and `logPrior` functions regularly requires specifying specific distributions. `TensorFlow` already has a number of distributions implemented, located at `tf$distributions` and `tf$contrib$distributions`. In the interest of cleanliness we have copied all the distributions in `tf$contrib$distributions` into `tf$distributions`, which gives you easier access to all the distributions implemented in TensorFlow. The module `tf$contrib$distributions` will still work as expected for compatability.
+
 The log-prior density is specified in exactly the same way except that the function should only take `params` as input, as a prior should be independent of the dataset. You do not have to specify the prior at all, and this leads to the algorithm using a uniform, uninformative prior.
 
 Suppose we want to simulate from the mean of a multivariate Normal density with each component of the mean having a Student-T prior, we would specify this as follows
@@ -49,7 +51,7 @@ params = list("theta" = rnorm(2))
 logLik = function(params, dataset) {
     # Declare distribution, assuming Sigma known and constant
     SigmaDiag = c( 1, 1 )
-    distn = tf$contrib$distributions$MultivariateNormalDiag(params$theta, SigmaDiag)
+    distn = tf$distributions$MultivariateNormalDiag(params$theta, SigmaDiag)
     # Return sum of log pdf
     return(tf$reduce_sum(distn$log_prob(dataset$X)))
 }
@@ -57,7 +59,7 @@ logLik = function(params, dataset) {
 # Declare log prior
 logPrior = function(params) {
     # Declare prior distribution
-    distn = tf$contrib$distributions$StudentT(3, 0, 1)
+    distn = tf$distributions$StudentT(3, 0, 1)
     # Apply log prior componentwise and return sum
     return(tf$reduce_sum(distn$log_prob(params$theta)))
 }

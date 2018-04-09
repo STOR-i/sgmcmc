@@ -1,6 +1,6 @@
 logLik = function(params, dataset) {
     uCurr = tf$gather(params$u, tf$to_int32((dataset$Group - 1)))
-    uDistn = tf$contrib$distributions$Normal(uCurr, 1)
+    uDistn = tf$distributions$Normal(uCurr, 1)
     logLik = tf$reduce_sum(uDistn$log_prob(dataset$X))
     return(logLik)
 }

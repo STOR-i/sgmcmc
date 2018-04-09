@@ -16,7 +16,7 @@ declareConsts = function() {
 
 logLik = function( params, dataset ) {
     # Declare distribution of each observation
-    baseDist = tf$contrib$distributions$MultivariateNormalFullCovariance( c(0, 0), params$Sigma )
+    baseDist = tf$distributions$MultivariateNormalFullCovariance( c(0, 0), params$Sigma )
     # Declare log likelihood function and return
     logLik = tf$reduce_sum( baseDist$log_prob( dataset$X ) )
     return( logLik )
@@ -24,7 +24,7 @@ logLik = function( params, dataset ) {
 
 logPrior = function( params ) {
     Sigma0 = tf$constant( diag(2), dtype = tf$float32 )
-    baseDist = tf$contrib$distributions$WishartFull( 2, Sigma0 )
+    baseDist = tf$distributions$WishartFull( 2, Sigma0 )
     logPrior = baseDist$log_prob( params$Sigma )
     return( logPrior )
 }
