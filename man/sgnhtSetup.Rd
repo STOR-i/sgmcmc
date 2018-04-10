@@ -72,7 +72,7 @@ Creates an sgnht (stochastic gradient Nose Hoover Thermostat) object which can b
 dataset = list("x" = rnorm(1000))
 params = list("theta" = 0)
 logLik = function(params, dataset) {
-    distn = tf$contrib$distributions$Normal(params$theta, 1)
+    distn = tf$distributions$Normal(params$theta, 1)
     return(tf$reduce_sum(distn$log_prob(dataset$x)))
 }
 stepsize = list("theta" = 1e-4)
