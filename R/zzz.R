@@ -12,7 +12,6 @@
         } else {
             # If tf$distributions does not exist, create it!
             tf$distributions = list()
-            class(tf$distributions) = "module"
             current_distns = NULL
         }
         current_distns <- names(tf$distributions)
