@@ -12,8 +12,9 @@ Description: Provides functions that performs popular stochastic gradient Markov
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.0), tensorflow
-Imports: utils
-SystemRequirements: TensorFlow (https://www.tensorflow.org/)
+Imports: utils, reticulate
+SystemRequirements: TensorFlow (https://www.tensorflow.org/),
+    TensorFlow Probability (https://www.tensorflow.org/probability/)
 Suggests:
     testthat,
     MASS,
