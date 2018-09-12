@@ -141,7 +141,7 @@
 <span class='no'>dataset</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='st'>"x"</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='fl'>1000</span>))
 <span class='no'>params</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='st'>"theta"</span> <span class='kw'>=</span> <span class='fl'>0</span>)
 <span class='no'>logLik</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>params</span>, <span class='no'>dataset</span>) {
-    <span class='no'>distn</span> <span class='kw'>=</span> <span class='no'>tf</span>$<span class='no'>contrib</span>$<span class='no'>distributions</span>$<span class='fu'>Normal</span>(<span class='no'>params</span>$<span class='no'>theta</span>, <span class='fl'>1</span>)
+    <span class='no'>distn</span> <span class='kw'>=</span> <span class='no'>tf</span>$<span class='no'>distributions</span>$<span class='fu'>Normal</span>(<span class='no'>params</span>$<span class='no'>theta</span>, <span class='fl'>1</span>)
     <span class='fu'>return</span>(<span class='no'>tf</span>$<span class='fu'>reduce_sum</span>(<span class='no'>distn</span>$<span class='fu'>log_prob</span>(<span class='no'>dataset</span>$<span class='no'>x</span>)))
 }
 <span class='no'>stepsize</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='st'>"theta"</span> <span class='kw'>=</span> <span class='fl'>1e-4</span>)

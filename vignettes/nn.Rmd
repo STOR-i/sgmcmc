@@ -53,7 +53,7 @@ params$lambdaa = rgamma(1, 1)
 params$lambdab = rgamma(1, 1)
 ```
 
-Now let's declare the `logLik` and `logPrior` functions. Remember that for ease of use, all distribution functions located in `tf$contrib$distributions` have been copied to `tf$distributions` as well (for more details see the [Get Started](https://stor-i.github.io/sgmcmc///articles/sgmcmc.html) page).
+Now let's declare the `logLik` and `logPrior` functions. Remember that for ease of use, all distribution functions implemented in the [`TensorFlow Probability` package](https://www.tensorflow.org/probability/api_docs/python/tfp/distributions) are located at `tf$distributions` (for more details see the [Get Started](https://stor-i.github.io/sgmcmc///articles/sgmcmc.html) page).
 ```{r}
 logLik = function(params, dataset) {
     # Calculate estimated probabilities

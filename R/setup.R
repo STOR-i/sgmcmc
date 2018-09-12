@@ -1,5 +1,7 @@
 # Create generic sgmcmc object
 createSGMCMC = function( logLik, logPrior, dataset, params, stepsize, minibatchSize, seed ) { 
+    # First check tf installation using tf_status. Throw error if it isn't installed.
+    checkTFInstall()
     # Set seed if required, TensorFlow seeds set inside dynamics
     if ( !is.null( seed ) ) {
         tf$set_random_seed(seed)
@@ -16,7 +18,7 @@ createSGMCMC = function( logLik, logPrior, dataset, params, stepsize, minibatchS
     # Check for tf$float64 errors (we only use tf$float32), if so throw a more explanatory error
     estLogPost = tryCatch({ 
         setupEstLogPost( logLik, logPrior, paramstf, placeholders, N, minibatchSize )
-    }, error = function ( e ) throwFloat64Error( e ) )
+    }, error = function ( e ) getPosteriorBuildError( e ) )
     # Check stepsize tuning constants are in list format
     stepsize = convertList( stepsize, params )
     # Declare sgmcmc object as list, return for custom tuning constants to be added by calling method
@@ -165,9 +167,4 @@ convertList = function( tuningConst, params ) {
         convertedConsts[[pname]] = tuningConst
     }
     return( convertedConsts )
-}
-
-# If tf$float64 error encountered, provide a more useful message
-throwFloat64Error = function( e ) {
-    stop(paste0("Problem building log posterior estimate from supplied logLik and logPrior functions. This is usually due to one of two things: a problem with the TensorFlow code used to declare logLik or logPrior functions; or that some constants declared in this function are read as type tf$float64. Maybe try to specify all constants as tf$float32. Full TensorFlow output below should make it clear if the issue is a float64 issue, or just a generic TensorFlow code issue.\n\n", e))
 }

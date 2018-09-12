@@ -88,16 +88,17 @@
 <a href="#sgmcmc-a-stochastic-gradient-mcmc-package-for-r" class="anchor"></a>sgmcmc: a stochastic gradient MCMC package for R</h1></div>
 
 <p><code>sgmcmc</code> implements popular stochastic gradient Markov chain Monte Carlo (SGMCMC) methods including <a href="http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf">stochastic gradient Langevin dynamics (SGLD)</a>, <a href="https://arxiv.org/pdf/1402.4102v2.pdf">stochastic gradient Hamiltonian Monte Carlo (SGHMC)</a> and <a href="http://papers.nips.cc/paper/5592-bayesian-sampling-using-stochastic-gradient-thermostats.pdf">stochastic gradient Nosé-Hoover thermostat (SGNHT)</a>. The package uses automatic differentiation, so all the differentiation needed for the methods is calculated automatically. Control variate methods can be used in order to improve the efficiency of the methods as proposed in the <a href="https://arxiv.org/pdf/1706.05439.pdf">recent publication</a>.</p>
-<p>The package is built on top of the <a href="https://tensorflow.rstudio.com/">TensorFlow library for R</a>, which has a lot of support for statistical distributions and operations, which allows a large class of posteriors to be built. For more details can be found at the <a href="https://tensorflow.rstudio.com/">TensorFlow R library webpage</a>, also see the <a href="https://www.tensorflow.org/api_docs/">TensorFlow API</a> for full documentation.</p>
+<p>The package is built on top of the <a href="https://tensorflow.rstudio.com/">TensorFlow library for R</a>, which has a lot of support for statistical distributions and operations, which allows a large class of posteriors to be built. More details can be found at the <a href="https://tensorflow.rstudio.com/">TensorFlow R library webpage</a>, also see the <a href="https://www.tensorflow.org/api_docs/">TensorFlow API</a> for full documentation.</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p><code>sgmcmc</code> requires <a href="https://github.com/rstudio/tensorflow">TensorFlow for R</a> to be installed, which requires packages that can’t be automatically built by <code>R</code>, so has a few steps:</p>
 <ul>
-<li>Install <a href="https://github.com/rstudio/tensorflow">TensorFlow for R</a>, first run <code>install.packages("tensorflow")</code>, then after run <code><a href="http://www.rdocumentation.org/packages/tensorflow/topics/install_tensorflow">tensorflow::install_tensorflow()</a></code>.</li>
-<li>Now run <code>install.packages("sgmcmc")</code>.</li>
+<li>Install <a href="https://github.com/rstudio/tensorflow">TensorFlow for R</a>, run <code>install.packages("tensorflow")</code>.</li>
+<li>Install the <code>sgmcmc</code> R package: <code>install.packages("sgmcmc")</code>.</li>
+<li>Install the required python packages (including TensorFlow and TensorFlow Probability) by running: <code><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/installTF">sgmcmc::installTF()</a></code>.</li>
 </ul>
-<p>The TensorFlow API changes a lot, so it’s best to make sure your TensorFlow for python installation is up to date.</p>
+<p>If you already have the TensorFlow and TensorFlow probability packages installed, then this should be autodetected by the package and you can skip the final step. Make sure these are up to date though, as the TensorFlow API is under active development and still changes quite regularly.</p>
 </div>
 <div id="documentation" class="section level2">
 <h2 class="hasAnchor">

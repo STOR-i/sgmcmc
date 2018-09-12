@@ -124,7 +124,7 @@ params$lambdaA =<span class="st"> </span><span class="kw">rgamma</span>(<span cl
 params$lambdaB =<span class="st"> </span><span class="kw">rgamma</span>(<span class="dv">1</span>, <span class="dv">1</span>)
 params$lambdaa =<span class="st"> </span><span class="kw">rgamma</span>(<span class="dv">1</span>, <span class="dv">1</span>)
 params$lambdab =<span class="st"> </span><span class="kw">rgamma</span>(<span class="dv">1</span>, <span class="dv">1</span>)</code></pre></div>
-<p>Now let’s declare the <code>logLik</code> and <code>logPrior</code> functions. Remember that for ease of use, all distribution functions located in <code>tf$contrib$distributions</code> have been copied to <code>tf$distributions</code> as well (for more details see the <a href="https://stor-i.github.io/sgmcmc///articles/sgmcmc.html">Get Started</a> page).</p>
+<p>Now let’s declare the <code>logLik</code> and <code>logPrior</code> functions. Remember that for ease of use, all distribution functions implemented in the <a href="https://www.tensorflow.org/probability/api_docs/python/tfp/distributions"><code>TensorFlow Probability</code> package</a> are located at <code>tf$distributions</code> (for more details see the <a href="https://stor-i.github.io/sgmcmc///articles/sgmcmc.html">Get Started</a> page).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">logLik =<span class="st"> </span>function(params, dataset) {
     <span class="co"># Calculate estimated probabilities</span>
     beta =<span class="st"> </span>tf$nn$<span class="kw">softmax</span>(tf$<span class="kw">matmul</span>(dataset$X, params$B) +<span class="st"> </span>params$b)

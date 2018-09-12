@@ -37,6 +37,10 @@ reference:
         - initSess
         - sgmcmcStep
         - getParams
+  - title: "Installation"
+    desc: "Install python packages depended on by sgmcmc, TensorFlow and TensorFlow Probability."
+    contents:
+        - installTF
   - title: "Datasets"
     desc: "Download and load datasets used in the examples and vignettes"
     contents:

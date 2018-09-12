@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>All news • sgmcmc</title>
+<title>Install TensorFlow and TensorFlow Probability — installTF • sgmcmc</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -37,7 +37,7 @@
   </head>
 
   <body>
-    <div class="container template-news">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -105,58 +105,26 @@
       </header>
 
       <div class="row">
-
-  <div class="col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Change log <small>All releases</small></h1>
+    <h1>Install TensorFlow and TensorFlow Probability</h1>
     </div>
 
-    <div class="contents">
-    <div id="sgmcmc-0-2-2" class="section level1">
-<h1 class="hasAnchor">
-<a href="#sgmcmc-0-2-2" class="anchor"></a>sgmcmc 0.2.2</h1>
-<ul>
-<li>Made loading TensorFlow distribution objects cleaner.</li>
-</ul>
-</div>
-    <div id="sgmcmc-0-2-1" class="section level1">
-<h1 class="hasAnchor">
-<a href="#sgmcmc-0-2-1" class="anchor"></a>sgmcmc 0.2.1</h1>
-<ul>
-<li>Added better support for sparse variables and minibatching parameters.</li>
-</ul>
-</div>
-    <div id="sgmcmc-0-2-0" class="section level1">
-<h1 class="hasAnchor">
-<a href="#sgmcmc-0-2-0" class="anchor"></a>sgmcmc 0.2.0</h1>
-<ul>
-<li>Added the ability to run algorithms step by step. This allows custom storage of parameters, useful when the full chain does not fit into memory!</li>
-<li>Added new vignette to demonstrate step by step functionality – a Bayesian neural network model.</li>
-<li>Changed optimizer to TensorFlow SGDOptimizer for control variate methods.</li>
-</ul>
-</div>
-    <div id="sgmcmc-0-1-0" class="section level1">
-<h1 class="hasAnchor">
-<a href="#sgmcmc-0-1-0" class="anchor"></a>sgmcmc 0.1.0</h1>
-<ul>
-<li>Initial release.</li>
-</ul>
-</div>
-    </div>
+    
+    <p>Install the python packages required by sgmcmc, including TensorFlow and TensorFlow probability.
+ Uses the tensorflow::install_tensorflow function.</p>
+    
+
+    <pre class="usage"><span class='fu'>installTF</span>()</pre>
+        
+
   </div>
-
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <div id="tocnav">
-      <h2>Contents</h2>
-      <ul class="nav nav-pills nav-stacked">
-        <li><a href="#sgmcmc-0-2-2">0.2.2</a></li>
-        <li><a href="#sgmcmc-0-2-1">0.2.1</a></li>
-        <li><a href="#sgmcmc-0-2-0">0.2.0</a></li>
-        <li><a href="#sgmcmc-0-1-0">0.1.0</a></li>
-      </ul>
-    </div>
-  </div>
+    <h2>Contents</h2>
+    <ul class="nav nav-pills nav-stacked">
+                </ul>
 
+  </div>
 </div>
 
       <footer>

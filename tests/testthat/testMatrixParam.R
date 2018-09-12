@@ -24,7 +24,7 @@ logLik = function( params, dataset ) {
 
 logPrior = function( params ) {
     Sigma0 = tf$constant( diag(2), dtype = tf$float32 )
-    baseDist = tf$distributions$WishartFull( 2, Sigma0 )
+    baseDist = tf$distributions$Wishart( 2, scale = Sigma0 )
     logPrior = baseDist$log_prob( params$Sigma )
     return( logPrior )
 }
