@@ -1,3 +1,7 @@
+# sgmcmc 0.2.3.9000
+
+* Added support for TensorFlow Probability distributions.
+
 # sgmcmc 0.2.2
 
 * Made loading TensorFlow distribution objects cleaner.
