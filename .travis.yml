@@ -12,12 +12,10 @@ before_install:
 - sudo pip install -U pip
 - R -e "install.packages('devtools')"
 - R -e "install.packages('tensorflow', repos='http://cran.us.r-project.org')"  
-- R -e "tensorflow::install_tensorflow()"  
 
 install:
-- R -e 'devtools::install_deps(dep = T)'
-- R -e 'devtools::install()'
-- R -e 'sgmcmc::InstallTF()'
+- R -e "devtools::install()"
+- R -e "sgmcmc::installTF()"
 
 script:
 - travis_wait 30 R CMD build . # Additional wait time, building vignettes takes a while
