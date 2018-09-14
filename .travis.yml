@@ -11,9 +11,9 @@ before_install:
 - sudo apt-get install python-pip python-virtualenv
 - sudo pip install -U pip
 - R -e "install.packages('devtools')"
-- R -e "install.packages('tensorflow', repos='http://cran.us.r-project.org')"  
 
 install:
+- R -e 'devtools::install_deps(dep = T)'
 - R -e "devtools::install()"
 - R -e "sgmcmc::installTF()"
 
