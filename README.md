@@ -10,7 +10,6 @@ The package is built on top of the [TensorFlow library for R](https://tensorflow
 ## Installation
 
 `sgmcmc` requires [TensorFlow for R](https://github.com/rstudio/tensorflow) to be installed, which requires packages that can't be automatically built by `R`, so has a few steps:
-- Install [TensorFlow for R](https://github.com/rstudio/tensorflow), run `install.packages("tensorflow")`.
 - Install the `sgmcmc` R package: `install.packages("sgmcmc")`.
 - Install the required python packages (including TensorFlow and TensorFlow Probability) by running: `sgmcmc::installTF()`.
 
