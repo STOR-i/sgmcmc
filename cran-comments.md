@@ -10,7 +10,7 @@ TensorFlow package not properly installed with `tensorflow::install_tensorflow()
 There were no ERRORs, WARNINGs or NOTEs.
 
 ## Downstream dependencies
-There are two downstream dependency: tensorflow, reticulate.
+There are two downstream dependencies: tensorflow, reticulate.
 
 * tensorflow: R CMD check: 0 ERRORs | 0 WARNING | 0 NOTE
 * reticulate: R CMD check: 0 ERRORs | 0 WARNING | 0 NOTE
