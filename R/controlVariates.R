@@ -66,7 +66,7 @@ setupFullLogPost = function( logLik, logPrior, params, placeholders ) {
 setupFullPlaceholders = function( data ) {
     tfPlaceholders = list()
     for ( dname in names( data ) ) {
-        current_size = dim( data[[dname]] )
+        current_size = getShape( data[[dname]] )
         tfPlaceholders[[dname]] = tf$placeholder( tf$float32, current_size )
     }
     return( tfPlaceholders )
