@@ -7,6 +7,19 @@
 
 The package is built on top of the [TensorFlow library for R](https://tensorflow.rstudio.com/), which has a lot of support for statistical distributions and operations, which allows a large class of posteriors to be built. More details can be found at the [TensorFlow R library webpage](https://tensorflow.rstudio.com/), also see the [TensorFlow API](https://www.tensorflow.org/api_docs/) for full documentation.
 
+## Citing sgmcmc
+
+To cite the `sgmcmc` package, please reference the [accompanying paper](https://arxiv.org/abs/1812.09064). Sample Bibtex is given below:
+
+```
+@article{sgmcmc-package,
+  title={sgmcmc: An R package for stochastic gradient Markov chain Monte Carlo},
+  author={Baker, Jack and Fearnhead, Paul and Fox, Emily B and Nemeth, Christopher},
+  journal={Journal of Statistical Software (to appear)},
+  year={2019}
+}
+```
+
 ## Installation
 
 `sgmcmc` requires [TensorFlow for R](https://github.com/rstudio/tensorflow) to be installed, which requires packages that can't be automatically built by `R`, so has a few steps:
