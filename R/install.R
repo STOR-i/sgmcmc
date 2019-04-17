@@ -4,6 +4,5 @@
 #'  Uses the tensorflow::install_tensorflow function.
 #' @export
 installTF = function() {
-    required_pkgs = c("keras", "tensorflow-hub", "tensorflow-probability")
-    install_tensorflow(extra_packages = required_pkgs)
+    install_tensorflow(version = "1.13.1")
 }
