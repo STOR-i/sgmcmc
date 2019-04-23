@@ -94,11 +94,10 @@
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p><code>sgmcmc</code> requires <a href="https://github.com/rstudio/tensorflow">TensorFlow for R</a> to be installed, which requires packages that can’t be automatically built by <code>R</code>, so has a few steps:</p>
 <ul>
-<li>Install <a href="https://github.com/rstudio/tensorflow">TensorFlow for R</a>, run <code>install.packages("tensorflow")</code>.</li>
 <li>Install the <code>sgmcmc</code> R package: <code>install.packages("sgmcmc")</code>.</li>
 <li>Install the required python packages (including TensorFlow and TensorFlow Probability) by running: <code><a href="http://www.rdocumentation.org/packages/sgmcmc/topics/installTF">sgmcmc::installTF()</a></code>.</li>
 </ul>
-<p>If you already have the TensorFlow and TensorFlow probability packages installed, then this should be autodetected by the package and you can skip the final step. Make sure these are up to date though, as the TensorFlow API is under active development and still changes quite regularly.</p>
+<p>If you already have the TensorFlow and TensorFlow probability packages installed, then this should be autodetected by the package and you can skip the final step. Make sure these are up to date though, as the TensorFlow API is under active development and still changes quite regularly. Especially ensure that your TensorFlow and TensorFlow probability modules are compatible.</p>
 </div>
 <div id="documentation" class="section level2">
 <h2 class="hasAnchor">

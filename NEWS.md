@@ -1,3 +1,7 @@
+# sgmcmc 0.2.4
+
+* Bug fixes
+
 # sgmcmc 0.2.3
 
 * Added support for TensorFlow Probability.

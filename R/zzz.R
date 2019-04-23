@@ -48,5 +48,7 @@ tfMissing <- function() {
 tfpMissing <- function(e) {
     message("\nNo TensorFlow Probability python installation found.")
     message("This can be installed using the installTF() function.\n")
+    message(paste("If TensorFlow Probability has been installed manually,", 
+                  "ensure \nyour TensorFlow Probability and TensorFlow versions are compatible.\n"))
     assign("TFP", FALSE, envir = tf_status)
 }

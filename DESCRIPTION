@@ -1,7 +1,7 @@
 Package: sgmcmc
 Type: Package
 Title: Stochastic Gradient Markov Chain Monte Carlo
-Version: 0.2.3
+Version: 0.2.4
 Authors@R: c(
     person("Jack", "Baker", email = "j.baker1@lancaster.ac.uk", role = c("aut", "cre", "cph")),
     person( "Christopher", "Nemeth", role = c("aut", "cph") ), 
