@@ -89,6 +89,17 @@
 
 <p><code>sgmcmc</code> implements popular stochastic gradient Markov chain Monte Carlo (SGMCMC) methods including <a href="http://people.ee.duke.edu/~lcarin/398_icmlpaper.pdf">stochastic gradient Langevin dynamics (SGLD)</a>, <a href="https://arxiv.org/pdf/1402.4102v2.pdf">stochastic gradient Hamiltonian Monte Carlo (SGHMC)</a> and <a href="http://papers.nips.cc/paper/5592-bayesian-sampling-using-stochastic-gradient-thermostats.pdf">stochastic gradient Nosé-Hoover thermostat (SGNHT)</a>. The package uses automatic differentiation, so all the differentiation needed for the methods is calculated automatically. Control variate methods can be used in order to improve the efficiency of the methods as proposed in the <a href="https://arxiv.org/pdf/1706.05439.pdf">recent publication</a>.</p>
 <p>The package is built on top of the <a href="https://tensorflow.rstudio.com/">TensorFlow library for R</a>, which has a lot of support for statistical distributions and operations, which allows a large class of posteriors to be built. More details can be found at the <a href="https://tensorflow.rstudio.com/">TensorFlow R library webpage</a>, also see the <a href="https://www.tensorflow.org/api_docs/">TensorFlow API</a> for full documentation.</p>
+<div id="citing-sgmcmc" class="section level2">
+<h2 class="hasAnchor">
+<a href="#citing-sgmcmc" class="anchor"></a>Citing sgmcmc</h2>
+<p>To cite the <code>sgmcmc</code> package, please reference the <a href="https://arxiv.org/abs/1812.09064">accompanying paper</a>. Sample Bibtex is given below:</p>
+<pre><code>@article{sgmcmc-package,
+  title={sgmcmc: An R package for stochastic gradient Markov chain Monte Carlo},
+  author={Baker, Jack and Fearnhead, Paul and Fox, Emily B and Nemeth, Christopher},
+  journal={Journal of Statistical Software (to appear)},
+  year={2019}
+}</code></pre>
+</div>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>

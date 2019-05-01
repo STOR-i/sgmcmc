@@ -80,7 +80,7 @@ output = sgldcv(logLik, dataset, params, stepsizesMCMC, stepsizesOptimization, l
 })
 ```
 
-A common performance measure for a classifier is the [log loss](https://www.kaggle.com/wiki/LogLoss). To check the algorithm converged, we'll plot the log loss of the data from our test set every 10 iterations. Let $$\hat \pi_i^{(j)} := \frac{1}{1 + \exp\left[-\beta_0^{(j)} - \mathbf x_i \beta^{(j)}\right]},$$
+A common performance measure for a classifier is the [log loss](https://datawookie.netlify.com/blog/2015/12/making-sense-of-logarithmic-loss/). To check the algorithm converged, we'll plot the log loss of the data from our test set every 10 iterations. Let $$\hat \pi_i^{(j)} := \frac{1}{1 + \exp\left[-\beta_0^{(j)} - \mathbf x_i \beta^{(j)}\right]},$$
 here $\hat \pi_i^{(j)}$ denotes the probability that the $j^{\text{th}}$ iteration of our MCMC chain assigned to observation $i$ is in our test set. Define our test set by $T$, the log loss is given by
 $$A := \frac{1}{|T|} \sum_{y_i \in T} \left[ y_i \log \hat \pi_i^{(j)} + (1 - y_i) \log(1 - \hat \pi_i^{(j)}) \right]$$
 
