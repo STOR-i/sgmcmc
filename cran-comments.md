@@ -1,8 +1,10 @@
-## Previous Submissions
+## CITATION Addition
 
->  Found the following (possibly) invalid URLs: https://www.kaggle.com/wiki/LogLoss
+The DOI in the CITATION is for a new JSS publication that will be registered after publication on CRAN.
 
-Fixed
+## Email Change
+
+Email had to be changed since University email has expired. I no longer have access to the previous email(j.baker1@lancaster.ac.uk), so cannot confirm from the previous email (sorry about that).
 
 ## Test environments
 System requirements fully met:
