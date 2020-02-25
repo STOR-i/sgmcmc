@@ -1,7 +1,7 @@
 # Create generic sgmcmc object
 createSGMCMC = function( logLik, logPrior, dataset, params, stepsize, minibatchSize, seed ) { 
     # First check tf installation using tf_status. Throw error if it isn't installed.
-    checkTFInstall()
+    #checkTFInstall() #comment this out for now until we set-up a better package check
     # Set seed if required, TensorFlow seeds set inside dynamics
     if ( !is.null( seed ) ) {
         tf$set_random_seed(seed)
