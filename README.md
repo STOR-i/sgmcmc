@@ -9,7 +9,7 @@ The package is built on top of the [TensorFlow library for R](https://tensorflow
 
 ## Citing sgmcmc
 
-To cite the `sgmcmc` package, please reference the [accompanying paper](https://arxiv.org/abs/1812.09064). Sample Bibtex is given below:
+To cite the `sgmcmc` package, please reference the [accompanying paper](https://arxiv.org/abs/1710.00578). Sample Bibtex is given below:
 
 ```
 @article{sgmcmc-package,
