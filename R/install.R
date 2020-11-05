@@ -4,5 +4,5 @@
 #'  Uses the tensorflow::install_tensorflow function.
 #' @export
 installTF = function() {
-    install_tensorflow(version = "1.13.1")
+    install_tensorflow()
 }
