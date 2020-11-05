@@ -107,7 +107,7 @@ setupPlaceholders = function( data, n ) {
     for ( dname in names( data ) ) {
         shapeCurr = getShape( data[[dname]] )
         shapeCurr[1] = n
-        tfPlaceholders[[dname]] = tf$placeholder( tf$float32, shapeCurr )
+        tfPlaceholders[[dname]] = shapeCurr #tf$placeholder( tf$float32, shapeCurr )
     }
     return( tfPlaceholders )
 }
